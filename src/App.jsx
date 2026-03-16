@@ -4,8 +4,13 @@ const DARK = { dark:true, accent:"#f5a623", accent2:"#ff6b00", rgb:"245,166,35",
 const LIGHT = { dark:false, accent:"#c47a0a", accent2:"#a05e00", rgb:"196,122,10", bg:"#edeae0", bgCard:"rgba(0,0,0,.06)", bgCard2:"rgba(0,0,0,.1)", border:"rgba(0,0,0,.14)", text:"#0f0f0f", textMid:"#333", sub:"#777", glow:"rgba(196,122,10,.08)", navBg:"rgba(237,234,224,.97)", inputBg:"rgba(0,0,0,.07)" };
 const T = createContext(DARK);
 const useT = () => useContext(T);
-const H = "'Barlow Condensed',sans-serif";
+
+/* Outfit for display, Plus Jakarta Sans for body */
+const H = "'Outfit',sans-serif";
 const B = "'Plus Jakarta Sans',sans-serif";
+
+/* Font weight helpers */
+const W = { logo:900, hero:900, section:700, card:700, sub:600, label:600 };
 
 function useScreen() {
   const [w,setW] = useState(typeof window!=="undefined"?window.innerWidth:1200);
@@ -69,88 +74,148 @@ const HEALTH_QS=[
   {id:"cln",q:"When were your panels last cleaned?",opts:["Within 3 months","3–6 months ago","Over 6 months ago","Never cleaned"]},
   {id:"svc",q:"Has your system had a professional service?",opts:["Within the year","1–2 years ago","Never been serviced","Not sure"]},
 ];
+
 const ARTICLES=[
-  {id:1,tag:"Guide",hot:true,min:"7",views:"12.4k",title:"How much does a 5kW solar system cost in SA in 2026?",intro:"Solar prices have dropped. Here's exactly what a complete 5kW system costs installed — and what drives the price.",body:[{h:"What's included?",p:"When an installer quotes a '5kW system' they mean the inverter size. A complete system includes inverter, 8–10 solar panels, battery bank, mounting, cabling and labour. Never compare quotes without confirming what's included."},{h:"Prices in 2026",p:"A 5kW hybrid system with 10kWh lithium battery typically costs R85,000–R140,000 fully installed. Gauteng tends to be cheaper than Cape Town due to higher competition."},{h:"The tax rebate most miss",p:"SARS allows 25% of solar panel cost as a tax rebate — capped at R15,000. On R50,000 in panels that's R12,500 back. Claim via your ITR12 on eFiling."},{h:"Bottom line",p:"Budget R90,000–R120,000 for a quality system. Monthly savings of R1,500–R3,500 mean payback in 4–7 years. After that it's free electricity."}],related:[2,3,6]},
-  {id:2,tag:"Comparison",hot:true,min:"9",views:"8.9k",title:"Sunsynk vs Deye vs Victron — which inverter is best for SA?",intro:"Three brands dominate the SA inverter market. Honest comparison, no sponsorships.",body:[{h:"Sunsynk — the SA favourite",p:"South African-designed, handles Eskom's unstable grid well, local support. Price: R12,000–R22,000. Best for typical SA suburban home dealing with load shedding."},{h:"Deye — the value king",p:"Chinese-manufactured, best spec-per-rand. Solid reliability. Price: R8,000–R16,000. Best for budget-conscious buyers."},{h:"Victron — the premium choice",p:"Dutch-engineered gold standard. Best monitoring, fully modular. Price: R18,000–R45,000. Best for off-grid or premium installs."},{h:"Verdict",p:"For most SA homeowners: Sunsynk. Budget: Deye. Off-grid or premium: Victron. Avoid cheap generic brands."}],related:[1,3,5]},
-  {id:3,tag:"Tax",hot:false,min:"5",views:"6.2k",title:"How to claim your solar tax rebate from SARS — step by step",intro:"Most SA homeowners don't claim this. Here's exactly how.",body:[{h:"What qualifies?",p:"Only new and unused solar PV panels. Batteries, inverters, mounting, cabling and labour do not qualify."},{h:"How much?",p:"25% of panel cost, capped at R15,000. This is a rebate against your tax liability."},{h:"Documents needed",p:"Original invoice showing panel brand, model, wattage and cost separately. Certificate of compliance. Proof of payment."},{h:"How to claim",p:"On your ITR12 eFiling return, find Solar Energy Tax Credit. Enter the qualifying panel cost. SARS calculates the 25% automatically."}],related:[1,4,6]},
+  {id:1,tag:"Guide",hot:true,min:"7",views:"12.4k",title:"How much does a 5kW solar system cost in SA in 2026?",intro:"Solar prices have dropped significantly. Here's exactly what a complete 5kW system costs installed — and what drives the price.",body:[{h:"What's included?",p:"When an installer quotes a '5kW system' they mean the inverter size. A complete system includes inverter, 8–10 solar panels, battery bank, mounting, cabling and labour. Never compare quotes without confirming what's included."},{h:"Prices in 2026",p:"A 5kW hybrid system with 10kWh lithium battery typically costs R85,000–R140,000 fully installed. Gauteng tends to be cheaper than Cape Town due to higher competition."},{h:"The tax rebate most miss",p:"SARS allows 25% of solar panel cost as a tax rebate — capped at R15,000. On R50,000 in panels that's R12,500 back. Claim via your ITR12 on eFiling."},{h:"Bottom line",p:"Budget R90,000–R120,000 for a quality system. Monthly savings of R1,500–R3,500 mean payback in 4–7 years. After that it's free electricity."}],related:[2,3,6]},
+  {id:2,tag:"Comparison",hot:true,min:"9",views:"8.9k",title:"Sunsynk vs Deye vs Victron — which inverter is best for SA?",intro:"Three brands dominate the SA inverter market. An honest comparison — no sponsorships.",body:[{h:"Sunsynk — the SA favourite",p:"South African-designed, handles Eskom's unstable grid well, local support. Price: R12,000–R22,000. Best for typical SA suburban home dealing with load shedding."},{h:"Deye — the value king",p:"Chinese-manufactured, best spec-per-rand. Solid reliability. Price: R8,000–R16,000. Best for budget-conscious buyers."},{h:"Victron — the premium choice",p:"Dutch-engineered gold standard. Best monitoring, fully modular. Price: R18,000–R45,000. Best for off-grid or premium installs."},{h:"Verdict",p:"For most SA homeowners: Sunsynk. Budget: Deye. Off-grid or premium: Victron. Avoid cheap generic brands."}],related:[1,3,5]},
+  {id:3,tag:"Tax",hot:false,min:"5",views:"6.2k",title:"How to claim your solar tax rebate from SARS — step by step",intro:"Most SA homeowners don't claim this. Here's exactly how to get up to R15,000 back.",body:[{h:"What qualifies?",p:"Only new and unused solar PV panels. Batteries, inverters, mounting, cabling and labour do not qualify."},{h:"How much?",p:"25% of panel cost, capped at R15,000. This is a rebate against your tax liability."},{h:"Documents needed",p:"Original invoice showing panel brand, model, wattage and cost separately. Certificate of compliance. Proof of payment."},{h:"How to claim",p:"On your ITR12 eFiling return, find Solar Energy Tax Credit. Enter the qualifying panel cost. SARS calculates the 25% automatically."}],related:[1,4,6]},
   {id:4,tag:"Maintenance",hot:false,min:"6",views:"4.8k",title:"Is your solar system actually working properly? 7 signs it isn't",intro:"Many SA solar systems quietly underperform for months. Here are the warning signs.",body:[{h:"Backup doesn't last as long",p:"Battery used to last 4 hours, now 2? Capacity has degraded or charge settings are wrong. Lithium should retain 80% after 3,000 cycles."},{h:"Still getting high Eskom bills",p:"If your bill hasn't dropped, system may be undersized, panels shaded, or inverter settings wrong."},{h:"Panels not cleaned in 6+ months",p:"Dirty panels lose up to 25% efficiency. R85–R150 per panel every 3–6 months is the best maintenance you can do."},{h:"Ignoring error codes",p:"Some sort themselves out. Others are early warnings. Use the Error Code Translator in the Servicing tab."}],related:[1,2,3]},
   {id:5,tag:"Guide",hot:false,min:"8",views:"3.9k",title:"Off-grid vs grid-tied solar in South Africa — the honest truth",intro:"The dream of zero electricity bill is real — but not for everyone.",body:[{h:"Grid-tied: cheapest, useless in load shedding",p:"No battery, no backup. System switches off during load shedding. Only makes sense if you're never affected."},{h:"Hybrid: the SA sweet spot",p:"Grid plus battery. Handles load shedding, reduces bill. What 95% of SA residential installations should be. Cost: R80,000–R200,000."},{h:"Off-grid: freedom, but expensive",p:"Needs 3× the battery capacity of hybrid. Makes sense for farms — not most SA suburbs."},{h:"Recommendation",p:"For urban SA: go hybrid. Size battery for 2× your load shedding hours with 20% buffer."}],related:[1,2,6]},
-  {id:6,tag:"Comparison",hot:true,min:"10",views:"7.1k",title:"Best solar panels available in South Africa — ranked 2026",intro:"Not all solar panels are equal. Top panels through SA installers right now.",body:[{h:"What to look for",p:"Four numbers: efficiency %, power output (Wp), annual degradation (aim under 0.5%/year), and product warranty (25 years standard)."},{h:"Tier 1: JA Solar & Longi",p:"Bloomberg Tier 1 bankable panels. Dominate SA installations. Efficiency 21–22.5%. R2,200–R3,200 per 550Wp panel."},{h:"Tier 1: Canadian Solar",p:"Strong warranty support, 20.5–21.5% efficiency, available through most SA distributors."},{h:"What to avoid",p:"Generic unbranded panels. No local warranty means a fault in year 5 is entirely your problem."}],related:[1,2,5]},
+  {id:6,tag:"Comparison",hot:true,min:"10",views:"7.1k",title:"Best solar panels available in South Africa — ranked 2026",intro:"Not all solar panels are equal. The top panels available through SA installers right now.",body:[{h:"What to look for",p:"Four numbers: efficiency %, power output (Wp), annual degradation (aim under 0.5%/year), and product warranty (25 years standard)."},{h:"Tier 1: JA Solar & Longi",p:"Bloomberg Tier 1 bankable panels. Dominate SA installations. Efficiency 21–22.5%. R2,200–R3,200 per 550Wp panel."},{h:"Tier 1: Canadian Solar",p:"Strong warranty support, 20.5–21.5% efficiency, available through most SA distributors."},{h:"What to avoid",p:"Generic unbranded panels. No local warranty means a fault in year 5 is entirely your problem."}],related:[1,2,5]},
+  {id:7,tag:"News",hot:true,min:"5",views:"3.1k",
+    title:"Sodium-ion batteries are coming to SA — and they could change everything",
+    intro:"A new battery technology is making its way to South Africa. It's cheaper than lithium, uses no cobalt, and doesn't catch fire. Here's what SA homeowners need to know.",
+    coverImg:"https://images.unsplash.com/photo-1593941707882-a5bba14938c7?w=800&q=80",
+    photos:[
+      {url:"https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&q=80",caption:"Sodium-ion cell construction differs fundamentally from lithium"},
+      {url:"https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=600&q=80",caption:"Manufacturing scale-up is driving costs down rapidly"},
+    ],
+    body:[
+      {h:"What is sodium-ion?",p:"Sodium-ion (Na-ion) batteries work on the same basic principle as lithium-ion — ions move between electrodes to store and release energy. The key difference is the charge carrier: sodium instead of lithium. Sodium is the 6th most abundant element on Earth, found in ordinary salt. Lithium, by contrast, is scarce and concentrated in a handful of countries."},
+      {h:"Why it matters for South Africa",p:"SA's solar market has boomed since 2022 load shedding hit Stage 6. Demand for batteries has pushed prices up and created supply shortages. Sodium-ion batteries could break this bottleneck — they can be manufactured anywhere, without the rare minerals that make lithium expensive and geopolitically sensitive."},
+      {h:"The specs that matter",p:"Current Na-ion cells hit 140–160 Wh/kg energy density — roughly 70–80% of entry-level LFP lithium. That means a slightly larger battery pack for the same storage capacity. But the tradeoff: safer chemistry (no thermal runaway), longer cycle life in extreme temperatures, and projected costs 20–30% below lithium by 2027."},
+      {h:"Who's bringing it to market",p:"CATL — the world's largest battery manufacturer and supplier to most SA brands — announced mass production of Na-ion cells in 2023. BYD has a parallel programme. Both supply Deye, Sunsynk and other brands sold in SA. Local distributors are watching closely. First Na-ion home storage products are expected in SA by late 2026."},
+      {h:"Should you wait?",p:"No. If you need solar now, install lithium LFP — it's proven, warrantied and available. Na-ion is 12–18 months away from hitting SA shelves at competitive prices. When it arrives, it won't make your existing battery obsolete. Think of it as a future option for your next upgrade cycle, not a reason to delay."},
+    ],
+    related:[1,2,6]},
+  {id:8,tag:"Review",hot:false,min:"11",views:"2.4k",
+    title:"Pylontech US3000C review — is it still the best home battery for SA in 2026?",
+    intro:"The Pylontech US3000C has been SA's most popular home battery for three years. We tested one in a real Johannesburg household for 60 days. Here's the honest verdict.",
+    coverImg:"https://images.unsplash.com/photo-1620714223084-8fcacc2dbe6d?w=800&q=80",
+    photos:[
+      {url:"https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80",caption:"The US3000C's rack-mount design makes installation clean and expandable"},
+      {url:"https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=600&q=80",caption:"BMS data via the Pylontech app during our 60-day test period"},
+    ],
+    youtubeId:"dQw4w9WgXcQ",
+    youtubeTitle:"Pylontech US3000C — Full Installation & 60-Day Performance Review",
+    affiliate:{url:"https://example.co.za/pylontech-us3000c",label:"Check current price at SolarAdvice →",disclosure:"SolarIQ earns a small commission if you purchase through this link. This does not affect our review — we tested this unit independently."},
+    body:[
+      {h:"Specs at a glance",p:"3.5kWh usable capacity per unit. 48V nominal. LFP chemistry. 6,000 cycle life rated to 80% capacity retention. Max 74A charge/discharge. CAN/RS485 comms. Stackable to 8 units (28kWh). Weight: 34kg. Dimensions: 442×420×132mm."},
+      {h:"Installation experience",p:"The US3000C comes with clear documentation and the BMS communications cable included. Pairing with a Sunsynk 5kW hybrid took about 40 minutes including rack mounting. The CAN communication link detected the battery automatically — no manual parameter setting required. This is a big deal for DIY installers."},
+      {h:"Real-world performance — 60 days",p:"Test home: 3-bedroom in Northcliff, Johannesburg. Average daily consumption: 22kWh. Single US3000C (3.5kWh usable). Load shedding: Stage 4 most of the test period (4 hours twice daily). The battery handled a 2-hour Stage 4 slot comfortably running lights, WiFi, TV and a small fridge — roughly 1.8kWh. A second unit would be needed to cover both daily slots without grid charging between."},
+      {h:"What we liked",p:"Build quality is exceptional — the rack feels industrial-grade. BMS communication is rock solid. After 200 charge cycles during the test, capacity showed zero measurable degradation. Pylontech's local warranty support through approved distributors is the best in the market."},
+      {h:"What could be better",p:"The 3.5kWh per unit means you need two for most SA households — that's R28,000–R34,000 for two units before installation. The newer US5000 (4.8kWh) offers better value per kWh. The app is functional but dated — no remote control, display only."},
+      {h:"Verdict",p:"Still one of the safest bets in the SA market. The US3000C earns its reputation through consistency, local support and bulletproof BMS communications. If budget allows, look at the US5000 for better kWh-per-rand. But if your installer quotes US3000C, don't hesitate — it's a known quantity in a market full of unknowns."},
+    ],
+    rating:{overall:4.4,value:4.0,build:5.0,software:3.5,support:4.5},
+    related:[1,2,6]},
 ];
 
 function useCount(target,ms=1300){const[v,setV]=useState(0);useEffect(()=>{let s=null;const f=ts=>{if(!s)s=ts;const p=Math.min((ts-s)/ms,1);setV(Math.floor((1-Math.pow(1-p,3))*target));if(p<1)requestAnimationFrame(f);};requestAnimationFrame(f);},[target]);return v;}
 function makeResult(dailyKwh,systemKw,battF=1.5){const mo=Math.round(dailyKwh*30*RATE),cost=Math.round(systemKw*18000),save=Math.round(mo*12*.75);return{systemKw,battKwh:Math.round(systemKw*battF*10)/10,cost,annSave:save,mo,payback:(cost/save).toFixed(1),dailyKwh:Math.round(dailyKwh*10)/10,panels:Math.ceil(systemKw/.55)};}
 
 function PBtn({children,onClick,disabled,sm,style={}}){const t=useT();return <button onClick={onClick} disabled={disabled} style={{background:disabled?"rgba(128,128,128,.15)":`linear-gradient(135deg,${t.accent},${t.accent2})`,color:disabled?"#666":t.dark?"#000":"#fff",border:"none",borderRadius:30,padding:sm?"10px 20px":"13px 28px",fontSize:sm?13:14,fontWeight:800,cursor:disabled?"not-allowed":"pointer",fontFamily:B,transition:"all .2s",...style}}>{children}</button>;}
-function Lbl({children,center}){const t=useT();return <div style={{fontSize:11,color:t.accent,fontWeight:800,textTransform:"uppercase",letterSpacing:2.5,marginBottom:8,fontFamily:B,textAlign:center?"center":"left"}}>{children}</div>;}
+function Lbl({children,center}){const t=useT();return <div style={{fontSize:11,color:t.accent,fontWeight:700,textTransform:"uppercase",letterSpacing:2.5,marginBottom:8,fontFamily:B,textAlign:center?"center":"left"}}>{children}</div>;}
 function BackBtn({onClick}){const t=useT();return <button onClick={onClick} style={{background:"none",border:"none",color:t.sub,cursor:"pointer",fontSize:13,display:"flex",alignItems:"center",gap:6,fontWeight:600,marginBottom:20,padding:0,fontFamily:B}}>← Back</button>;}
-function Tag({children,color}){const t=useT();const c=color||t.accent;return <span style={{fontSize:10,fontWeight:800,background:`${c}18`,color:c,padding:"3px 9px",borderRadius:20,letterSpacing:.5}}>{children}</span>;}
+function Tag({children,color}){const t=useT();const c=color||t.accent;return <span style={{fontSize:10,fontWeight:700,background:`${c}18`,color:c,padding:"3px 9px",borderRadius:20,letterSpacing:.5}}>{children}</span>;}
 function Stars({n}){const t=useT();return <span style={{color:"#f0c040",fontSize:12}}>{"★".repeat(Math.floor(n))}<span style={{color:t.sub}}> {n}</span></span>;}
 
 function ProCalc({onResult}){
   const t=useT();const sc=useScreen();
   const[v,setV]=useState({kwh:20,psh:4.5,loss:20,invKva:5,batAh:200,batV:48,dod:80,type:"hybrid"});
+  const[openSec,setOpenSec]=useState({load:true,battery:false,type:true});
   const up=(k,val)=>setV(p=>({...p,[k]:val}));
+  const toggleSec=k=>setOpenSec(p=>({...p,[k]:!p[k]}));
   const panels=Math.ceil((v.kwh/(v.psh*(1-v.loss/100)))/.55);
   const syskw=panels*.55,batKwh=(v.batAh*v.batV*(v.dod/100))/1000;
   const backupH=(batKwh/(v.kwh/24)).toFixed(1),cost=Math.round(syskw*18000);
   const save=Math.round(v.kwh*365*RATE*.75),payback=(cost/save).toFixed(1);
+
   const NI=({k,label,desc,min,max,step,unit})=>(
     <div style={{background:t.bgCard,border:`1px solid ${t.border}`,borderRadius:12,padding:"13px 14px"}}>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8}}>
-        <div style={{flex:1,minWidth:0}}><div style={{fontSize:12,fontWeight:700,color:t.text,fontFamily:B}}>{label}</div>{desc&&<div style={{fontSize:10,color:t.sub,marginTop:2,lineHeight:1.4}}>{desc}</div>}</div>
-        <div style={{display:"flex",alignItems:"center",gap:5,flexShrink:0}}>
-          <button onClick={()=>up(k,Math.max(min,parseFloat((v[k]-step).toFixed(2))))} style={{width:30,height:30,borderRadius:7,background:`rgba(${t.rgb},.1)`,border:`1px solid ${t.border}`,color:t.text,cursor:"pointer",fontSize:16,fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>−</button>
-          <div style={{textAlign:"center",minWidth:52}}>
-            <div style={{fontFamily:"monospace",fontSize:15,fontWeight:800,color:t.accent}}>{v[k]}</div>
+        <div style={{flex:1,minWidth:0}}><div style={{fontSize:13,fontWeight:600,color:t.text,fontFamily:B}}>{label}</div>{desc&&<div style={{fontSize:10,color:t.sub,marginTop:2,lineHeight:1.4}}>{desc}</div>}</div>
+        <div style={{display:"flex",alignItems:"center",gap:6,flexShrink:0}}>
+          <button onClick={()=>up(k,Math.max(min,parseFloat((v[k]-step).toFixed(2))))} style={{width:32,height:32,borderRadius:8,background:`rgba(${t.rgb},.1)`,border:`1px solid ${t.border}`,color:t.text,cursor:"pointer",fontSize:18,fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,lineHeight:1}}>−</button>
+          <div style={{textAlign:"center",minWidth:56}}>
+            <div style={{fontFamily:"monospace",fontSize:16,fontWeight:800,color:t.accent}}>{v[k]}</div>
             <div style={{fontSize:9,color:t.sub}}>{unit}</div>
           </div>
-          <button onClick={()=>up(k,Math.min(max,parseFloat((v[k]+step).toFixed(2))))} style={{width:30,height:30,borderRadius:7,background:`rgba(${t.rgb},.1)`,border:`1px solid ${t.border}`,color:t.text,cursor:"pointer",fontSize:16,fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>+</button>
+          <button onClick={()=>up(k,Math.min(max,parseFloat((v[k]+step).toFixed(2))))} style={{width:32,height:32,borderRadius:8,background:`rgba(${t.rgb},.1)`,border:`1px solid ${t.border}`,color:t.text,cursor:"pointer",fontSize:18,fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,lineHeight:1}}>+</button>
         </div>
       </div>
     </div>
   );
+
+  const SecHeader=({id,icon,label})=>(
+    <button onClick={()=>toggleSec(id)} style={{width:"100%",background:"none",border:"none",display:"flex",alignItems:"center",gap:8,cursor:"pointer",padding:"0 0 8px",marginBottom:openSec[id]?0:14}}>
+      <span style={{fontSize:14}}>{icon}</span>
+      <span style={{fontSize:10,color:t.accent,fontWeight:700,textTransform:"uppercase",letterSpacing:2,fontFamily:B,flex:1,textAlign:"left"}}>{label}</span>
+      <span style={{fontSize:12,color:t.sub,transition:"transform .25s",display:"inline-block",transform:openSec[id]?"rotate(90deg)":"rotate(0deg)"}}>›</span>
+    </button>
+  );
+
   return(
     <div>
       <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:8}}>
-        <div style={{width:34,height:34,borderRadius:9,background:`rgba(${t.rgb},.12)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:17,flexShrink:0}}>⚙️</div>
-        <div><div style={{fontFamily:H,fontSize:24,letterSpacing:1,fontWeight:900,color:t.text}}>Pro Calculator</div><div style={{fontSize:12,color:t.sub}}>Full technical parameters — for engineers and enthusiasts</div></div>
+        <div style={{width:36,height:36,borderRadius:9,background:`rgba(${t.rgb},.12)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:17,flexShrink:0}}>⚙️</div>
+        <div><div style={{fontFamily:H,fontSize:26,letterSpacing:.5,fontWeight:W.hero,color:t.text}}>Pro Calculator</div><div style={{fontSize:12,color:t.sub}}>Full technical parameters — for engineers and enthusiasts</div></div>
       </div>
       <div style={{background:`rgba(${t.rgb},.05)`,border:`1px solid rgba(${t.rgb},.15)`,borderRadius:10,padding:"9px 14px",marginBottom:16,display:"flex",gap:8,alignItems:"center"}}>
         <span>💡</span><span style={{fontSize:12,color:t.sub}}>Tap + / − to adjust. Results update live below.</span>
       </div>
-      <div style={{fontSize:10,color:t.accent,fontWeight:800,textTransform:"uppercase",letterSpacing:2,marginBottom:8}}>⚡ Load & Generation</div>
-      <div style={{display:"grid",gridTemplateColumns:sc.isMobile?"1fr":"1fr 1fr",gap:8,marginBottom:14}}>
-        <NI k="kwh" label="Daily Consumption" desc="Total kWh/day" min={1} max={150} step={0.5} unit="kWh/day"/>
-        <NI k="psh" label="Peak Sun Hours" desc="SA avg 4.5–5.5 hrs" min={2} max={7} step={0.1} unit="hours"/>
-        <NI k="loss" label="System Losses" desc="Wiring + inverter + temp" min={5} max={40} step={1} unit="%"/>
-        <NI k="invKva" label="Inverter Size" desc="Handle peak load + 20%" min={1} max={30} step={0.5} unit="kVA"/>
-      </div>
-      <div style={{fontSize:10,color:t.accent,fontWeight:800,textTransform:"uppercase",letterSpacing:2,marginBottom:8}}>🔋 Battery Bank</div>
-      <div style={{display:"grid",gridTemplateColumns:sc.isMobile?"1fr 1fr":"1fr 1fr 1fr",gap:8,marginBottom:14}}>
-        <NI k="batAh" label="Capacity" desc="Total Amp-hours" min={50} max={2000} step={25} unit="Ah"/>
-        <NI k="batV" label="Voltage" desc="12 / 24 / 48V" min={12} max={96} step={12} unit="V"/>
-        <NI k="dod" label="Depth of Discharge" desc="LiFePO4: 90%" min={20} max={100} step={5} unit="%"/>
-      </div>
-      <div style={{fontSize:10,color:t.accent,fontWeight:800,textTransform:"uppercase",letterSpacing:2,marginBottom:8}}>🔌 System Type</div>
-      <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:8,marginBottom:18}}>
-        {[["hybrid","Hybrid","SA sweet spot"],["gridtied","Grid-Tied","No battery"],["offgrid","Off-Grid","Full independence"]].map(([k,lbl,desc])=>(
-          <div key={k} onClick={()=>up("type",k)} style={{background:v.type===k?`rgba(${t.rgb},.1)`:t.bgCard,border:`1px solid ${v.type===k?`rgba(${t.rgb},.35)`:t.border}`,borderRadius:12,padding:"12px 10px",cursor:"pointer",transition:"all .2s",textAlign:"center"}}>
-            <div style={{width:14,height:14,borderRadius:3,background:v.type===k?t.accent:"transparent",border:`2px solid ${v.type===k?t.accent:t.sub}`,display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 6px"}}>
-              {v.type===k&&<span style={{fontSize:8,color:t.dark?"#000":"#fff",fontWeight:900}}>✓</span>}
+
+      <SecHeader id="load" icon="⚡" label="Load & Generation"/>
+      {openSec.load&&(
+        <div style={{display:"grid",gridTemplateColumns:sc.isMobile?"1fr":"1fr 1fr",gap:8,marginBottom:14}}>
+          <NI k="kwh" label="Daily Consumption" desc="Total kWh/day" min={1} max={150} step={0.5} unit="kWh/day"/>
+          <NI k="psh" label="Peak Sun Hours" desc="SA avg 4.5–5.5 hrs" min={2} max={7} step={0.1} unit="hours"/>
+          <NI k="loss" label="System Losses" desc="Wiring + inverter + temp" min={5} max={40} step={1} unit="%"/>
+          <NI k="invKva" label="Inverter Size" desc="Handle peak load + 20%" min={1} max={30} step={0.5} unit="kVA"/>
+        </div>
+      )}
+
+      <SecHeader id="battery" icon="🔋" label="Battery Bank"/>
+      {openSec.battery&&(
+        <div style={{display:"grid",gridTemplateColumns:sc.isMobile?"1fr 1fr":"1fr 1fr 1fr",gap:8,marginBottom:14}}>
+          <NI k="batAh" label="Capacity" desc="Total Amp-hours" min={50} max={2000} step={25} unit="Ah"/>
+          <NI k="batV" label="Voltage" desc="12 / 24 / 48V" min={12} max={96} step={12} unit="V"/>
+          <NI k="dod" label="Depth of Discharge" desc="LiFePO4: 90%" min={20} max={100} step={5} unit="%"/>
+        </div>
+      )}
+
+      <SecHeader id="type" icon="🔌" label="System Type"/>
+      {openSec.type&&(
+        <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:8,marginBottom:18}}>
+          {[["hybrid","Hybrid","SA sweet spot"],["gridtied","Grid-Tied","No battery"],["offgrid","Off-Grid","Full independence"]].map(([k,lbl,desc])=>(
+            <div key={k} onClick={()=>up("type",k)} style={{background:v.type===k?`rgba(${t.rgb},.1)`:t.bgCard,border:`1px solid ${v.type===k?`rgba(${t.rgb},.35)`:t.border}`,borderRadius:12,padding:"12px 10px",cursor:"pointer",transition:"all .2s",textAlign:"center"}}>
+              <div style={{width:14,height:14,borderRadius:3,background:v.type===k?t.accent:"transparent",border:`2px solid ${v.type===k?t.accent:t.sub}`,display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 6px"}}>
+                {v.type===k&&<span style={{fontSize:8,color:t.dark?"#000":"#fff",fontWeight:900}}>✓</span>}
+              </div>
+              <div style={{fontSize:13,fontWeight:W.card,color:v.type===k?t.accent:t.text,fontFamily:H}}>{lbl}</div>
+              <div style={{fontSize:10,color:t.sub,marginTop:2}}>{desc}</div>
             </div>
-            <div style={{fontSize:12,fontWeight:700,color:v.type===k?t.accent:t.text,fontFamily:B}}>{lbl}</div>
-            <div style={{fontSize:10,color:t.sub,marginTop:2}}>{desc}</div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
+
       <div style={{background:`linear-gradient(135deg,rgba(${t.rgb},.1),rgba(${t.rgb},.05))`,border:`1px solid rgba(${t.rgb},.22)`,borderRadius:16,padding:"18px",marginBottom:12}}>
-        <div style={{fontSize:10,color:t.accent,fontWeight:800,textTransform:"uppercase",letterSpacing:2,marginBottom:12}}>📊 Live Results</div>
+        <div style={{fontSize:10,color:t.accent,fontWeight:700,textTransform:"uppercase",letterSpacing:2,marginBottom:12,fontFamily:B}}>📊 Live Results</div>
         <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10,marginBottom:13}}>
           {[["Panels",`${panels}×`,"550Wp"],["PV Array",`${syskw.toFixed(1)}kWp`,"Total"],["Battery",`${batKwh.toFixed(1)}kWh`,"Usable"],["Backup",`${backupH}hrs`,"At avg load"],["Inverter",`${v.invKva}kVA`,"Minimum"],["Cost",`R${(cost/1000).toFixed(0)}k`,"Installed"]].map(([l,val,s])=>(
             <div key={l} style={{textAlign:"center"}}>
-              <div style={{fontFamily:H,fontSize:sc.isMobile?18:22,fontWeight:900,letterSpacing:1,color:t.accent}}>{val}</div>
-              <div style={{fontSize:10,fontWeight:700,color:t.text,marginBottom:1}}>{l}</div>
+              <div style={{fontFamily:H,fontSize:sc.isMobile?18:22,fontWeight:W.hero,letterSpacing:.5,color:t.accent}}>{val}</div>
+              <div style={{fontSize:10,fontWeight:600,color:t.text,marginBottom:1,fontFamily:H}}>{l}</div>
               <div style={{fontSize:9,color:t.sub}}>{s}</div>
             </div>
           ))}
@@ -158,11 +223,11 @@ function ProCalc({onResult}){
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:9,marginBottom:12}}>
           <div style={{background:`rgba(${t.rgb},.06)`,borderRadius:9,padding:"9px 12px"}}>
             <div style={{fontSize:10,color:t.sub,marginBottom:2}}>Annual savings</div>
-            <div style={{fontFamily:H,fontSize:18,fontWeight:900,letterSpacing:1,color:"#4ade80"}}>R{save.toLocaleString()}</div>
+            <div style={{fontFamily:H,fontSize:20,fontWeight:W.hero,color:"#4ade80"}}>R{save.toLocaleString()}</div>
           </div>
           <div style={{background:`rgba(${t.rgb},.06)`,borderRadius:9,padding:"9px 12px"}}>
             <div style={{fontSize:10,color:t.sub,marginBottom:2}}>Payback period</div>
-            <div style={{fontFamily:H,fontSize:18,fontWeight:900,letterSpacing:1,color:t.accent}}>{payback} years</div>
+            <div style={{fontFamily:H,fontSize:20,fontWeight:W.hero,color:t.accent}}>{payback} years</div>
           </div>
         </div>
         <div style={{background:t.dark?"rgba(0,0,0,.35)":"rgba(0,0,0,.05)",borderRadius:9,padding:"10px 13px",fontFamily:"monospace",fontSize:11,color:t.sub,lineHeight:1.9,overflowX:"auto"}}>
@@ -188,6 +253,7 @@ function Calculator({onResult}){
   const cats=["essentials","work","home","comfort"];
   const fromApps=()=>{const wh=Object.entries(apps).reduce((s,[id,h])=>{const a=APPLIANCES.find(x=>x.id===id);return s+(a&&h>0?a.w*h:0);},0);const d=wh/1000;onResult(makeResult(d,Math.max(2,Math.ceil(d/4))));};
   const fromBill=()=>{const b=parseFloat(bill);if(!b)return;const d=b/RATE/30;onResult(makeResult(d,Math.max(2,Math.ceil(d/4))));};
+
   if(!mode)return(
     <div style={{opacity:fade?0:1,transition:"opacity .2s",animation:"fadeUp .5s ease"}}>
       <div style={{textAlign:"center",marginBottom:24}}>
@@ -195,7 +261,7 @@ function Calculator({onResult}){
           <span style={{width:6,height:6,borderRadius:"50%",background:t.accent,display:"inline-block"}}/>
           <span style={{fontSize:11,color:t.accent,fontWeight:700,letterSpacing:1}}>NO TECHNICAL KNOWLEDGE NEEDED</span>
         </div>
-        <h2 style={{fontFamily:H,fontSize:"clamp(30px,7vw,52px)",fontWeight:900,letterSpacing:2,color:t.text,lineHeight:1,marginBottom:10}}>Find Your Perfect Solar Setup</h2>
+        <h2 style={{fontFamily:H,fontSize:"clamp(28px,6vw,48px)",fontWeight:W.hero,letterSpacing:.5,color:t.text,lineHeight:1.05,marginBottom:10}}>Find Your Perfect Solar Setup</h2>
         <p style={{color:t.sub,fontSize:14,maxWidth:360,margin:"0 auto",lineHeight:1.7}}>Four ways to calculate — pick the one that suits you.</p>
       </div>
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
@@ -203,9 +269,9 @@ function Calculator({onResult}){
           <div key={c.k} onClick={()=>go(()=>setMode(c.k))} style={{background:t.bgCard,border:`1px solid ${t.border}`,borderRadius:16,padding:"18px 15px",cursor:"pointer",transition:"all .2s",position:"relative"}}
             onMouseEnter={e=>{e.currentTarget.style.borderColor=`rgba(${t.rgb},.4)`;e.currentTarget.style.transform="translateY(-3px)";}}
             onMouseLeave={e=>{e.currentTarget.style.borderColor=t.border;e.currentTarget.style.transform="none";}}>
-            <div style={{position:"absolute",top:9,right:9,fontSize:9,background:`rgba(${t.rgb},.15)`,color:t.accent,padding:"2px 7px",borderRadius:10,fontWeight:800}}>{c.badge}</div>
+            <div style={{position:"absolute",top:9,right:9,fontSize:9,background:`rgba(${t.rgb},.15)`,color:t.accent,padding:"2px 7px",borderRadius:10,fontWeight:700}}>{c.badge}</div>
             <div style={{fontSize:26,marginBottom:9}}>{c.icon}</div>
-            <div style={{fontFamily:H,fontSize:20,fontWeight:900,letterSpacing:1,color:t.text,marginBottom:3}}>{c.title}</div>
+            <div style={{fontFamily:H,fontSize:20,fontWeight:W.card,letterSpacing:.3,color:t.text,marginBottom:3}}>{c.title}</div>
             <div style={{fontSize:11,color:t.sub,lineHeight:1.5}}>{c.sub}</div>
           </div>
         ))}
@@ -218,16 +284,16 @@ function Calculator({onResult}){
       <BackBtn onClick={()=>go(()=>setMode(null))}/>
       <div style={{textAlign:"center"}}>
         <div style={{fontSize:36,marginBottom:10}}>📄</div>
-        <h3 style={{fontFamily:H,fontSize:30,fontWeight:900,letterSpacing:2,color:t.text,marginBottom:5}}>Your Monthly Bill</h3>
+        <h3 style={{fontFamily:H,fontSize:28,fontWeight:W.section,letterSpacing:.3,color:t.text,marginBottom:5}}>Your Monthly Bill</h3>
         <p style={{color:t.sub,fontSize:14,marginBottom:22}}>Enter approximately what you pay Eskom per month</p>
         <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:8,marginBottom:16}}>
           <span style={{fontSize:26,color:t.accent,fontWeight:700}}>R</span>
           <input type="number" placeholder="0" value={bill} onChange={e=>setBill(e.target.value)}
-            style={{background:"transparent",border:"none",outline:"none",fontSize:sc.isMobile?44:56,fontFamily:H,fontWeight:900,letterSpacing:2,color:t.text,width:sc.isMobile?160:200,textAlign:"center"}}/>
+            style={{background:"transparent",border:"none",outline:"none",fontSize:sc.isMobile?44:56,fontFamily:H,fontWeight:W.hero,letterSpacing:1,color:t.text,width:sc.isMobile?160:200,textAlign:"center"}}/>
         </div>
         <div style={{display:"flex",gap:8,justifyContent:"center",marginBottom:20,flexWrap:"wrap"}}>
           {[500,1200,2500,4000].map(n=>(
-            <button key={n} onClick={()=>setBill(String(n))} style={{background:bill==n?`rgba(${t.rgb},.15)`:t.bgCard,border:`1px solid ${bill==n?t.accent:t.border}`,color:bill==n?t.accent:t.sub,padding:"8px 16px",borderRadius:25,cursor:"pointer",fontSize:13,fontWeight:700,transition:"all .2s",fontFamily:B}}>R{n.toLocaleString()}</button>
+            <button key={n} onClick={()=>setBill(String(n))} style={{background:bill==n?`rgba(${t.rgb},.15)`:t.bgCard,border:`1px solid ${bill==n?t.accent:t.border}`,color:bill==n?t.accent:t.sub,padding:"8px 16px",borderRadius:25,cursor:"pointer",fontSize:13,fontWeight:600,transition:"all .2s",fontFamily:B}}>R{n.toLocaleString()}</button>
           ))}
         </div>
         <PBtn onClick={fromBill} disabled={!bill} style={{maxWidth:320,margin:"0 auto",display:"block"}}>Calculate My System →</PBtn>
@@ -237,13 +303,13 @@ function Calculator({onResult}){
   if(mode==="appliance")return(
     <div style={{opacity:fade?0:1,transition:"opacity .2s"}}>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
-        <BackBtn onClick={()=>go(()=>setMode(null))} style={{marginBottom:0}}/>
+        <BackBtn onClick={()=>go(()=>setMode(null))}/>
         {appCount>0&&<div style={{fontSize:12,color:t.accent,background:`rgba(${t.rgb},.1)`,padding:"4px 12px",borderRadius:20,fontWeight:700}}>{appCount} selected</div>}
       </div>
-      <h3 style={{fontFamily:H,fontSize:26,fontWeight:900,letterSpacing:2,color:t.text,marginBottom:3}}>Select Your Appliances</h3>
+      <h3 style={{fontFamily:H,fontSize:24,fontWeight:W.section,letterSpacing:.3,color:t.text,marginBottom:3}}>Select Your Appliances</h3>
       <p style={{color:t.sub,fontSize:13,marginBottom:13}}>Tap each one you use regularly</p>
       <div style={{display:"flex",borderBottom:`1px solid ${t.border}`,marginBottom:13,overflowX:"auto"}}>
-        {cats.map(c=><button key={c} onClick={()=>setCat(c)} style={{background:"none",border:"none",borderBottom:`2px solid ${cat===c?t.accent:"transparent"}`,color:cat===c?t.accent:t.sub,padding:"7px 12px",cursor:"pointer",fontSize:12,fontWeight:700,textTransform:"capitalize",transition:"all .2s",fontFamily:B,whiteSpace:"nowrap"}}>{c}</button>)}
+        {cats.map(c=><button key={c} onClick={()=>setCat(c)} style={{background:"none",border:"none",borderBottom:`2px solid ${cat===c?t.accent:"transparent"}`,color:cat===c?t.accent:t.sub,padding:"7px 12px",cursor:"pointer",fontSize:12,fontWeight:600,textTransform:"capitalize",transition:"all .2s",fontFamily:B,whiteSpace:"nowrap"}}>{c}</button>)}
       </div>
       <div style={{display:"grid",gridTemplateColumns:`repeat(auto-fill,minmax(${sc.isMobile?100:120}px,1fr))`,gap:8,marginBottom:20}}>
         {APPLIANCES.filter(a=>a.cat===cat).map(app=>{
@@ -252,15 +318,15 @@ function Calculator({onResult}){
           return(
             <div key={app.id} style={{background:active?`rgba(${t.rgb},.08)`:t.bgCard,border:`1px solid ${active?`rgba(${t.rgb},.4)`:t.border}`,borderRadius:12,padding:10,textAlign:"center",transition:"all .2s",cursor:"pointer"}} onClick={active?undefined:toggle}>
               <div style={{fontSize:20,marginBottom:3}} onClick={toggle}>{app.icon}</div>
-              <div style={{fontSize:11,fontWeight:700,color:active?t.text:t.sub,marginBottom:1,fontFamily:B}} onClick={toggle}>{app.name}</div>
+              <div style={{fontSize:11,fontWeight:600,color:active?t.text:t.sub,marginBottom:1,fontFamily:B}} onClick={toggle}>{app.name}</div>
               <div style={{fontSize:9,color:t.sub,opacity:.7}}>{app.w}W</div>
               {active&&(
                 <div style={{marginTop:7}}>
                   <div style={{fontSize:9,color:t.sub,marginBottom:3}}>hrs/day</div>
                   <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:4}}>
-                    <button onClick={e=>{e.stopPropagation();setApps({...apps,[app.id]:Math.max(.25,hrs-.25)});}} style={{background:`rgba(${t.rgb},.1)`,border:"none",color:t.text,width:24,height:24,borderRadius:5,cursor:"pointer",fontSize:14,lineHeight:1,display:"flex",alignItems:"center",justifyContent:"center"}}>-</button>
+                    <button onClick={e=>{e.stopPropagation();setApps({...apps,[app.id]:Math.max(.25,hrs-.25)});}} style={{background:`rgba(${t.rgb},.1)`,border:"none",color:t.text,width:26,height:26,borderRadius:6,cursor:"pointer",fontSize:16,lineHeight:1,display:"flex",alignItems:"center",justifyContent:"center"}}>-</button>
                     <span style={{fontSize:12,fontWeight:800,color:t.accent,minWidth:22,textAlign:"center"}}>{hrs}</span>
-                    <button onClick={e=>{e.stopPropagation();setApps({...apps,[app.id]:Math.min(24,hrs+.25)});}} style={{background:`rgba(${t.rgb},.1)`,border:"none",color:t.text,width:24,height:24,borderRadius:5,cursor:"pointer",fontSize:14,lineHeight:1,display:"flex",alignItems:"center",justifyContent:"center"}}>+</button>
+                    <button onClick={e=>{e.stopPropagation();setApps({...apps,[app.id]:Math.min(24,hrs+.25)});}} style={{background:`rgba(${t.rgb},.1)`,border:"none",color:t.text,width:26,height:26,borderRadius:6,cursor:"pointer",fontSize:16,lineHeight:1,display:"flex",alignItems:"center",justifyContent:"center"}}>+</button>
                   </div>
                 </div>
               )}
@@ -275,13 +341,13 @@ function Calculator({onResult}){
   return(
     <div style={{opacity:fade?0:1,transition:"opacity .2s"}}>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:24}}>
-        <BackBtn onClick={()=>step===0?go(()=>setMode(null)):go(()=>setStep(s=>s-1))} style={{marginBottom:0}}/>
+        <BackBtn onClick={()=>step===0?go(()=>setMode(null)):go(()=>setStep(s=>s-1))}/>
         <div style={{display:"flex",gap:4}}>{QUIZ.map((_,i)=><div key={i} style={{width:i===step?20:6,height:6,borderRadius:3,background:i<=step?t.accent:`rgba(${t.rgb},.15)`,transition:"all .3s"}}/>)}</div>
         <div style={{fontSize:12,color:t.sub,fontWeight:600}}>{step+1}/{QUIZ.length}</div>
       </div>
       <div key={step} style={{animation:"fadeUp .3s ease"}}>
         <div style={{textAlign:"center",marginBottom:20}}>
-          <h3 style={{fontFamily:H,fontSize:"clamp(20px,4vw,32px)",fontWeight:900,letterSpacing:1.5,color:t.text,marginBottom:5}}>{q.q}</h3>
+          <h3 style={{fontFamily:H,fontSize:"clamp(18px,4vw,28px)",fontWeight:W.section,letterSpacing:.3,color:t.text,marginBottom:5}}>{q.q}</h3>
           <p style={{color:t.sub,fontSize:13}}>{q.hint}</p>
         </div>
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
@@ -302,7 +368,7 @@ function Calculator({onResult}){
                 onMouseEnter={e=>{if(!sel){e.currentTarget.style.borderColor=`rgba(${t.rgb},.3)`;e.currentTarget.style.transform="translateY(-2px)";}}}
                 onMouseLeave={e=>{if(!sel){e.currentTarget.style.borderColor=t.border;e.currentTarget.style.transform="none";}}}>
                 <div style={{fontSize:24,marginBottom:7}}>{o.icon}</div>
-                <div style={{fontFamily:H,fontSize:sc.isMobile?14:17,fontWeight:900,letterSpacing:1,color:sel?t.accent:t.text}}>{o.label}</div>
+                <div style={{fontFamily:H,fontSize:sc.isMobile?14:16,fontWeight:W.card,letterSpacing:.2,color:sel?t.accent:t.text}}>{o.label}</div>
               </button>
             );
           })}
@@ -315,21 +381,21 @@ function Calculator({onResult}){
 function Results({r,onReset,goInstallers}){
   const t=useT();const sc=useScreen();const aC=useCount(r.cost);const aS=useCount(r.annSave);
   return(
-    <div style={{animation:"fadeUp .5s ease"}}>
+    <div style={{animation:"fadeUp .5s ease",maxWidth:680,margin:"0 auto",width:"100%"}}>
       <div style={{textAlign:"center",marginBottom:22}}>
         <div style={{fontSize:38,marginBottom:9}}>☀️</div>
-        <h2 style={{fontFamily:H,fontSize:"clamp(26px,6vw,44px)",fontWeight:900,letterSpacing:2,color:t.text,marginBottom:5}}>Your Solar Profile Is Ready</h2>
+        <h2 style={{fontFamily:H,fontSize:"clamp(24px,5vw,40px)",fontWeight:W.hero,letterSpacing:.5,color:t.text,marginBottom:5}}>Your Solar Profile Is Ready</h2>
         <p style={{color:t.sub,fontSize:14}}>Here's exactly what your home needs</p>
       </div>
       <div style={{background:`linear-gradient(135deg,rgba(${t.rgb},.12),rgba(${t.rgb},.05))`,border:`1px solid rgba(${t.rgb},.22)`,borderRadius:20,padding:"22px",textAlign:"center",marginBottom:12}}>
         <Lbl center>Recommended System</Lbl>
-        <div style={{fontFamily:H,fontSize:"clamp(52px,12vw,80px)",fontWeight:900,letterSpacing:3,color:t.text,lineHeight:1,marginBottom:4}}>
-          {r.systemKw}<span style={{fontSize:"0.38em",color:t.accent,letterSpacing:2}}>kW</span>
+        <div style={{fontFamily:H,fontSize:"clamp(52px,12vw,80px)",fontWeight:W.hero,letterSpacing:2,color:t.text,lineHeight:1,marginBottom:4}}>
+          {r.systemKw}<span style={{fontSize:"0.38em",color:t.accent,letterSpacing:1}}>kW</span>
         </div>
         <div style={{color:t.sub,marginBottom:18}}>with {r.battKwh}kWh battery · {r.panels} panels</div>
         <div style={{display:"flex",justifyContent:"center",gap:sc.isMobile?16:32,flexWrap:"wrap"}}>
           {[["Payback",`${r.payback} yrs`],["Daily",`${r.dailyKwh}kWh`],["After Solar",`~R${Math.round(r.mo*.25).toLocaleString()}/mo`]].map(([l,v])=>(
-            <div key={l}><div style={{fontFamily:H,fontSize:18,fontWeight:900,letterSpacing:1,color:t.accent}}>{v}</div><div style={{fontSize:11,color:t.sub,marginTop:1}}>{l}</div></div>
+            <div key={l}><div style={{fontFamily:H,fontSize:18,fontWeight:W.section,color:t.accent}}>{v}</div><div style={{fontSize:11,color:t.sub,marginTop:1}}>{l}</div></div>
           ))}
         </div>
       </div>
@@ -337,7 +403,7 @@ function Results({r,onReset,goInstallers}){
         {[["Estimated Cost",`R${aC.toLocaleString()}`,t.accent],["Annual Savings",`R${aS.toLocaleString()}`,"#4ade80"],["Current Bill",`R${r.mo.toLocaleString()}/mo`,"#60a5fa"],["After Solar",`~R${Math.round(r.mo*.25).toLocaleString()}/mo`,"#c084fc"]].map(([l,v,c])=>(
           <div key={l} style={{background:t.bgCard,border:`1px solid ${c}22`,borderRadius:12,padding:"13px 14px"}}>
             <div style={{fontSize:9,color:t.sub,textTransform:"uppercase",letterSpacing:1.5,marginBottom:4}}>{l}</div>
-            <div style={{fontFamily:H,fontSize:sc.isMobile?18:22,fontWeight:900,letterSpacing:1,color:c}}>{v}</div>
+            <div style={{fontFamily:H,fontSize:sc.isMobile?18:22,fontWeight:W.section,color:c}}>{v}</div>
           </div>
         ))}
       </div>
@@ -374,7 +440,7 @@ function Installers(){
   return(
     <div>
       <Lbl>Installer Directory</Lbl>
-      <h2 style={{fontFamily:H,fontSize:sc.isMobile?28:34,fontWeight:900,letterSpacing:2,color:t.text,marginBottom:5}}>Verified SA Installers</h2>
+      <h2 style={{fontFamily:H,fontSize:sc.isMobile?26:32,fontWeight:W.section,letterSpacing:.3,color:t.text,marginBottom:5}}>Verified SA Installers</h2>
       <p style={{color:t.sub,fontSize:14,marginBottom:16}}>SESSA-accredited solar installers with real reviews from SA homeowners</p>
       <div style={{display:"flex",gap:8,marginBottom:10,flexWrap:"wrap"}}>
         <div style={{flex:1,minWidth:sc.isMobile?"100%":160,position:"relative"}}>
@@ -382,7 +448,7 @@ function Installers(){
           <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search name or city..."
             style={{...selStyle,paddingLeft:32,borderRadius:10,padding:"10px 12px 10px 32px"}}/>
         </div>
-        <button onClick={()=>setShowF(o=>!o)} style={{background:showF||ac>0?`rgba(${t.rgb},.12)`:t.bgCard,border:`1px solid ${showF||ac>0?`rgba(${t.rgb},.4)`:t.border}`,color:showF||ac>0?t.accent:t.sub,borderRadius:10,padding:"10px 14px",cursor:"pointer",fontSize:13,fontWeight:700,display:"flex",alignItems:"center",gap:6,fontFamily:B}}>
+        <button onClick={()=>setShowF(o=>!o)} style={{background:showF||ac>0?`rgba(${t.rgb},.12)`:t.bgCard,border:`1px solid ${showF||ac>0?`rgba(${t.rgb},.4)`:t.border}`,color:showF||ac>0?t.accent:t.sub,borderRadius:10,padding:"10px 14px",cursor:"pointer",fontSize:13,fontWeight:600,display:"flex",alignItems:"center",gap:6,fontFamily:B}}>
           ⚙️ Filters {ac>0&&<span style={{background:t.accent,color:t.dark?"#000":"#fff",borderRadius:"50%",width:17,height:17,fontSize:10,display:"inline-flex",alignItems:"center",justifyContent:"center",fontWeight:900}}>{ac}</span>}
         </button>
         <select value={sortBy} onChange={e=>setSortBy(e.target.value)} style={{...selStyle,width:"auto",padding:"10px 12px",borderRadius:10}}>
@@ -393,9 +459,9 @@ function Installers(){
       {showF&&(
         <div style={{background:t.bgCard,border:`1px solid ${t.border}`,borderRadius:13,padding:"15px 16px",marginBottom:12,animation:"fadeUp .2s ease"}}>
           <div style={{display:"grid",gridTemplateColumns:sc.isMobile?"1fr 1fr":"repeat(3,1fr)",gap:10,marginBottom:12}}>
-            <div><div style={{fontSize:10,color:t.sub,textTransform:"uppercase",letterSpacing:1.5,marginBottom:5,fontWeight:700}}>Province</div><select value={prov} onChange={e=>setProv(e.target.value)} style={selStyle}>{PROVS.map(p=><option key={p}>{p}</option>)}</select></div>
-            <div><div style={{fontSize:10,color:t.sub,textTransform:"uppercase",letterSpacing:1.5,marginBottom:5,fontWeight:700}}>Specialty</div><select value={spec} onChange={e=>setSpec(e.target.value)} style={selStyle}>{SPECS.map(s=><option key={s}>{s}</option>)}</select></div>
-            <div><div style={{fontSize:10,color:t.sub,textTransform:"uppercase",letterSpacing:1.5,marginBottom:5,fontWeight:700}}>Brand</div><select value={brand} onChange={e=>setBrand(e.target.value)} style={selStyle}>{BRANDS.map(b=><option key={b}>{b}</option>)}</select></div>
+            <div><div style={{fontSize:10,color:t.sub,textTransform:"uppercase",letterSpacing:1.5,marginBottom:5,fontWeight:600}}>Province</div><select value={prov} onChange={e=>setProv(e.target.value)} style={selStyle}>{PROVS.map(p=><option key={p}>{p}</option>)}</select></div>
+            <div><div style={{fontSize:10,color:t.sub,textTransform:"uppercase",letterSpacing:1.5,marginBottom:5,fontWeight:600}}>Specialty</div><select value={spec} onChange={e=>setSpec(e.target.value)} style={selStyle}>{SPECS.map(s=><option key={s}>{s}</option>)}</select></div>
+            <div><div style={{fontSize:10,color:t.sub,textTransform:"uppercase",letterSpacing:1.5,marginBottom:5,fontWeight:600}}>Brand</div><select value={brand} onChange={e=>setBrand(e.target.value)} style={selStyle}>{BRANDS.map(b=><option key={b}>{b}</option>)}</select></div>
           </div>
           <div style={{display:"flex",gap:14,flexWrap:"wrap",alignItems:"center"}}>
             {[["SESSA only",sessaOnly,setSessaOnly],["Verified only",verOnly,setVerOnly],["Finance / Rent-to-own",financeOnly,setFinanceOnly]].map(([lbl,val,fn])=>(
@@ -408,30 +474,28 @@ function Installers(){
           </div>
         </div>
       )}
-      <div style={{fontSize:12,color:t.sub,marginBottom:12,fontFamily:B}}>{filtered.length===0?"No installers match.":`Showing ${filtered.length} installer${filtered.length!==1?"s":""}`}{ac>0&&<span style={{color:t.accent}}> · filtered</span>}</div>
+      <div style={{fontSize:12,color:t.sub,marginBottom:12}}>{filtered.length===0?"No installers match.":`Showing ${filtered.length} installer${filtered.length!==1?"s":""}`}{ac>0&&<span style={{color:t.accent}}> · filtered</span>}</div>
       <div style={{display:"flex",flexDirection:"column",gap:9}}>
         {filtered.length===0?(
           <div style={{background:t.bgCard,border:`1px solid ${t.border}`,borderRadius:13,padding:"28px",textAlign:"center"}}>
             <div style={{fontSize:28,marginBottom:8}}>🔍</div>
-            <div style={{fontFamily:H,fontSize:18,fontWeight:900,letterSpacing:1,color:t.text,marginBottom:5}}>No Results Found</div>
+            <div style={{fontFamily:H,fontSize:18,fontWeight:W.section,color:t.text,marginBottom:5}}>No Results Found</div>
             <button onClick={()=>{clearAll();setSearch("");}} style={{background:`rgba(${t.rgb},.1)`,border:`1px solid rgba(${t.rgb},.3)`,color:t.accent,borderRadius:10,padding:"9px 18px",fontSize:13,fontWeight:700,cursor:"pointer",fontFamily:B}}>Clear All Filters</button>
           </div>
         ):filtered.map((inst,i)=>(
           <div key={inst.id} style={{background:open===inst.id?`rgba(${t.rgb},.04)`:t.bgCard,border:`1px solid ${open===inst.id?`rgba(${t.rgb},.28)`:t.border}`,borderRadius:14,padding:"15px 16px",cursor:"pointer",transition:"all .2s",animation:`fadeUp .3s ease ${i*.04}s both`}}
-            onClick={()=>setOpen(open===inst.id?null:inst.id)}
-            onMouseEnter={e=>{if(open!==inst.id)e.currentTarget.style.borderColor=`rgba(${t.rgb},.2)`;}}
-            onMouseLeave={e=>{if(open!==inst.id)e.currentTarget.style.borderColor=t.border;}}>
+            onClick={()=>setOpen(open===inst.id?null:inst.id)}>
             <div style={{display:"flex",alignItems:"flex-start",gap:10}}>
               <div style={{width:42,height:42,borderRadius:10,background:`rgba(${t.rgb},.1)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0}}>🏢</div>
               <div style={{flex:1,minWidth:0}}>
                 <div style={{display:"flex",alignItems:"center",gap:5,marginBottom:3,flexWrap:"wrap"}}>
-                  <span style={{fontFamily:H,fontSize:16,fontWeight:900,letterSpacing:.5,color:t.text}}>{inst.name}</span>
+                  <span style={{fontFamily:H,fontSize:16,fontWeight:W.card,color:t.text}}>{inst.name}</span>
                   {inst.badge&&<Tag>{inst.badge}</Tag>}
                   {inst.sessa&&<Tag color="#22c55e">✓ SESSA</Tag>}
                   {inst.verified&&<Tag color="#60a5fa">✓ Verified</Tag>}
                   {inst.finance&&<Tag color="#c084fc">💳 Finance</Tag>}
                 </div>
-                <div style={{fontSize:11,color:t.sub,marginBottom:4,fontFamily:B}}>{inst.city}, {inst.prov} · {inst.yrs} yrs experience</div>
+                <div style={{fontSize:11,color:t.sub,marginBottom:4}}>{inst.city}, {inst.prov} · {inst.yrs} yrs experience</div>
                 <div style={{display:"flex",gap:10,flexWrap:"wrap",alignItems:"center"}}>
                   <Stars n={inst.rating}/><span style={{fontSize:11,color:t.sub}}> ({inst.rev} reviews)</span>
                   <span style={{fontSize:11,color:t.sub}}>⚡ {inst.resp} response</span>
@@ -451,7 +515,7 @@ function Installers(){
                   {[["Specialty",inst.spec],["Experience",`${inst.yrs} yrs`],["Response",inst.resp],["Price",inst.price],["Jobs",`${inst.jobs}+`],["Finance",inst.finance?"Available":"N/A"]].map(([l,v])=>(
                     <div key={l} style={{background:t.bgCard2,borderRadius:8,padding:"8px 9px"}}>
                       <div style={{fontSize:9,color:t.sub,marginBottom:2,textTransform:"uppercase",letterSpacing:.8}}>{l}</div>
-                      <div style={{fontSize:11,fontWeight:700,color:t.textMid,fontFamily:B}}>{v}</div>
+                      <div style={{fontSize:11,fontWeight:600,color:t.textMid}}>{v}</div>
                     </div>
                   ))}
                 </div>
@@ -468,12 +532,12 @@ function Installers(){
       <div style={{marginTop:18,background:`linear-gradient(135deg,rgba(${t.rgb},.08),rgba(${t.rgb},.03))`,border:`1px solid rgba(${t.rgb},.18)`,borderRadius:14,padding:"18px 20px"}}>
         <div style={{display:"flex",alignItems:"center",gap:12,flexWrap:"wrap"}}>
           <div style={{fontSize:28}}>📋</div>
-          <div style={{flex:1}}><div style={{fontFamily:H,fontSize:17,fontWeight:900,letterSpacing:1,color:t.text,marginBottom:2}}>Installer? Generate PDF Proposals</div><div style={{fontSize:13,color:t.sub}}>Branded quotes from SolarIQ results. <span style={{color:t.accent,fontWeight:700}}>Coming soon.</span></div></div>
+          <div style={{flex:1}}><div style={{fontFamily:H,fontSize:16,fontWeight:W.card,color:t.text,marginBottom:2}}>Installer? Generate PDF Proposals</div><div style={{fontSize:13,color:t.sub}}>Branded quotes from SolarIQ results. <span style={{color:t.accent,fontWeight:700}}>Coming soon.</span></div></div>
           <button style={{background:t.bgCard,border:`1px solid rgba(${t.rgb},.3)`,color:t.accent,borderRadius:10,padding:"9px 16px",fontSize:13,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap",fontFamily:B}}>Join Waitlist →</button>
         </div>
       </div>
       <div style={{marginTop:9,background:t.bgCard,border:`1px solid ${t.border}`,borderRadius:10,padding:"12px 16px",textAlign:"center"}}>
-        <span style={{fontSize:13,color:t.sub,fontFamily:B}}>Are you a solar installer? </span>
+        <span style={{fontSize:13,color:t.sub}}>Are you a solar installer? </span>
         <button style={{background:"none",border:"none",color:t.accent,cursor:"pointer",fontSize:13,fontWeight:700,fontFamily:B}}>List your business free →</button>
       </div>
     </div>
@@ -486,51 +550,47 @@ function Servicing(){
   const[hAns,setHAns]=useState({});const[hStep,setHStep]=useState(0);const[hResult,setHResult]=useState(null);const[tProv,setTProv]=useState("All");const[tSpec,setTSpec]=useState("All");
   const lookupErr=()=>{const c=errCode.trim().toUpperCase();const m=ERRORS[c];setErrRes(m?{...m,code:c}:{notFound:true,code:c});};
   const calcHealth=()=>{
-    const sc={age:[0,5,15,25],perf:[0,10,25,5],snd:[0,10,25,40],err:[0,10,25,40],cln:[0,5,20,30],svc:[0,10,30,15]};
-    let tot=0;Object.keys(sc).forEach(k=>{const idx=HEALTH_QS.find(q=>q.id===k)?.opts.indexOf(hAns[k]);if(idx>=0)tot+=sc[k][idx]||0;});
+    const sc2={age:[0,5,15,25],perf:[0,10,25,5],snd:[0,10,25,40],err:[0,10,25,40],cln:[0,5,20,30],svc:[0,10,30,15]};
+    let tot=0;Object.keys(sc2).forEach(k=>{const idx=HEALTH_QS.find(q=>q.id===k)?.opts.indexOf(hAns[k]);if(idx>=0)tot+=sc2[k][idx]||0;});
     const score=Math.max(0,100-tot);
     const needsSpecs=score<60?["Full System Service"]:score<80?["Full System Service"]:[];
     setHResult({score,needsSpecs,status:score>=80?"Healthy":score>=60?"Needs Attention":score>=40?"Service Required":"Critical — Act Now",color:score>=80?"#4ade80":score>=60?t.accent:score>=40?"#fb923c":"#ef4444",note:score>=80?"System performing well. Schedule annual service within 3 months.":score>=60?"System shows signs of wear. Book an inspection soon.":score>=40?"Book a professional service within 2 weeks.":"Possible serious issue. Contact a technician immediately."});
   };
   const reset=()=>{setPage("home");setErrCode("");setErrRes(null);setHAns({});setHStep(0);setHResult(null);};
   const TECH_SPECS=[...new Set(TECHS.map(x=>x.spec))];
-  const filteredTechs=TECHS.filter(x=>{
-    if(tProv!=="All"&&x.prov!==tProv)return false;
-    if(tSpec!=="All"&&x.spec!==tSpec)return false;
-    return true;
-  });
+  const filteredTechs=TECHS.filter(x=>{if(tProv!=="All"&&x.prov!==tProv)return false;if(tSpec!=="All"&&x.spec!==tSpec)return false;return true;});
 
   if(page==="home")return(
-    <div>
+    <div style={{maxWidth:680,margin:"0 auto",width:"100%"}}>
       <Lbl>After-Sales Care</Lbl>
-      <h2 style={{fontFamily:H,fontSize:sc.isMobile?26:34,fontWeight:900,letterSpacing:2,color:t.text,marginBottom:5}}>Solar Servicing & Repair</h2>
+      <h2 style={{fontFamily:H,fontSize:sc.isMobile?24:30,fontWeight:W.section,letterSpacing:.3,color:t.text,marginBottom:5}}>Solar Servicing & Repair</h2>
       <p style={{color:t.sub,fontSize:14,marginBottom:18}}>Keep your system at peak performance — for the lifetime of your investment.</p>
       <div style={{display:"grid",gridTemplateColumns:sc.isMobile?"1fr 1fr":"repeat(auto-fill,minmax(200px,1fr))",gap:10,marginBottom:14}}>
         {[{id:"health",icon:"🩺",title:"Health Check",desc:"6 questions to diagnose your system.",badge:"AI",color:"#4ade80"},{id:"error",icon:"⚠️",title:"Error Code Translator",desc:"Type any inverter code. Plain English instantly.",badge:"Instant",color:t.accent},{id:"techs",icon:"🔧",title:"Find a Technician",desc:"Verified repair specialists near you.",badge:null,color:"#60a5fa"},{id:"reminder",icon:"📅",title:"Service Reminders",desc:"WhatsApp reminders when service is due.",badge:"Free",color:"#c084fc"}].map((c,i)=>(
           <div key={c.id} onClick={()=>setPage(c.id)} style={{background:t.bgCard,border:`1px solid ${t.border}`,borderRadius:14,padding:sc.isMobile?"14px 12px":"18px",cursor:"pointer",transition:"all .22s",position:"relative",animation:`fadeUp .35s ease ${i*.07}s both`}}
             onMouseEnter={e=>{e.currentTarget.style.borderColor=`${c.color}44`;e.currentTarget.style.transform="translateY(-3px)";}}
             onMouseLeave={e=>{e.currentTarget.style.borderColor=t.border;e.currentTarget.style.transform="none";}}>
-            {c.badge&&<div style={{position:"absolute",top:10,right:10,fontSize:9,background:`${c.color}18`,color:c.color,padding:"2px 7px",borderRadius:8,fontWeight:800}}>{c.badge}</div>}
+            {c.badge&&<div style={{position:"absolute",top:10,right:10,fontSize:9,background:`${c.color}18`,color:c.color,padding:"2px 7px",borderRadius:8,fontWeight:700}}>{c.badge}</div>}
             <div style={{fontSize:sc.isMobile?22:26,marginBottom:9}}>{c.icon}</div>
-            <div style={{fontFamily:H,fontSize:sc.isMobile?15:18,fontWeight:900,letterSpacing:1,color:t.text,marginBottom:3}}>{c.title}</div>
+            <div style={{fontFamily:H,fontSize:sc.isMobile?14:17,fontWeight:W.card,color:t.text,marginBottom:3}}>{c.title}</div>
             <div style={{fontSize:12,color:t.sub,lineHeight:1.5,marginBottom:9}}>{c.desc}</div>
-            <div style={{fontSize:12,color:c.color,fontWeight:700}}>Open →</div>
+            <div style={{fontSize:12,color:c.color,fontWeight:600}}>Open →</div>
           </div>
         ))}
       </div>
       <div style={{background:"rgba(239,68,68,.06)",border:"1px solid rgba(239,68,68,.15)",borderRadius:12,padding:"13px 16px",display:"flex",alignItems:"center",gap:11}}>
         <span style={{fontSize:20}}>🚨</span>
-        <div style={{flex:1}}><div style={{fontFamily:H,fontSize:15,fontWeight:900,letterSpacing:1,color:"#f87171",marginBottom:1}}>System Completely Offline?</div><div style={{fontSize:12,color:t.sub}}>Emergency technicians available 24/7 across SA.</div></div>
-        <button onClick={()=>setPage("techs")} style={{background:"rgba(239,68,68,.15)",border:"1px solid rgba(239,68,68,.3)",color:"#f87171",borderRadius:9,padding:"8px 12px",fontSize:12,fontWeight:800,cursor:"pointer",whiteSpace:"nowrap",fontFamily:B}}>Find Now</button>
+        <div style={{flex:1}}><div style={{fontFamily:H,fontSize:14,fontWeight:W.card,color:"#f87171",marginBottom:1}}>System Completely Offline?</div><div style={{fontSize:12,color:t.sub}}>Emergency technicians available 24/7 across SA.</div></div>
+        <button onClick={()=>setPage("techs")} style={{background:"rgba(239,68,68,.15)",border:"1px solid rgba(239,68,68,.3)",color:"#f87171",borderRadius:9,padding:"8px 12px",fontSize:12,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap",fontFamily:B}}>Find Now</button>
       </div>
     </div>
   );
 
   if(page==="error")return(
-    <div>
+    <div style={{maxWidth:680,margin:"0 auto",width:"100%"}}>
       <BackBtn onClick={reset}/>
       <Lbl>Diagnostic Tool</Lbl>
-      <h3 style={{fontFamily:H,fontSize:sc.isMobile?24:28,fontWeight:900,letterSpacing:2,color:t.text,marginBottom:5}}>Error Code Translator</h3>
+      <h3 style={{fontFamily:H,fontSize:sc.isMobile?22:26,fontWeight:W.section,color:t.text,marginBottom:5}}>Error Code Translator</h3>
       <p style={{color:t.sub,fontSize:13,marginBottom:14}}>Type the error code on your inverter display. Supports Sunsynk, Victron, Deye, Growatt.</p>
       <div style={{display:"flex",gap:8,marginBottom:10}}>
         <input value={errCode} onChange={e=>setErrCode(e.target.value)} onKeyDown={e=>e.key==="Enter"&&lookupErr()} placeholder="e.g. F32, E001, G05..."
@@ -548,7 +608,7 @@ function Servicing(){
           {errRes.notFound?(
             <div style={{background:t.bgCard,border:`1px solid ${t.border}`,borderRadius:13,padding:"20px",textAlign:"center"}}>
               <div style={{fontSize:28,marginBottom:8}}>🤔</div>
-              <div style={{fontFamily:H,fontSize:18,fontWeight:900,letterSpacing:1,color:t.text,marginBottom:4}}>Code "{errRes.code}" Not Found</div>
+              <div style={{fontFamily:H,fontSize:17,fontWeight:W.section,color:t.text,marginBottom:4}}>Code "{errRes.code}" Not Found</div>
               <div style={{fontSize:13,color:t.sub,marginBottom:12}}>We add new codes daily. A technician can diagnose this on the spot.</div>
               <button onClick={()=>setPage("techs")} style={{background:`rgba(${t.rgb},.1)`,border:`1px solid rgba(${t.rgb},.3)`,color:t.accent,borderRadius:10,padding:"9px 18px",fontSize:13,fontWeight:700,cursor:"pointer",fontFamily:B}}>Find a Technician →</button>
             </div>
@@ -556,11 +616,11 @@ function Servicing(){
             <>
               <div style={{background:errRes.sev==="critical"?"rgba(239,68,68,.06)":errRes.sev==="warning"?`rgba(${t.rgb},.06)`:"rgba(96,165,250,.06)",border:`1px solid ${errRes.sev==="critical"?"rgba(239,68,68,.2)":errRes.sev==="warning"?`rgba(${t.rgb},.2)`:"rgba(96,165,250,.2)"}`,borderRadius:13,padding:"18px",marginBottom:9}}>
                 <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:10}}>
-                  <div style={{fontFamily:H,fontSize:26,fontWeight:900,letterSpacing:2,color:errRes.sev==="critical"?"#ef4444":errRes.sev==="warning"?t.accent:"#60a5fa"}}>{errRes.code}</div>
+                  <div style={{fontFamily:H,fontSize:26,fontWeight:W.hero,color:errRes.sev==="critical"?"#ef4444":errRes.sev==="warning"?t.accent:"#60a5fa"}}>{errRes.code}</div>
                   <div><div style={{fontSize:10,color:t.sub,textTransform:"uppercase",letterSpacing:1,marginBottom:2}}>{errRes.brand}</div>
-                  <span style={{fontSize:10,background:errRes.sev==="critical"?"rgba(239,68,68,.15)":errRes.sev==="warning"?`rgba(${t.rgb},.15)`:"rgba(96,165,250,.15)",color:errRes.sev==="critical"?"#f87171":errRes.sev==="warning"?t.accent:"#93c5fd",padding:"2px 8px",borderRadius:8,fontWeight:800,textTransform:"uppercase"}}>{errRes.sev}</span></div>
+                  <span style={{fontSize:10,background:errRes.sev==="critical"?"rgba(239,68,68,.15)":errRes.sev==="warning"?`rgba(${t.rgb},.15)`:"rgba(96,165,250,.15)",color:errRes.sev==="critical"?"#f87171":errRes.sev==="warning"?t.accent:"#93c5fd",padding:"2px 8px",borderRadius:8,fontWeight:700,textTransform:"uppercase"}}>{errRes.sev}</span></div>
                 </div>
-                <div style={{fontFamily:H,fontSize:18,fontWeight:900,letterSpacing:1,color:t.text,marginBottom:8}}>{errRes.title}</div>
+                <div style={{fontFamily:H,fontSize:17,fontWeight:W.section,color:t.text,marginBottom:8}}>{errRes.title}</div>
                 <div style={{fontSize:14,color:t.sub,lineHeight:1.7,marginBottom:10}}>{errRes.fix}</div>
                 <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
                   <div style={{flex:1,background:errRes.diy?"rgba(74,222,128,.07)":"rgba(239,68,68,.07)",border:`1px solid ${errRes.diy?"rgba(74,222,128,.2)":"rgba(239,68,68,.2)"}`,borderRadius:10,padding:"10px 13px",display:"flex",alignItems:"center",gap:8}}>
@@ -587,14 +647,14 @@ function Servicing(){
 
   if(page==="health"){
     if(hResult)return(
-      <div style={{animation:"fadeUp .5s ease"}}>
+      <div style={{animation:"fadeUp .5s ease",maxWidth:680,margin:"0 auto",width:"100%"}}>
         <BackBtn onClick={()=>{setHResult(null);setHAns({});setHStep(0);}}/>
         <div style={{textAlign:"center",marginBottom:22}}>
           <div style={{width:80,height:80,borderRadius:"50%",background:`${hResult.color}18`,border:`3px solid ${hResult.color}`,display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 11px",flexDirection:"column"}}>
-            <div style={{fontFamily:H,fontSize:22,fontWeight:900,color:hResult.color}}>{hResult.score}</div>
-            <div style={{fontSize:9,color:hResult.color,fontWeight:700}}>/100</div>
+            <div style={{fontFamily:H,fontSize:22,fontWeight:W.hero,color:hResult.color}}>{hResult.score}</div>
+            <div style={{fontSize:9,color:hResult.color,fontWeight:600}}>/100</div>
           </div>
-          <div style={{fontFamily:H,fontSize:24,fontWeight:900,letterSpacing:2,color:hResult.color,marginBottom:4}}>{hResult.status}</div>
+          <div style={{fontFamily:H,fontSize:24,fontWeight:W.section,color:hResult.color,marginBottom:4}}>{hResult.status}</div>
           <p style={{color:t.sub,fontSize:14,maxWidth:340,margin:"0 auto",lineHeight:1.7}}>{hResult.note}</p>
         </div>
         <div style={{background:t.bgCard,border:`1px solid ${t.border}`,borderRadius:12,padding:"14px",marginBottom:13}}>
@@ -613,80 +673,78 @@ function Servicing(){
             </div>
           </div>
         )}
-        <PBtn onClick={()=>setPage("techs")}>Book a Professional Service →</PBtn>
+        <PBtn onClick={()=>setPage("techs")} style={{width:"100%"}}>Book a Professional Service →</PBtn>
       </div>
     );
     const q=HEALTH_QS[hStep];
     return(
-      <div>
+      <div style={{maxWidth:680,margin:"0 auto",width:"100%"}}>
         <BackBtn onClick={()=>hStep===0?reset():setHStep(s=>s-1)}/>
         <div style={{display:"flex",gap:4,marginBottom:18}}>{HEALTH_QS.map((_,i)=><div key={i} style={{flex:1,height:3,borderRadius:2,background:i<=hStep?t.accent:`rgba(${t.rgb},.15)`,transition:"background .3s"}}/>)}</div>
         <div key={hStep} style={{animation:"fadeUp .3s ease"}}>
           <Lbl>Question {hStep+1} of {HEALTH_QS.length}</Lbl>
-          <h3 style={{fontFamily:H,fontSize:sc.isMobile?20:24,fontWeight:900,letterSpacing:1,color:t.text,marginBottom:14,lineHeight:1.2}}>{q.q}</h3>
+          <h3 style={{fontFamily:H,fontSize:sc.isMobile?19:23,fontWeight:W.section,color:t.text,marginBottom:14,lineHeight:1.2}}>{q.q}</h3>
           <div style={{display:"flex",flexDirection:"column",gap:8}}>
-            {q.opts.map(o=>{const sel=hAns[q.id]===o;return <button key={o} onClick={()=>{const na={...hAns,[q.id]:o};setHAns(na);if(hStep<HEALTH_QS.length-1)setTimeout(()=>setHStep(s=>s+1),200);else setTimeout(calcHealth,200);}} style={{background:sel?`rgba(${t.rgb},.1)`:t.bgCard,border:`1px solid ${sel?t.accent:t.border}`,borderRadius:10,padding:"12px 15px",cursor:"pointer",textAlign:"left",fontSize:14,color:sel?t.accent:t.sub,fontWeight:sel?700:400,transition:"all .2s",fontFamily:B}}>{o}</button>;})}
+            {q.opts.map(o=>{const sel=hAns[q.id]===o;return <button key={o} onClick={()=>{const na={...hAns,[q.id]:o};setHAns(na);if(hStep<HEALTH_QS.length-1)setTimeout(()=>setHStep(s=>s+1),200);else setTimeout(calcHealth,200);}} style={{background:sel?`rgba(${t.rgb},.1)`:t.bgCard,border:`1px solid ${sel?t.accent:t.border}`,borderRadius:10,padding:"12px 15px",cursor:"pointer",textAlign:"left",fontSize:14,color:sel?t.accent:t.sub,fontWeight:sel?600:400,transition:"all .2s",fontFamily:B}}>{o}</button>;})}
           </div>
         </div>
       </div>
     );
   }
 
-  if(page==="techs"){
-    return(
-      <div>
-        <BackBtn onClick={reset}/>
-        <Lbl>Repair Specialists</Lbl>
-        <h3 style={{fontFamily:H,fontSize:sc.isMobile?22:26,fontWeight:900,letterSpacing:2,color:t.text,marginBottom:4}}>Find a Technician</h3>
-        <p style={{color:t.sub,fontSize:13,marginBottom:13}}>Verified repair specialists across SA — matched to your issue</p>
-        <div style={{display:"flex",gap:7,marginBottom:10,flexWrap:"wrap"}}>
-          {["All","Gauteng","Western Cape","KwaZulu-Natal"].map(p=><button key={p} onClick={()=>setTProv(p)} style={{background:tProv===p?`rgba(${t.rgb},.12)`:t.bgCard,border:`1px solid ${tProv===p?`rgba(${t.rgb},.4)`:t.border}`,color:tProv===p?t.accent:t.sub,borderRadius:20,padding:"6px 13px",cursor:"pointer",fontSize:12,fontWeight:700,fontFamily:B}}>{p}</button>)}
-        </div>
-        <div style={{display:"flex",gap:7,marginBottom:14,flexWrap:"wrap"}}>
-          {["All",...TECH_SPECS].map(s=><button key={s} onClick={()=>setTSpec(s)} style={{background:tSpec===s?`rgba(${t.rgb},.12)`:t.bgCard,border:`1px solid ${tSpec===s?`rgba(${t.rgb},.4)`:t.border}`,color:tSpec===s?t.accent:t.sub,borderRadius:20,padding:"6px 13px",cursor:"pointer",fontSize:12,fontWeight:700,fontFamily:B}}>{s}</button>)}
-        </div>
-        <div style={{display:"flex",flexDirection:"column",gap:10}}>
-          {filteredTechs.map((tech,i)=>(
-            <div key={tech.id} style={{background:t.bgCard,border:`1px solid ${t.border}`,borderRadius:13,padding:"14px 16px",animation:`fadeUp .35s ease ${i*.07}s both`}}>
-              <div style={{display:"flex",alignItems:"flex-start",gap:10,marginBottom:10}}>
-                <div style={{width:40,height:40,borderRadius:9,background:`rgba(${t.rgb},.1)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:17,flexShrink:0}}>🔧</div>
-                <div style={{flex:1,minWidth:0}}>
-                  <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:2,flexWrap:"wrap"}}>
-                    <span style={{fontFamily:H,fontSize:15,fontWeight:900,letterSpacing:.5,color:t.text}}>{tech.name}</span>
-                    {tech.emergency&&<span style={{fontSize:9,background:"rgba(239,68,68,.15)",color:"#f87171",padding:"2px 7px",borderRadius:8,fontWeight:800}}>🚨 24/7</span>}
-                  </div>
-                  <div style={{fontSize:12,color:t.sub,fontFamily:B,marginBottom:3}}>{tech.spec} · {tech.city}, {tech.prov}</div>
-                  <Stars n={tech.rating}/><span style={{fontSize:11,color:t.sub}}> ({tech.rev} reviews)</span>
-                </div>
-                <div style={{fontFamily:H,fontSize:15,fontWeight:900,letterSpacing:1,color:t.accent,flexShrink:0}}>{tech.price}</div>
-              </div>
-              <p style={{fontSize:12,color:t.sub,lineHeight:1.6,marginBottom:10}}>{tech.about}</p>
-              <div style={{display:"flex",gap:7,marginBottom:10,flexWrap:"wrap"}}>
-                {tech.photos.map((p,i)=><div key={i} style={{width:50,height:50,background:`rgba(${t.rgb},.08)`,border:`1px solid ${t.border}`,borderRadius:8,display:"flex",alignItems:"center",justifyContent:"center",fontSize:20}}>{p}</div>)}
-              </div>
-              <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
-                <PBtn sm style={{flex:1,minWidth:100,borderRadius:9,padding:"9px"}}>Book Service</PBtn>
-                <button style={{background:"rgba(37,211,102,.1)",border:"1px solid rgba(37,211,102,.25)",color:"#25d366",borderRadius:9,padding:"9px 13px",fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:B}}>📱 WhatsApp</button>
-                <button style={{background:t.bgCard,border:`1px solid ${t.border}`,color:t.sub,borderRadius:9,padding:"9px 13px",fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:B}}>🌐 Website</button>
-              </div>
-            </div>
-          ))}
-          {filteredTechs.length===0&&<div style={{textAlign:"center",padding:"24px",color:t.sub,fontSize:13}}>No technicians match your filters. <button onClick={()=>{setTProv("All");setTSpec("All");}} style={{background:"none",border:"none",color:t.accent,cursor:"pointer",fontWeight:700,fontFamily:B}}>Clear filters</button></div>}
-        </div>
+  if(page==="techs")return(
+    <div style={{maxWidth:680,margin:"0 auto",width:"100%"}}>
+      <BackBtn onClick={reset}/>
+      <Lbl>Repair Specialists</Lbl>
+      <h3 style={{fontFamily:H,fontSize:sc.isMobile?20:24,fontWeight:W.section,color:t.text,marginBottom:4}}>Find a Technician</h3>
+      <p style={{color:t.sub,fontSize:13,marginBottom:13}}>Verified repair specialists across SA — matched to your issue</p>
+      <div style={{display:"flex",gap:7,marginBottom:10,flexWrap:"wrap"}}>
+        {["All","Gauteng","Western Cape","KwaZulu-Natal"].map(p=><button key={p} onClick={()=>setTProv(p)} style={{background:tProv===p?`rgba(${t.rgb},.12)`:t.bgCard,border:`1px solid ${tProv===p?`rgba(${t.rgb},.4)`:t.border}`,color:tProv===p?t.accent:t.sub,borderRadius:20,padding:"6px 13px",cursor:"pointer",fontSize:12,fontWeight:600,fontFamily:B}}>{p}</button>)}
       </div>
-    );
-  }
+      <div style={{display:"flex",gap:7,marginBottom:14,flexWrap:"wrap"}}>
+        {["All",...TECH_SPECS].map(s=><button key={s} onClick={()=>setTSpec(s)} style={{background:tSpec===s?`rgba(${t.rgb},.12)`:t.bgCard,border:`1px solid ${tSpec===s?`rgba(${t.rgb},.4)`:t.border}`,color:tSpec===s?t.accent:t.sub,borderRadius:20,padding:"6px 13px",cursor:"pointer",fontSize:12,fontWeight:600,fontFamily:B}}>{s}</button>)}
+      </div>
+      <div style={{display:"flex",flexDirection:"column",gap:10}}>
+        {filteredTechs.map((tech,i)=>(
+          <div key={tech.id} style={{background:t.bgCard,border:`1px solid ${t.border}`,borderRadius:13,padding:"14px 16px",animation:`fadeUp .35s ease ${i*.07}s both`}}>
+            <div style={{display:"flex",alignItems:"flex-start",gap:10,marginBottom:10}}>
+              <div style={{width:40,height:40,borderRadius:9,background:`rgba(${t.rgb},.1)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:17,flexShrink:0}}>🔧</div>
+              <div style={{flex:1,minWidth:0}}>
+                <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:2,flexWrap:"wrap"}}>
+                  <span style={{fontFamily:H,fontSize:15,fontWeight:W.card,color:t.text}}>{tech.name}</span>
+                  {tech.emergency&&<span style={{fontSize:9,background:"rgba(239,68,68,.15)",color:"#f87171",padding:"2px 7px",borderRadius:8,fontWeight:700}}>🚨 24/7</span>}
+                </div>
+                <div style={{fontSize:12,color:t.sub,marginBottom:3}}>{tech.spec} · {tech.city}, {tech.prov}</div>
+                <Stars n={tech.rating}/><span style={{fontSize:11,color:t.sub}}> ({tech.rev} reviews)</span>
+              </div>
+              <div style={{fontFamily:H,fontSize:15,fontWeight:W.section,color:t.accent,flexShrink:0}}>{tech.price}</div>
+            </div>
+            <p style={{fontSize:12,color:t.sub,lineHeight:1.6,marginBottom:10}}>{tech.about}</p>
+            <div style={{display:"flex",gap:7,marginBottom:10,flexWrap:"wrap"}}>
+              {tech.photos.map((p,i)=><div key={i} style={{width:50,height:50,background:`rgba(${t.rgb},.08)`,border:`1px solid ${t.border}`,borderRadius:8,display:"flex",alignItems:"center",justifyContent:"center",fontSize:20}}>{p}</div>)}
+            </div>
+            <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+              <PBtn sm style={{flex:1,minWidth:100,borderRadius:9,padding:"9px"}}>Book Service</PBtn>
+              <button style={{background:"rgba(37,211,102,.1)",border:"1px solid rgba(37,211,102,.25)",color:"#25d366",borderRadius:9,padding:"9px 13px",fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:B}}>📱 WhatsApp</button>
+              <button style={{background:t.bgCard,border:`1px solid ${t.border}`,color:t.sub,borderRadius:9,padding:"9px 13px",fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:B}}>🌐 Website</button>
+            </div>
+          </div>
+        ))}
+        {filteredTechs.length===0&&<div style={{textAlign:"center",padding:"24px",color:t.sub,fontSize:13}}>No technicians match. <button onClick={()=>{setTProv("All");setTSpec("All");}} style={{background:"none",border:"none",color:t.accent,cursor:"pointer",fontWeight:700,fontFamily:B}}>Clear filters</button></div>}
+      </div>
+    </div>
+  );
 
   if(page==="reminder")return(
-    <div>
+    <div style={{maxWidth:680,margin:"0 auto",width:"100%"}}>
       <BackBtn onClick={reset}/>
       <Lbl>Free Service</Lbl>
-      <h3 style={{fontFamily:H,fontSize:sc.isMobile?22:26,fontWeight:900,letterSpacing:2,color:t.text,marginBottom:5}}>Service Reminders</h3>
+      <h3 style={{fontFamily:H,fontSize:sc.isMobile?20:24,fontWeight:W.section,color:t.text,marginBottom:5}}>Service Reminders</h3>
       <p style={{color:t.sub,fontSize:14,marginBottom:16}}>Register once. We'll WhatsApp you when service is due.</p>
       <div style={{display:"flex",flexDirection:"column",gap:10,marginBottom:14}}>
         {[["Your name","text","John Smith"],["WhatsApp number","tel","+27 82 000 0000"],["System size","text","e.g. 5kW Sunsynk"],["Installation date","date",""],["Inverter brand","text","e.g. Sunsynk, Victron, Deye"]].map(([l,tp,ph])=>(
           <div key={l}>
-            <label style={{fontSize:11,color:t.sub,textTransform:"uppercase",letterSpacing:1.2,display:"block",marginBottom:4,fontWeight:700}}>{l}</label>
+            <label style={{fontSize:11,color:t.sub,textTransform:"uppercase",letterSpacing:1.2,display:"block",marginBottom:4,fontWeight:600}}>{l}</label>
             <input type={tp} placeholder={ph} style={{width:"100%",background:t.inputBg,border:`1px solid ${t.border}`,borderRadius:9,padding:"11px 13px",color:t.text,fontSize:14,outline:"none",boxSizing:"border-box",fontFamily:B}}/>
           </div>
         ))}
@@ -698,42 +756,129 @@ function Servicing(){
   return null;
 }
 
+function RatingBar({label,score}){
+  const t=useT();
+  const c=score>=4.5?"#4ade80":score>=3.5?t.accent:"#f87171";
+  return(
+    <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:7}}>
+      <div style={{fontSize:12,color:t.sub,width:90,flexShrink:0}}>{label}</div>
+      <div style={{flex:1,height:4,background:`rgba(128,128,128,.15)`,borderRadius:2}}>
+        <div style={{width:`${(score/5)*100}%`,height:"100%",background:c,borderRadius:2,transition:"width .8s ease"}}/>
+      </div>
+      <div style={{fontSize:12,fontWeight:700,color:c,width:28,textAlign:"right"}}>{score}</div>
+    </div>
+  );
+}
+
 function ArticleView({article,onBack}){
   const t=useT();const sc=useScreen();
   const related=article.related.map(id=>ARTICLES.find(a=>a.id===id)).filter(Boolean);
   return(
-    <div style={{maxWidth:640,margin:"0 auto",animation:"fadeUp .4s ease"}}>
+    <div style={{maxWidth:700,margin:"0 auto",animation:"fadeUp .4s ease"}}>
       <BackBtn onClick={()=>onBack(null)}/>
       <div style={{display:"flex",gap:7,alignItems:"center",marginBottom:12}}>
         <Tag>{article.tag}</Tag>
         {article.hot&&<span style={{fontSize:11,color:"#f87171"}}>🔥 Trending</span>}
         <span style={{fontSize:12,color:t.sub,marginLeft:"auto"}}>{article.min} min · {article.views} views</span>
       </div>
-      <h1 style={{fontFamily:H,fontSize:"clamp(24px,5vw,40px)",fontWeight:900,letterSpacing:1.5,color:t.text,lineHeight:1.1,marginBottom:14}}>{article.title}</h1>
+      <h1 style={{fontFamily:H,fontSize:"clamp(22px,4vw,36px)",fontWeight:W.hero,letterSpacing:.3,color:t.text,lineHeight:1.15,marginBottom:14}}>{article.title}</h1>
       <p style={{fontSize:15,color:t.textMid,lineHeight:1.85,borderLeft:`3px solid ${t.accent}`,paddingLeft:14,marginBottom:22,fontStyle:"italic"}}>{article.intro}</p>
+
+      {/* Cover image for news/review articles */}
+      {article.coverImg&&(
+        <div style={{borderRadius:14,overflow:"hidden",marginBottom:22,border:`1px solid ${t.border}`}}>
+          <img src={article.coverImg} alt={article.title} style={{width:"100%",height:sc.isMobile?180:260,objectFit:"cover",display:"block"}}/>
+        </div>
+      )}
+
+      {/* YouTube embed for review articles */}
+      {article.youtubeId&&(
+        <div style={{marginBottom:22}}>
+          <div style={{borderRadius:12,overflow:"hidden",border:`1px solid ${t.border}`,position:"relative",paddingBottom:"56.25%",height:0}}>
+            <iframe
+              src={`https://www.youtube.com/embed/${article.youtubeId}`}
+              title={article.youtubeTitle||"Video"}
+              style={{position:"absolute",top:0,left:0,width:"100%",height:"100%",border:"none"}}
+              allowFullScreen
+            />
+          </div>
+          {article.youtubeTitle&&<div style={{fontSize:11,color:t.sub,marginTop:6,textAlign:"center"}}>{article.youtubeTitle}</div>}
+        </div>
+      )}
+
+      {/* Rating breakdown for reviews */}
+      {article.rating&&(
+        <div style={{background:t.bgCard,border:`1px solid ${t.border}`,borderRadius:13,padding:"16px 18px",marginBottom:22}}>
+          <div style={{display:"flex",alignItems:"center",gap:14,marginBottom:14}}>
+            <div style={{textAlign:"center"}}>
+              <div style={{fontFamily:H,fontSize:40,fontWeight:W.hero,color:t.accent,lineHeight:1}}>{article.rating.overall}</div>
+              <div style={{fontSize:10,color:t.sub,marginTop:2}}>Overall</div>
+            </div>
+            <div style={{flex:1}}>
+              <RatingBar label="Value" score={article.rating.value}/>
+              <RatingBar label="Build quality" score={article.rating.build}/>
+              <RatingBar label="Software" score={article.rating.software}/>
+              <RatingBar label="Support" score={article.rating.support}/>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div style={{height:1,background:`linear-gradient(90deg,${t.accent},transparent)`,marginBottom:24,opacity:.4}}/>
+
       <div style={{display:"flex",flexDirection:"column",gap:22,marginBottom:30}}>
         {article.body.map((sec,i)=>(
           <div key={i}>
-            <h2 style={{fontFamily:H,fontSize:sc.isMobile?18:21,fontWeight:900,letterSpacing:1,color:t.text,marginBottom:8}}>{sec.h}</h2>
+            <h2 style={{fontFamily:H,fontSize:sc.isMobile?17:20,fontWeight:W.section,color:t.text,marginBottom:8}}>{sec.h}</h2>
             <p style={{fontSize:15,color:t.textMid,lineHeight:1.85}}>{sec.p}</p>
           </div>
         ))}
       </div>
+
+      {/* Inline photos for news/review */}
+      {article.photos&&article.photos.length>0&&(
+        <div style={{display:"grid",gridTemplateColumns:sc.isMobile?"1fr":"1fr 1fr",gap:10,marginBottom:22}}>
+          {article.photos.map((ph,i)=>(
+            <div key={i} style={{borderRadius:10,overflow:"hidden",border:`1px solid ${t.border}`}}>
+              <img src={ph.url} alt={ph.caption} style={{width:"100%",height:160,objectFit:"cover",display:"block"}}/>
+              {ph.caption&&<div style={{fontSize:11,color:t.sub,padding:"6px 10px",background:t.bgCard}}>{ph.caption}</div>}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Affiliate link for review articles */}
+      {article.affiliate&&(
+        <div style={{background:`linear-gradient(135deg,rgba(${t.rgb},.08),rgba(${t.rgb},.04))`,border:`1px solid rgba(${t.rgb},.2)`,borderRadius:12,padding:"14px 16px",marginBottom:8}}>
+          <a href={article.affiliate.url} target="_blank" rel="noopener noreferrer" style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,textDecoration:"none"}}>
+            <div>
+              <div style={{fontFamily:H,fontSize:15,fontWeight:W.card,color:t.accent,marginBottom:3}}>{article.affiliate.label}</div>
+              <div style={{fontSize:11,color:t.sub}}>Best current price · Usually ships in 3–5 days</div>
+            </div>
+            <span style={{fontSize:18,flexShrink:0}}>🛒</span>
+          </a>
+        </div>
+      )}
+      {article.affiliate&&(
+        <div style={{fontSize:10,color:t.sub,marginBottom:24,lineHeight:1.6,padding:"8px 10px",background:t.bgCard,borderRadius:8,border:`1px solid ${t.border}`}}>
+          <span style={{fontWeight:700,color:t.sub}}>Disclosure: </span>{article.affiliate.disclosure}
+        </div>
+      )}
+
       <div style={{background:`linear-gradient(135deg,rgba(${t.rgb},.1),rgba(${t.rgb},.04))`,border:`1px solid rgba(${t.rgb},.2)`,borderRadius:14,padding:"18px",textAlign:"center",marginBottom:26}}>
-        <div style={{fontFamily:H,fontSize:18,fontWeight:900,letterSpacing:1.5,color:t.text,marginBottom:4}}>Ready to Calculate Your System?</div>
+        <div style={{fontFamily:H,fontSize:17,fontWeight:W.section,color:t.text,marginBottom:4}}>Ready to Calculate Your System?</div>
         <p style={{color:t.sub,fontSize:13,marginBottom:13}}>Free calculator — personalised result in under 2 minutes.</p>
         <PBtn sm style={{width:"auto",padding:"10px 24px"}}>☀️ Calculate My System</PBtn>
       </div>
       {related.length>0&&(
         <div>
-          <div style={{fontFamily:H,fontSize:17,fontWeight:900,letterSpacing:1,color:t.text,marginBottom:11}}>Related Articles</div>
+          <div style={{fontFamily:H,fontSize:16,fontWeight:W.section,color:t.text,marginBottom:11}}>Related Articles</div>
           <div style={{display:"flex",flexDirection:"column",gap:7}}>
             {related.map(rel=>(
               <div key={rel.id} onClick={()=>onBack(rel)} style={{background:t.bgCard,border:`1px solid ${t.border}`,borderRadius:10,padding:"12px 14px",cursor:"pointer",transition:"all .2s",display:"flex",alignItems:"center",gap:10}}
                 onMouseEnter={e=>{e.currentTarget.style.borderColor=`rgba(${t.rgb},.3)`;e.currentTarget.style.transform="translateX(4px)";}}
                 onMouseLeave={e=>{e.currentTarget.style.borderColor=t.border;e.currentTarget.style.transform="none";}}>
-                <div style={{flex:1}}><Tag>{rel.tag}</Tag><div style={{fontFamily:H,fontSize:13,fontWeight:900,letterSpacing:.5,color:t.text,marginTop:4}}>{rel.title}</div></div>
+                <div style={{flex:1}}><Tag>{rel.tag}</Tag><div style={{fontFamily:H,fontSize:13,fontWeight:W.card,color:t.text,marginTop:4}}>{rel.title}</div></div>
                 <span style={{fontSize:14,color:t.sub,flexShrink:0}}>›</span>
               </div>
             ))}
@@ -753,38 +898,45 @@ function Blog(){
   return(
     <div>
       <Lbl>Knowledge Hub</Lbl>
-      <h2 style={{fontFamily:H,fontSize:sc.isMobile?26:34,fontWeight:900,letterSpacing:2,color:t.text,marginBottom:5}}>Solar Guides & Reviews</h2>
+      <h2 style={{fontFamily:H,fontSize:sc.isMobile?24:30,fontWeight:W.section,letterSpacing:.3,color:t.text,marginBottom:5}}>Solar Guides & Reviews</h2>
       <p style={{color:t.sub,fontSize:14,marginBottom:16}}>Honest solar content for South Africans. No brand deals. No bias.</p>
       <div style={{display:"flex",gap:7,marginBottom:18,flexWrap:"wrap"}}>
-        {tags.map(tg=><button key={tg} onClick={()=>setTag(tg)} style={{background:tag===tg?`rgba(${t.rgb},.13)`:t.bgCard,border:`1px solid ${tag===tg?`rgba(${t.rgb},.4)`:t.border}`,color:tag===tg?t.accent:t.sub,borderRadius:20,padding:"6px 14px",cursor:"pointer",fontSize:12,fontWeight:700,fontFamily:B}}>{tg}</button>)}
+        {tags.map(tg=><button key={tg} onClick={()=>setTag(tg)} style={{background:tag===tg?`rgba(${t.rgb},.13)`:t.bgCard,border:`1px solid ${tag===tg?`rgba(${t.rgb},.4)`:t.border}`,color:tag===tg?t.accent:t.sub,borderRadius:20,padding:"6px 14px",cursor:"pointer",fontSize:12,fontWeight:600,fontFamily:B}}>{tg}</button>)}
       </div>
-      <div onClick={()=>setActive(list[0])} style={{background:`linear-gradient(135deg,rgba(${t.rgb},.08),rgba(${t.rgb},.03))`,border:`1px solid rgba(${t.rgb},.15)`,borderRadius:15,padding:"20px",marginBottom:11,cursor:"pointer",transition:"all .2s"}}
+      {/* Featured */}
+      <div onClick={()=>setActive(list[0])} style={{background:`linear-gradient(135deg,rgba(${t.rgb},.08),rgba(${t.rgb},.03))`,border:`1px solid rgba(${t.rgb},.15)`,borderRadius:15,overflow:"hidden",marginBottom:11,cursor:"pointer",transition:"all .2s"}}
         onMouseEnter={e=>{e.currentTarget.style.borderColor=`rgba(${t.rgb},.3)`;e.currentTarget.style.transform="translateY(-2px)";}}
         onMouseLeave={e=>{e.currentTarget.style.borderColor=`rgba(${t.rgb},.15)`;e.currentTarget.style.transform="none";}}>
-        <div style={{display:"flex",gap:7,marginBottom:9,alignItems:"center"}}>
-          <Tag>FEATURED</Tag>
-          {list[0].hot&&<span style={{fontSize:11,color:"#f87171"}}>🔥 {list[0].views} reads</span>}
-        </div>
-        <h3 style={{fontFamily:H,fontSize:"clamp(16px,3vw,22px)",fontWeight:900,letterSpacing:1,color:t.text,marginBottom:7,lineHeight:1.2}}>{list[0].title}</h3>
-        <p style={{fontSize:13,color:t.sub,lineHeight:1.6,marginBottom:10}}>{list[0].intro}</p>
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-          <span style={{fontSize:12,color:t.sub}}>{list[0].min} min read</span>
-          <span style={{fontSize:13,color:t.accent,fontWeight:700}}>Read article →</span>
+        {list[0].coverImg&&<img src={list[0].coverImg} alt="" style={{width:"100%",height:sc.isMobile?140:200,objectFit:"cover",display:"block"}}/>}
+        <div style={{padding:"16px 18px"}}>
+          <div style={{display:"flex",gap:7,marginBottom:9,alignItems:"center"}}>
+            <Tag>FEATURED</Tag><Tag>{list[0].tag}</Tag>
+            {list[0].hot&&<span style={{fontSize:11,color:"#f87171"}}>🔥 {list[0].views} reads</span>}
+          </div>
+          <h3 style={{fontFamily:H,fontSize:"clamp(15px,3vw,20px)",fontWeight:W.section,color:t.text,marginBottom:7,lineHeight:1.2}}>{list[0].title}</h3>
+          <p style={{fontSize:13,color:t.sub,lineHeight:1.6,marginBottom:10}}>{list[0].intro}</p>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+            <span style={{fontSize:12,color:t.sub}}>{list[0].min} min read</span>
+            <span style={{fontSize:13,color:t.accent,fontWeight:600}}>Read article →</span>
+          </div>
         </div>
       </div>
-      <div style={{display:"grid",gridTemplateColumns:sc.isMobile?"1fr":"repeat(auto-fill,minmax(250px,1fr))",gap:9}}>
+      <div style={{display:"grid",gridTemplateColumns:sc.isMobile?"1fr":"repeat(auto-fill,minmax(240px,1fr))",gap:9}}>
         {list.slice(1).map((p,i)=>(
-          <div key={p.id} onClick={()=>setActive(p)} style={{background:t.bgCard,border:`1px solid ${t.border}`,borderRadius:13,padding:"16px",cursor:"pointer",transition:"all .2s",animation:`fadeUp .35s ease ${i*.07}s both`}}
+          <div key={p.id} onClick={()=>setActive(p)} style={{background:t.bgCard,border:`1px solid ${t.border}`,borderRadius:13,overflow:"hidden",cursor:"pointer",transition:"all .2s",animation:`fadeUp .35s ease ${i*.07}s both`}}
             onMouseEnter={e=>{e.currentTarget.style.borderColor=`rgba(${t.rgb},.25)`;e.currentTarget.style.transform="translateY(-2px)";}}
             onMouseLeave={e=>{e.currentTarget.style.borderColor=t.border;e.currentTarget.style.transform="none";}}>
-            <div style={{display:"flex",gap:6,marginBottom:7,alignItems:"center"}}>
-              <Tag>{p.tag}</Tag>{p.hot&&<span style={{fontSize:11,color:"#f87171"}}>🔥</span>}
-              <span style={{fontSize:10,color:t.sub,marginLeft:"auto"}}>{p.views}</span>
-            </div>
-            <h4 style={{fontFamily:H,fontSize:15,fontWeight:900,letterSpacing:.5,color:t.text,lineHeight:1.3,marginBottom:8}}>{p.title}</h4>
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-              <span style={{fontSize:11,color:t.sub}}>{p.min} min</span>
-              <span style={{fontSize:12,color:t.accent,fontWeight:700}}>Read →</span>
+            {p.coverImg&&<img src={p.coverImg} alt="" style={{width:"100%",height:100,objectFit:"cover",display:"block"}}/>}
+            <div style={{padding:"13px 14px"}}>
+              <div style={{display:"flex",gap:6,marginBottom:7,alignItems:"center"}}>
+                <Tag>{p.tag}</Tag>{p.hot&&<span style={{fontSize:11,color:"#f87171"}}>🔥</span>}
+                <span style={{fontSize:10,color:t.sub,marginLeft:"auto"}}>{p.views}</span>
+              </div>
+              <h4 style={{fontFamily:H,fontSize:14,fontWeight:W.card,color:t.text,lineHeight:1.3,marginBottom:8}}>{p.title}</h4>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                <span style={{fontSize:11,color:t.sub}}>{p.min} min</span>
+                <span style={{fontSize:12,color:t.accent,fontWeight:600}}>Read →</span>
+              </div>
             </div>
           </div>
         ))}
@@ -795,33 +947,68 @@ function Blog(){
 
 function ComingSoon(){
   const t=useT();
-  const params=typeof window!=="undefined"?new URLSearchParams(window.location.search):new URLSearchParams();
-  const unlocked=params.get("preview")==="solariq2026";
-  if(unlocked)return null;
+  const[email,setEmail]=useState("");const[done,setDone]=useState(false);
+  const LAUNCH=new Date("2026-04-08T00:00:00");
+  const[timeLeft,setTimeLeft]=useState({d:0,h:0,m:0,s:0});
+  useEffect(()=>{
+    const calc=()=>{
+      const now=new Date();const diff=LAUNCH-now;
+      if(diff<=0){setTimeLeft({d:0,h:0,m:0,s:0});return;}
+      setTimeLeft({d:Math.floor(diff/86400000),h:Math.floor((diff%86400000)/3600000),m:Math.floor((diff%3600000)/60000),s:Math.floor((diff%60000)/1000)});
+    };
+    calc();const id=setInterval(calc,1000);return()=>clearInterval(id);
+  },[]);
   return(
-    <div style={{position:"fixed",inset:0,background:"#07090d",zIndex:9999,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:24}}>
-      <div style={{fontSize:48,marginBottom:16,animation:"float 3s ease infinite"}}>☀️</div>
-      <div style={{fontFamily:H,fontSize:"clamp(36px,10vw,72px)",fontWeight:900,letterSpacing:4,color:"#f5a623",marginBottom:4,textAlign:"center"}}>SOLARIQ</div>
-      <div style={{fontFamily:H,fontSize:"clamp(14px,3vw,20px)",fontWeight:700,letterSpacing:3,color:"rgba(255,255,255,.3)",marginBottom:32,textAlign:"center"}}>SOMETHING POWERFUL IS COMING</div>
-      <div style={{maxWidth:400,textAlign:"center",marginBottom:32}}>
-        <p style={{fontSize:15,color:"rgba(255,255,255,.4)",lineHeight:1.8}}>SA's complete solar platform — calculate, install, maintain, repair. Free. Always.</p>
+    <div style={{position:"fixed",inset:0,background:"#07090d",zIndex:9999,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"24px 20px",overflowY:"auto"}}>
+      {/* Animated background glow */}
+      <div style={{position:"absolute",top:"20%",left:"50%",transform:"translateX(-50%)",width:"60vw",height:"40vh",background:"radial-gradient(ellipse,rgba(245,166,35,.06) 0%,transparent 70%)",pointerEvents:"none",animation:"glow 6s ease infinite"}}/>
+      <div style={{position:"absolute",bottom:"10%",left:"20%",width:"30vw",height:"30vh",background:"radial-gradient(ellipse,rgba(255,107,0,.04) 0%,transparent 70%)",pointerEvents:"none",animation:"glow 8s ease infinite 2s"}}/>
+
+      {/* Logo — matches site exactly */}
+      <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:20,animation:"fadeUp .6s ease"}}>
+        <div style={{width:40,height:40,background:"linear-gradient(135deg,#f5a623,#ff6b00)",borderRadius:11,display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,animation:"float 3s ease infinite",boxShadow:"0 0 24px rgba(245,166,35,.3)"}}>☀️</div>
+        <span style={{fontFamily:H,fontSize:32,fontWeight:W.logo,letterSpacing:2,color:"#f0f0f0"}}>Solar<span style={{color:"#f5a623"}}>IQ</span></span>
       </div>
-      <div style={{display:"flex",gap:8,width:"100%",maxWidth:360,marginBottom:16}}>
-        <input placeholder="your@email.com" style={{flex:1,background:"rgba(255,255,255,.06)",border:"1px solid rgba(255,255,255,.12)",borderRadius:9,padding:"11px 14px",color:"#f0f0f0",fontSize:14,outline:"none",fontFamily:"'Plus Jakarta Sans',sans-serif"}}/>
-        <button style={{background:"linear-gradient(135deg,#f5a623,#ff6b00)",border:"none",borderRadius:9,padding:"11px 18px",fontSize:13,fontWeight:800,color:"#000",cursor:"pointer",fontFamily:"'Plus Jakarta Sans',sans-serif",whiteSpace:"nowrap"}}>Notify Me</button>
+
+      {/* Headline */}
+      <div style={{textAlign:"center",marginBottom:28,animation:"fadeUp .7s ease",maxWidth:520}}>
+        <h1 style={{fontFamily:H,fontSize:"clamp(28px,7vw,52px)",fontWeight:W.hero,color:"#f0f0f0",lineHeight:1.1,marginBottom:10,letterSpacing:.5}}>
+          SA's Solar Platform.<br/><span style={{color:"#f5a623"}}>Launching 8 April 2026.</span>
+        </h1>
+        <p style={{fontSize:15,color:"rgba(255,255,255,.35)",lineHeight:1.8}}>Calculate your system. Find verified installers. Diagnose faults. Read honest reviews. All free. All in one place.</p>
       </div>
-      <div style={{fontSize:11,color:"rgba(255,255,255,.2)",marginBottom:40}}>No spam · Unsubscribe anytime · 🇿🇦 Built for South Africa</div>
-      <div style={{display:"flex",gap:24,flexWrap:"wrap",justifyContent:"center"}}>
-        {[["☀️","Solar Calculator"],["🗺️","Installer Directory"],["🔧","System Diagnostics"],["📖","SA Solar Guides"]].map(([icon,l])=>(
-          <div key={l} style={{textAlign:"center"}}>
-            <div style={{fontSize:20,marginBottom:4}}>{icon}</div>
-            <div style={{fontSize:11,color:"rgba(255,255,255,.3)",fontWeight:600}}>{l}</div>
+
+      {/* Countdown */}
+      <div style={{display:"flex",gap:sc_cs(),alignItems:"center",marginBottom:28,animation:"fadeUp .8s ease"}}>
+        {[["Days",timeLeft.d],["Hours",timeLeft.h],["Minutes",timeLeft.m],["Seconds",timeLeft.s]].map(([l,v],i)=>(
+          <div key={l} style={{textAlign:"center",minWidth:64}}>
+            <div style={{fontFamily:H,fontSize:"clamp(32px,8vw,56px)",fontWeight:W.hero,color:"#f5a623",lineHeight:1,letterSpacing:1}}>{String(v).padStart(2,"0")}</div>
+            <div style={{fontSize:10,color:"rgba(255,255,255,.25)",fontWeight:600,textTransform:"uppercase",letterSpacing:2,marginTop:4}}>{l}</div>
           </div>
-        ))}
+        )).reduce((acc,el,i)=>i===0?[el]:[...acc,<div key={`sep${i}`} style={{fontFamily:H,fontSize:"clamp(24px,6vw,40px)",fontWeight:900,color:"rgba(245,166,35,.3)",marginBottom:16}}>:</div>,el],[])}
       </div>
+
+      {/* Email signup */}
+      <div style={{width:"100%",maxWidth:380,marginBottom:12,animation:"fadeUp .9s ease"}}>
+        {done?(
+          <div style={{background:"rgba(74,222,128,.08)",border:"1px solid rgba(74,222,128,.2)",borderRadius:12,padding:"14px",textAlign:"center"}}>
+            <div style={{fontSize:20,marginBottom:4}}>✅</div>
+            <div style={{fontFamily:H,fontSize:16,fontWeight:W.section,color:"#4ade80",marginBottom:2}}>You're on the list</div>
+            <div style={{fontSize:13,color:"rgba(255,255,255,.3)"}}>We'll notify you on launch day.</div>
+          </div>
+        ):(
+          <div style={{display:"flex",gap:8}}>
+            <input value={email} onChange={e=>setEmail(e.target.value)} onKeyDown={e=>e.key==="Enter"&&email&&setDone(true)} placeholder="your@email.com"
+              style={{flex:1,background:"rgba(255,255,255,.06)",border:"1px solid rgba(255,255,255,.1)",borderRadius:10,padding:"12px 14px",color:"#f0f0f0",fontSize:14,outline:"none",fontFamily:"'Plus Jakarta Sans',sans-serif"}}/>
+            <button onClick={()=>email&&setDone(true)} style={{background:"linear-gradient(135deg,#f5a623,#ff6b00)",border:"none",borderRadius:10,padding:"12px 18px",fontSize:13,fontWeight:800,color:"#000",cursor:"pointer",fontFamily:"'Plus Jakarta Sans',sans-serif",whiteSpace:"nowrap"}}>Notify Me</button>
+          </div>
+        )}
+      </div>
+      <div style={{fontSize:11,color:"rgba(255,255,255,.18)",animation:"fadeUp 1s ease"}}>No spam · Unsubscribe anytime · 🇿🇦 Built for South Africa</div>
     </div>
   );
 }
+function sc_cs(){return typeof window!=="undefined"&&window.innerWidth<400?8:16;}
 
 export default function App(){
   const params=typeof window!=="undefined"?new URLSearchParams(window.location.search):new URLSearchParams();
@@ -845,7 +1032,7 @@ export default function App(){
   const TICKS=["☀️ Solar tax rebate: claim 25% back from SARS","🔋 Load shedding prep — is your system sized right?","⚙️ Pro Calculator now live","🩺 Free System Health Check — 2 minutes","🔧 Verified repair technicians across SA","📋 Installer proposal generator — coming soon"];
 
   const css=`
-    @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { width: 100%; overflow-x: hidden; }
     body { background: ${t.bg}; transition: background .35s, color .35s; -webkit-text-size-adjust: 100%; }
@@ -854,8 +1041,8 @@ export default function App(){
     input::placeholder { color: ${isDark?"#444":"#999"}; }
     select option { background: ${isDark?"#111":"#f5f2eb"}; color: ${t.text}; }
     @keyframes fadeUp  { from { opacity:0; transform:translateY(10px) } to { opacity:1; transform:translateY(0) } }
-    @keyframes float   { 0%,100% { transform:translateY(0) } 50% { transform:translateY(-5px) } }
-    @keyframes glow    { 0%,100% { opacity:.2 } 50% { opacity:.6 } }
+    @keyframes float   { 0%,100% { transform:translateY(0) } 50% { transform:translateY(-6px) } }
+    @keyframes glow    { 0%,100% { opacity:.5 } 50% { opacity:1 } }
     @keyframes ticker  { 0% { transform:translateX(0) } 100% { transform:translateX(-50%) } }
     @keyframes pulse   { 0%,100% { opacity:1 } 50% { opacity:.3 } }
   `;
@@ -883,18 +1070,18 @@ export default function App(){
 
         {/* Desktop Nav */}
         {!sc.isMobile&&(
-          <nav style={{background:t.navBg,backdropFilter:"blur(20px)",borderBottom:`1px solid ${t.border}`,padding:"0 20px",position:"sticky",top:0,zIndex:200,flexShrink:0}}>
-            <div style={{maxWidth:1160,margin:"0 auto",display:"flex",alignItems:"center",justifyContent:"space-between",height:52,width:"100%"}}>
+          <nav style={{background:t.navBg,backdropFilter:"blur(20px)",borderBottom:`1px solid ${t.border}`,padding:"0 24px",position:"sticky",top:0,zIndex:200,flexShrink:0}}>
+            <div style={{maxWidth:1200,margin:"0 auto",display:"flex",alignItems:"center",justifyContent:"space-between",height:52,width:"100%"}}>
               <div onClick={()=>goTab("home")} style={{display:"flex",alignItems:"center",gap:8,cursor:"pointer",flexShrink:0}}>
                 <div style={{width:26,height:26,background:`linear-gradient(135deg,${t.accent},${t.accent2})`,borderRadius:7,display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,animation:"float 3s ease infinite"}}>☀️</div>
-                <span style={{fontFamily:H,fontSize:21,fontWeight:900,letterSpacing:2,color:t.text}}>Solar<span style={{color:t.accent}}>IQ</span></span>
-                <span style={{fontSize:9,background:`rgba(${t.rgb},.15)`,color:t.accent,padding:"1px 6px",borderRadius:8,fontWeight:800,letterSpacing:1}}>BETA</span>
+                <span style={{fontFamily:H,fontSize:20,fontWeight:W.logo,letterSpacing:1.5,color:t.text}}>Solar<span style={{color:t.accent}}>IQ</span></span>
+                <span style={{fontSize:9,background:`rgba(${t.rgb},.15)`,color:t.accent,padding:"1px 6px",borderRadius:8,fontWeight:700,letterSpacing:1}}>BETA</span>
               </div>
               <div style={{display:"flex",gap:2}}>
-                {NAV.map(x=><button key={x.id} onClick={()=>goTab(x.id)} style={{background:tab===x.id?`rgba(${t.rgb},.08)`:"none",border:`1px solid ${tab===x.id?`rgba(${t.rgb},.22)`:"transparent"}`,color:tab===x.id?t.accent:t.sub,padding:"5px 13px",borderRadius:7,cursor:"pointer",fontSize:12,fontWeight:600,transition:"all .2s",fontFamily:B}}>{x.l}</button>)}
+                {NAV.map(x=><button key={x.id} onClick={()=>goTab(x.id)} style={{background:tab===x.id?`rgba(${t.rgb},.08)`:"none",border:`1px solid ${tab===x.id?`rgba(${t.rgb},.22)`:"transparent"}`,color:tab===x.id?t.accent:t.sub,padding:"5px 14px",borderRadius:7,cursor:"pointer",fontSize:12,fontWeight:600,transition:"all .2s",fontFamily:B}}>{x.l}</button>)}
               </div>
               <div style={{display:"flex",alignItems:"center",gap:8}}>
-                <button onClick={()=>setIsDark(d=>!d)} title={isDark?"Switch to light":"Switch to dark"} style={{background:`rgba(${t.rgb},.1)`,border:`1px solid rgba(${t.rgb},.25)`,borderRadius:8,padding:"5px 10px",cursor:"pointer",fontSize:15,lineHeight:1}}>
+                <button onClick={()=>setIsDark(d=>!d)} style={{background:`rgba(${t.rgb},.1)`,border:`1px solid rgba(${t.rgb},.25)`,borderRadius:8,padding:"5px 10px",cursor:"pointer",fontSize:15,lineHeight:1}}>
                   {isDark?"⛅":"☀️"}
                 </button>
                 <PBtn sm style={{borderRadius:7,padding:"7px 14px",fontSize:12,width:"auto"}}>📧 Stay Updated</PBtn>
@@ -908,7 +1095,7 @@ export default function App(){
           <div style={{background:t.navBg,backdropFilter:"blur(20px)",borderBottom:`1px solid ${t.border}`,padding:"0 16px",position:"sticky",top:0,zIndex:200,height:50,display:"flex",alignItems:"center",justifyContent:"space-between",flexShrink:0}}>
             <div onClick={()=>goTab("home")} style={{display:"flex",alignItems:"center",gap:7,cursor:"pointer"}}>
               <div style={{width:24,height:24,background:`linear-gradient(135deg,${t.accent},${t.accent2})`,borderRadius:6,display:"flex",alignItems:"center",justifyContent:"center",fontSize:11}}>☀️</div>
-              <span style={{fontFamily:H,fontSize:19,fontWeight:900,letterSpacing:2,color:t.text}}>Solar<span style={{color:t.accent}}>IQ</span></span>
+              <span style={{fontFamily:H,fontSize:18,fontWeight:W.logo,letterSpacing:1.5,color:t.text}}>Solar<span style={{color:t.accent}}>IQ</span></span>
             </div>
             <button onClick={()=>setIsDark(d=>!d)} style={{background:`rgba(${t.rgb},.1)`,border:`1px solid rgba(${t.rgb},.25)`,borderRadius:7,padding:"5px 10px",cursor:"pointer",fontSize:14,lineHeight:1}}>
               {isDark?"⛅":"☀️"}
@@ -921,28 +1108,28 @@ export default function App(){
 
         {/* Main */}
         <div style={{flex:1,width:"100%"}}>
-          <div style={{maxWidth:1160,margin:"0 auto",padding:sc.isMobile?"16px 14px 100px":"36px 28px 60px",position:"relative",width:"100%"}}>
+          <div style={{maxWidth:1200,margin:"0 auto",padding:sc.isMobile?"16px 14px 100px":"40px 32px 60px",position:"relative",width:"100%"}}>
 
             {tab==="home"&&(
               <div style={{animation:"fadeUp .5s ease"}}>
                 {/* Hero */}
-                <div style={{display:"grid",gridTemplateColumns:sc.isDesktop?"1fr 1fr":"1fr",gap:sc.isDesktop?48:32,alignItems:"center",marginBottom:sc.isMobile?32:48}}>
+                <div style={{display:"grid",gridTemplateColumns:sc.isDesktop?"1fr 1fr":"1fr",gap:sc.isDesktop?56:32,alignItems:"center",marginBottom:sc.isMobile?32:52}}>
                   <div>
-                    <div style={{display:"inline-flex",alignItems:"center",gap:7,background:`rgba(${t.rgb},.08)`,border:`1px solid rgba(${t.rgb},.2)`,borderRadius:20,padding:"5px 13px",marginBottom:16}}>
+                    <div style={{display:"inline-flex",alignItems:"center",gap:7,background:`rgba(${t.rgb},.08)`,border:`1px solid rgba(${t.rgb},.2)`,borderRadius:20,padding:"5px 13px",marginBottom:18}}>
                       <span style={{width:6,height:6,borderRadius:"50%",background:t.accent,display:"inline-block",animation:"pulse 2s infinite"}}/>
                       <span style={{fontSize:10,color:t.accent,fontWeight:700,letterSpacing:1}}>SA'S SOLAR INTELLIGENCE PLATFORM</span>
                     </div>
-                    <h1 style={{fontFamily:H,fontSize:"clamp(38px,8vw,62px)",fontWeight:900,letterSpacing:2,lineHeight:1.0,marginBottom:14,color:t.text}}>
+                    <h1 style={{fontFamily:H,fontSize:"clamp(36px,5vw,58px)",fontWeight:W.hero,lineHeight:1.05,marginBottom:16,color:t.text,letterSpacing:.3}}>
                       From Research<br/>To Install<br/><span style={{color:t.accent}}>To Lifetime Care.</span>
                     </h1>
-                    <p style={{fontSize:sc.isMobile?14:15,color:t.sub,lineHeight:1.8,marginBottom:20,maxWidth:400}}>The only platform SA solar owners need — calculate, install, maintain, repair. Free. Always.</p>
-                    <div style={{display:"flex",flexDirection:"column",gap:9,maxWidth:360}}>
+                    <p style={{fontSize:sc.isMobile?14:15,color:t.sub,lineHeight:1.8,marginBottom:22,maxWidth:400}}>The only platform SA solar owners need — calculate, install, maintain, repair. Free. Always.</p>
+                    <div style={{display:"flex",flexDirection:"column",gap:10,maxWidth:360}}>
                       <PBtn onClick={()=>goTab("calc")}>☀️ Calculate My System</PBtn>
-                      <button onClick={()=>goTab("serv")} style={{background:`rgba(${t.rgb},.08)`,border:`1px solid rgba(${t.rgb},.2)`,color:t.accent,borderRadius:30,padding:"12px 20px",fontSize:13,fontWeight:700,cursor:"pointer",fontFamily:B,width:"100%"}}>🔧 Service My Solar</button>
+                      <button onClick={()=>goTab("serv")} style={{background:`rgba(${t.rgb},.08)`,border:`1px solid rgba(${t.rgb},.2)`,color:t.accent,borderRadius:30,padding:"12px 20px",fontSize:13,fontWeight:600,cursor:"pointer",fontFamily:B,width:"100%"}}>🔧 Service My Solar</button>
                     </div>
-                    <div style={{display:"flex",gap:sc.isMobile?16:24,marginTop:20,flexWrap:"wrap"}}>
+                    <div style={{display:"flex",gap:sc.isMobile?16:28,marginTop:22,flexWrap:"wrap"}}>
                       {[["4","Calc modes"],["R0","Always free"],["🇿🇦","SA built"],["24/7","Support"]].map(([v,l])=>(
-                        <div key={l}><div style={{fontFamily:H,fontSize:18,fontWeight:900,letterSpacing:1,color:t.text}}>{v}</div><div style={{fontSize:10,color:t.sub,marginTop:1}}>{l}</div></div>
+                        <div key={l}><div style={{fontFamily:H,fontSize:18,fontWeight:W.section,color:t.text}}>{v}</div><div style={{fontSize:10,color:t.sub,marginTop:1}}>{l}</div></div>
                       ))}
                     </div>
                   </div>
@@ -952,8 +1139,8 @@ export default function App(){
                         onMouseEnter={e=>{e.currentTarget.style.borderColor=`rgba(${t.rgb},.3)`;e.currentTarget.style.transform="translateX(4px)";}}
                         onMouseLeave={e=>{e.currentTarget.style.borderColor=t.border;e.currentTarget.style.transform="none";}}>
                         <div style={{width:32,height:32,borderRadius:8,background:`rgba(${t.rgb},.08)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,flexShrink:0}}>{x.icon}</div>
-                        <div style={{flex:1,minWidth:0}}><div style={{fontSize:13,fontWeight:700,color:t.text,marginBottom:1}}>{x.l}</div><div style={{fontSize:11,color:t.sub}}>{x.s}</div></div>
-                        {x.badge&&<span style={{fontSize:9,background:`rgba(${t.rgb},.12)`,color:t.accent,padding:"2px 6px",borderRadius:7,fontWeight:800,flexShrink:0}}>{x.badge}</span>}
+                        <div style={{flex:1,minWidth:0}}><div style={{fontSize:13,fontWeight:600,color:t.text,marginBottom:1,fontFamily:H}}>{x.l}</div><div style={{fontSize:11,color:t.sub}}>{x.s}</div></div>
+                        {x.badge&&<span style={{fontSize:9,background:`rgba(${t.rgb},.12)`,color:t.accent,padding:"2px 6px",borderRadius:7,fontWeight:700,flexShrink:0}}>{x.badge}</span>}
                         <span style={{fontSize:13,color:t.sub,flexShrink:0}}>›</span>
                       </div>
                     ))}
@@ -964,17 +1151,17 @@ export default function App(){
                 <div style={{marginBottom:28}}>
                   <div style={{textAlign:"center",marginBottom:18}}>
                     <Lbl center>Your Solar Journey</Lbl>
-                    <h2 style={{fontFamily:H,fontSize:sc.isMobile?22:28,fontWeight:900,letterSpacing:1.5,color:t.text}}>SolarIQ is with you at every stage</h2>
+                    <h2 style={{fontFamily:H,fontSize:sc.isMobile?20:26,fontWeight:W.section,color:t.text}}>SolarIQ is with you at every stage</h2>
                   </div>
                   <div style={{display:"grid",gridTemplateColumns:sc.isMobile?"1fr 1fr":"repeat(5,1fr)",gap:9}}>
                     {[{n:"01",l:"Research",icon:"🔍",d:"Calculate what you need",c:t.accent},{n:"02",l:"Compare",icon:"⚖️",d:"Find the best installers",c:t.accent2},{n:"03",l:"Install",icon:"⚡",d:"Accredited professionals",c:"#4ade80"},{n:"04",l:"Maintain",icon:"🔧",d:"Reminders & cleaning tips",c:"#60a5fa"},{n:"05",l:"Repair",icon:"🩺",d:"Error codes & health checks",c:"#c084fc"}].map((s,i)=>(
                       <div key={s.n} style={{background:t.bgCard,border:`1px solid ${t.border}`,borderRadius:12,padding:"14px 12px",animation:`fadeUp .4s ease ${i*.07}s both`}}>
                         <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:7}}>
-                          <span style={{fontFamily:H,fontSize:10,fontWeight:900,color:s.c,opacity:.4}}>{s.n}</span>
+                          <span style={{fontFamily:H,fontSize:10,fontWeight:W.logo,color:s.c,opacity:.4}}>{s.n}</span>
                           <div style={{flex:1,height:1,background:`${s.c}20`}}/>
                           <span style={{fontSize:14}}>{s.icon}</span>
                         </div>
-                        <div style={{fontFamily:H,fontSize:14,fontWeight:900,letterSpacing:.5,color:s.c,marginBottom:3}}>{s.l}</div>
+                        <div style={{fontFamily:H,fontSize:14,fontWeight:W.card,color:s.c,marginBottom:3}}>{s.l}</div>
                         <div style={{fontSize:11,color:t.sub,lineHeight:1.5}}>{s.d}</div>
                       </div>
                     ))}
@@ -984,7 +1171,7 @@ export default function App(){
                 {/* Newsletter */}
                 <div style={{background:`linear-gradient(135deg,rgba(${t.rgb},.08),rgba(${t.rgb},.03))`,border:`1px solid rgba(${t.rgb},.15)`,borderRadius:16,padding:sc.isMobile?"20px":"28px",textAlign:"center"}}>
                   <div style={{fontSize:22,marginBottom:8}}>📬</div>
-                  <h3 style={{fontFamily:H,fontSize:sc.isMobile?20:24,fontWeight:900,letterSpacing:1.5,color:t.text,marginBottom:5}}>Solar insights for SA homeowners</h3>
+                  <h3 style={{fontFamily:H,fontSize:sc.isMobile?19:22,fontWeight:W.section,color:t.text,marginBottom:5}}>Solar insights for SA homeowners</h3>
                   <p style={{color:t.sub,fontSize:14,marginBottom:16,lineHeight:1.7,maxWidth:380,margin:"0 auto 16px"}}>Weekly deals, maintenance tips and load shedding updates. No spam, unsubscribe anytime.</p>
                   <div style={{display:"flex",flexDirection:sc.isMobile?"column":"row",gap:8,justifyContent:"center",maxWidth:360,margin:"0 auto"}}>
                     <input placeholder="your@email.com" style={{flex:1,background:t.inputBg,border:`1px solid ${t.border}`,borderRadius:9,padding:"10px 13px",color:t.text,fontSize:14,outline:"none",fontFamily:B,width:"100%"}}/>
@@ -994,10 +1181,10 @@ export default function App(){
               </div>
             )}
 
-            {tab==="calc"&&!res&&<div style={{maxWidth:680,margin:"0 auto",width:"100%"}}><Calculator onResult={r=>{setRes(r);setTab("result");}}/></div>}
-            {tab==="result"&&res&&<div style={{maxWidth:680,margin:"0 auto",width:"100%"}}><Results r={res} onReset={()=>{setRes(null);setTab("home");}} goInstallers={()=>goTab("inst")}/></div>}
+            {tab==="calc"&&!res&&<div style={{maxWidth:700,margin:"0 auto",width:"100%"}}><Calculator onResult={r=>{setRes(r);setTab("result");}}/></div>}
+            {tab==="result"&&res&&<Results r={res} onReset={()=>{setRes(null);setTab("home");}} goInstallers={()=>goTab("inst")}/>}
             {tab==="inst"&&<Installers/>}
-            {tab==="serv"&&<div style={{maxWidth:680,margin:"0 auto",width:"100%"}}><Servicing/></div>}
+            {tab==="serv"&&<Servicing/>}
             {tab==="blog"&&<Blog/>}
           </div>
         </div>
@@ -1005,7 +1192,7 @@ export default function App(){
         {/* Footer */}
         <div style={{borderTop:`1px solid ${t.border}`,padding:"18px 20px",textAlign:"center",paddingBottom:sc.isMobile?80:18,flexShrink:0}}>
           <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:7,marginBottom:4}}>
-            <span>☀️</span><span style={{fontFamily:H,fontSize:15,fontWeight:900,letterSpacing:2,color:t.text}}>Solar<span style={{color:t.accent}}>IQ</span></span>
+            <span>☀️</span><span style={{fontFamily:H,fontSize:14,fontWeight:W.logo,letterSpacing:1.5,color:t.text}}>Solar<span style={{color:t.accent}}>IQ</span></span>
           </div>
           <div style={{fontSize:12,color:t.sub}}>South Africa's complete solar platform. 🇿🇦</div>
         </div>
@@ -1014,9 +1201,9 @@ export default function App(){
         {sc.isMobile&&(
           <div style={{position:"fixed",bottom:0,left:0,right:0,background:t.navBg,backdropFilter:"blur(20px)",borderTop:`1px solid ${t.border}`,display:"flex",zIndex:200,paddingBottom:"env(safe-area-inset-bottom,0px)"}}>
             {NAV.map(x=>(
-              <button key={x.id} onClick={()=>goTab(x.id)} style={{flex:1,background:"none",border:"none",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"8px 4px",cursor:"pointer",gap:3,transition:"all .2s"}}>
+              <button key={x.id} onClick={()=>goTab(x.id)} style={{flex:1,background:"none",border:"none",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"8px 4px",cursor:"pointer",gap:3}}>
                 <span style={{fontSize:16,filter:tab===x.id?"none":"grayscale(1)",opacity:tab===x.id?1:.45}}>{x.icon}</span>
-                <span style={{fontSize:9,fontWeight:700,color:tab===x.id?t.accent:t.sub,fontFamily:B,letterSpacing:.3}}>{x.l}</span>
+                <span style={{fontSize:9,fontWeight:600,color:tab===x.id?t.accent:t.sub,fontFamily:B,letterSpacing:.3}}>{x.l}</span>
               </button>
             ))}
           </div>
