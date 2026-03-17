@@ -1,6 +1,6 @@
 import { useState, useEffect, createContext, useContext, useRef } from "react";
 
-const GOOGLE_API_KEY = "AIzaSyAUxnVGXFz3e05VifOUirMCn2LE1v5jAFk";
+const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_API_KEY;
 
 const DARK = { dark:true, accent:"#f5a623", accent2:"#ff6b00", rgb:"245,166,35", bg:"#07090d", bgCard:"rgba(255,255,255,.04)", bgCard2:"rgba(255,255,255,.07)", border:"rgba(255,255,255,.08)", text:"#f0f0f0", textMid:"#aaa", sub:"#555", navBg:"rgba(7,9,13,.95)", inputBg:"rgba(255,255,255,.06)" };
 const LIGHT = { dark:false, accent:"#c47a0a", accent2:"#a05e00", rgb:"196,122,10", bg:"#edeae0", bgCard:"rgba(0,0,0,.06)", bgCard2:"rgba(0,0,0,.1)", border:"rgba(0,0,0,.14)", text:"#0f0f0f", textMid:"#333", sub:"#777", navBg:"rgba(237,234,224,.97)", inputBg:"rgba(0,0,0,.07)" };
