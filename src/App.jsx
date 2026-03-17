@@ -91,36 +91,64 @@ const PSH_BY_CITY = {
 function SolarRoofMap({onResult}){
   const t=useT();const sc=useScreen();
   const mapRef=useRef(null);const mapObjRef=useRef(null);
+  const inputRef=useRef(null);const acRef=useRef(null);
   const[query,setQuery]=useState("");
-  const[status,setStatus]=useState("idle"); // idle | loading | success | error | notfound
+  const[status,setStatus]=useState("idle");
   const[loadStep,setLoadStep]=useState(0);
   const[solarData,setSolarData]=useState(null);
   const[coords,setCoords]=useState(null);
   const[detectedCity,setDetectedCity]=useState("default");
   const[mapLoaded,setMapLoaded]=useState(false);
+  const[mapKey,setMapKey]=useState(0);
 
   const STEPS=["📍 Locating address...","🛰️ Loading satellite view...","☀️ Measuring roof area...","⚡ Calculating solar potential...","📊 Building your report..."];
 
   // Load Google Maps script
   useEffect(()=>{
-    if(window.google){setMapLoaded(true);return;}
+    if(window.google&&window.google.maps){setMapLoaded(true);return;}
+    const existing=document.querySelector("script[data-gmaps]");
+    if(existing){existing.addEventListener("load",()=>setMapLoaded(true));return;}
     const s=document.createElement("script");
     s.src=`https://maps.googleapis.com/maps/api/js?key=${GOOGLE_API_KEY}&libraries=places`;
-    s.async=true;s.defer=true;
+    s.async=true;s.defer=true;s.dataset.gmaps="1";
     s.onload=()=>setMapLoaded(true);
     document.head.appendChild(s);
   },[]);
 
-  // Init map when loaded and coords available
+  // Wire up Places Autocomplete once map is loaded
+  useEffect(()=>{
+    if(!mapLoaded||!inputRef.current||acRef.current)return;
+    const ac=new window.google.maps.places.Autocomplete(inputRef.current,{
+      componentRestrictions:{country:"za"},
+      types:["geocode","establishment"],
+    });
+    ac.addListener("place_changed",()=>{
+      const place=ac.getPlace();
+      if(place&&place.formatted_address){
+        setQuery(place.formatted_address);
+        geocodeAndFetch(place.formatted_address);
+      } else if(place&&place.name){
+        setQuery(place.name);
+        geocodeAndFetch(place.name);
+      }
+    });
+    acRef.current=ac;
+  },[mapLoaded]);
+
+  // Init map when coords available
   useEffect(()=>{
     if(!mapLoaded||!coords||!mapRef.current)return;
-    const map=new window.google.maps.Map(mapRef.current,{
-      center:coords,zoom:19,mapTypeId:"satellite",tilt:0,
-      disableDefaultUI:true,gestureHandling:"none",
-      styles:[{featureType:"all",elementType:"labels",stylers:[{visibility:"off"}]}]
-    });
-    mapObjRef.current=map;
-  },[mapLoaded,coords]);
+    const timer=setTimeout(()=>{
+      if(!mapRef.current)return;
+      const map=new window.google.maps.Map(mapRef.current,{
+        center:coords,zoom:19,mapTypeId:"satellite",tilt:0,
+        disableDefaultUI:true,gestureHandling:"none",
+      });
+      new window.google.maps.Marker({position:coords,map,icon:{path:window.google.maps.SymbolPath.CIRCLE,scale:8,fillColor:"#f5a623",fillOpacity:1,strokeColor:"#fff",strokeWeight:2}});
+      mapObjRef.current=map;
+    },300);
+    return()=>clearTimeout(timer);
+  },[mapLoaded,coords,mapKey]);
 
   const geocodeAndFetch=async(address)=>{
     setStatus("loading");setLoadStep(0);setSolarData(null);setCoords(null);
@@ -136,7 +164,7 @@ function SolarRoofMap({onResult}){
       });
       const loc={lat:geoResult.geometry.location.lat(),lng:geoResult.geometry.location.lng()};
       const formatted=geoResult.formatted_address;
-      setCoords(loc);setLoadStep(1);
+      setCoords(loc);setMapKey(k=>k+1);setLoadStep(1);
 
       // Detect city for PSH
       const cityMatch=SA_CITIES.find(c=>formatted.toLowerCase().includes(c.name.toLowerCase()));
@@ -212,7 +240,7 @@ function SolarRoofMap({onResult}){
         <div style={{display:"flex",gap:8,marginBottom:12}}>
           <div style={{flex:1,position:"relative"}}>
             <span style={{position:"absolute",left:12,top:"50%",transform:"translateY(-50%)",fontSize:14,pointerEvents:"none"}}>📍</span>
-            <input value={query} onChange={e=>setQuery(e.target.value)} onKeyDown={e=>e.key==="Enter"&&handleSearch()}
+            <input ref={inputRef} value={query} onChange={e=>setQuery(e.target.value)} onKeyDown={e=>e.key==="Enter"&&handleSearch()}
               placeholder="Enter your home address..."
               style={{width:"100%",background:t.inputBg,border:`1px solid ${t.border}`,borderRadius:10,padding:"12px 12px 12px 36px",color:t.text,fontSize:14,outline:"none",fontFamily:B,boxSizing:"border-box"}}/>
           </div>
