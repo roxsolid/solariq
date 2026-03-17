@@ -1,6 +1,6 @@
 import { useState, useEffect, createContext, useContext, useRef } from "react";
 
-const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_API_KEY;
+const GOOGLE_API_KEY = "AIzaSyAUxnVGXFz3e05VifOUirMCn2LE1v5jAFk";
 
 const DARK = { dark:true, accent:"#f5a623", accent2:"#ff6b00", rgb:"245,166,35", bg:"#07090d", bgCard:"rgba(255,255,255,.04)", bgCard2:"rgba(255,255,255,.07)", border:"rgba(255,255,255,.08)", text:"#f0f0f0", textMid:"#aaa", sub:"#555", navBg:"rgba(7,9,13,.95)", inputBg:"rgba(255,255,255,.06)" };
 const LIGHT = { dark:false, accent:"#c47a0a", accent2:"#a05e00", rgb:"196,122,10", bg:"#edeae0", bgCard:"rgba(0,0,0,.06)", bgCard2:"rgba(0,0,0,.1)", border:"rgba(0,0,0,.14)", text:"#0f0f0f", textMid:"#333", sub:"#777", navBg:"rgba(237,234,224,.97)", inputBg:"rgba(0,0,0,.07)" };
@@ -125,12 +125,17 @@ function SolarRoofMap({onResult}){
   const geocodeAndFetch=async(address)=>{
     setStatus("loading");setLoadStep(0);setSolarData(null);setCoords(null);
     try{
-      // Step 1 - geocode
-      const geoRes=await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address+", South Africa")}&key=${GOOGLE_API_KEY}`);
-      const geoData=await geoRes.json();
-      if(!geoData.results||geoData.results.length===0){setStatus("notfound");return;}
-      const loc=geoData.results[0].geometry.location;
-      const formatted=geoData.results[0].formatted_address;
+      // Step 1 - geocode using Maps JS API Geocoder (avoids HTTP referrer issues)
+      if(!window.google){setStatus("error");return;}
+      const geocoder=new window.google.maps.Geocoder();
+      const geoResult=await new Promise((resolve,reject)=>{
+        geocoder.geocode({address:address+", South Africa"},(results,status)=>{
+          if(status==="OK"&&results&&results.length>0)resolve(results[0]);
+          else reject(new Error(status));
+        });
+      });
+      const loc={lat:geoResult.geometry.location.lat(),lng:geoResult.geometry.location.lng()};
+      const formatted=geoResult.formatted_address;
       setCoords(loc);setLoadStep(1);
 
       // Detect city for PSH
@@ -176,7 +181,10 @@ function SolarRoofMap({onResult}){
         setSolarData({source:"estimate",address:formatted,roofArea,panels:usablePanels,systemKw,annualKwh,dailyKwh,mo,cost,annSave,payback:(cost/annSave).toFixed(1),suitability:"Good",psh,sunshine:Math.round(psh*365),city});
       }
       setStatus("success");
-    }catch(err){setStatus("error");}
+    }catch(err){
+      if(err.message==="ZERO_RESULTS"||err.message==="NOT_FOUND")setStatus("notfound");
+      else setStatus("error");
+    }
   };
 
   const handleSearch=()=>{if(query.trim().length>3)geocodeAndFetch(query.trim());};
