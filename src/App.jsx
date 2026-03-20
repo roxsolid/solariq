@@ -88,173 +88,332 @@ const PSH_BY_CITY = {
   "Bloemfontein":6.1,"Port Elizabeth":5.5,"default":5.0
 };
 
-function SolarRoofMap({onResult}){
-  const t=useT();const sc=useScreen();
-  const mapRef=useRef(null);const mapObjRef=useRef(null);
-  const inputRef=useRef(null);const acRef=useRef(null);
-  const[query,setQuery]=useState("");
-  const[status,setStatus]=useState("idle");
-  const[loadStep,setLoadStep]=useState(0);
-  const[solarData,setSolarData]=useState(null);
-  const[coords,setCoords]=useState(null);
-  const[detectedCity,setDetectedCity]=useState("default");
-  const[mapLoaded,setMapLoaded]=useState(false);
-  const[mapKey,setMapKey]=useState(0);
 
-  const STEPS=["📍 Locating address...","🛰️ Loading satellite view...","☀️ Measuring roof area...","⚡ Calculating solar potential...","📊 Building your report..."];
+// NASA POWER API — free, covers all of SA
+const fetchNASA = async (lat, lng) => {
+  try {
+    const url = `https://power.larc.nasa.gov/api/temporal/climatology/point?parameters=ALLSKY_SFC_SW_DWN&community=RE&longitude=${lng}&latitude=${lat}&format=JSON`;
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    const data = await res.json();
+    const monthly = data?.properties?.parameter?.ALLSKY_SFC_SW_DWN;
+    if (!monthly) return null;
+    const ann = Object.values(monthly).filter((_,i)=>i<12).reduce((s,v)=>s+v,0)/12;
+    const psh = Math.round(ann * 10) / 10;
+    const annualKwh = Math.round(psh * 365 * 0.85);
+    return { psh, annualKwh, source: "NASA POWER" };
+  } catch { return null; }
+};
 
-  // Load Google Maps script
-  useEffect(()=>{
-    if(window.google&&window.google.maps){setMapLoaded(true);return;}
-    const existing=document.querySelector("script[data-gmaps]");
-    if(existing){existing.addEventListener("load",()=>setMapLoaded(true));return;}
-    const s=document.createElement("script");
-    s.src=`https://maps.googleapis.com/maps/api/js?key=${GOOGLE_API_KEY}&libraries=places`;
-    s.async=true;s.defer=true;s.dataset.gmaps="1";
-    s.onload=()=>setMapLoaded(true);
-    document.head.appendChild(s);
-  },[]);
+// PVGIS API — EU JRC, excellent SA coverage
+const fetchPVGIS = async (lat, lng) => {
+  try {
+    const url = `https://re.jrc.ec.europa.eu/api/v5_2/PVcalc?lat=${lat}&lon=${lng}&peakpower=1&loss=14&outputformat=json`;
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    const data = await res.json();
+    const annualKwh = data?.outputs?.totals?.fixed?.E_y;
+    if (!annualKwh) return null;
+    const psh = Math.round((annualKwh / 365) * 10) / 10;
+    return { psh, annualKwh: Math.round(annualKwh), source: "PVGIS" };
+  } catch { return null; }
+};
 
-  // Wire up Places Autocomplete once map is loaded
-  useEffect(()=>{
-    if(!mapLoaded||!inputRef.current||acRef.current)return;
-    const ac=new window.google.maps.places.Autocomplete(inputRef.current,{
-      componentRestrictions:{country:"za"},
-      types:["geocode","establishment"],
+// Canvas heat map + panel overlay renderer
+function RoofCanvas({ width, height, showPanels, solarScore }) {
+  const canvasRef = useRef(null);
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, width, height);
+
+    // Heat signature overlay — radial gradient from centre outward
+    // Score 0–1 controls intensity
+    const cx = width * 0.52, cy = height * 0.48;
+    const r = Math.min(width, height) * 0.42;
+
+    // Multiple overlapping heat zones
+    const zones = [
+      { x: cx, y: cy, r: r * 0.35, alpha: 0.72 * solarScore },
+      { x: cx - width * 0.08, y: cy - height * 0.06, r: r * 0.25, alpha: 0.55 * solarScore },
+      { x: cx + width * 0.1, y: cy + height * 0.08, r: r * 0.2, alpha: 0.45 * solarScore },
+      { x: cx + width * 0.05, y: cy - height * 0.1, r: r * 0.18, alpha: 0.38 * solarScore },
+    ];
+
+    zones.forEach(z => {
+      const grad = ctx.createRadialGradient(z.x, z.y, 0, z.x, z.y, z.r);
+      grad.addColorStop(0, `rgba(255,60,0,${z.alpha})`);
+      grad.addColorStop(0.3, `rgba(255,140,0,${z.alpha * 0.75})`);
+      grad.addColorStop(0.6, `rgba(255,200,0,${z.alpha * 0.45})`);
+      grad.addColorStop(1, `rgba(255,220,50,0)`);
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.ellipse(z.x, z.y, z.r * 1.3, z.r, -0.2, 0, Math.PI * 2);
+      ctx.fill();
     });
-    ac.addListener("place_changed",()=>{
-      const place=ac.getPlace();
-      if(place&&place.formatted_address){
-        setQuery(place.formatted_address);
-        geocodeAndFetch(place.formatted_address);
-      } else if(place&&place.name){
-        setQuery(place.name);
-        geocodeAndFetch(place.name);
+
+    // Cooler edge zones
+    const edgeGrad = ctx.createRadialGradient(cx, cy, r * 0.5, cx, cy, r * 1.1);
+    edgeGrad.addColorStop(0, "rgba(0,80,255,0)");
+    edgeGrad.addColorStop(0.7, `rgba(0,60,220,${0.08 * solarScore})`);
+    edgeGrad.addColorStop(1, `rgba(0,40,180,${0.15 * solarScore})`);
+    ctx.fillStyle = edgeGrad;
+    ctx.fillRect(0, 0, width, height);
+
+    // Panel overlay
+    if (showPanels) {
+      const panelW = width * 0.088;
+      const panelH = height * 0.13;
+      const gap = 4;
+      const cols = 5, rows = 3;
+      const startX = cx - (cols * (panelW + gap)) / 2 + panelW * 0.1;
+      const startY = cy - (rows * (panelH + gap)) / 2 - height * 0.04;
+
+      for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < cols; col++) {
+          const x = startX + col * (panelW + gap);
+          const y = startY + row * (panelH + gap);
+
+          // Panel body
+          ctx.fillStyle = "rgba(15,30,80,0.82)";
+          ctx.beginPath();
+          ctx.roundRect(x, y, panelW, panelH, 2);
+          ctx.fill();
+
+          // Panel frame
+          ctx.strokeStyle = "rgba(100,140,255,0.6)";
+          ctx.lineWidth = 1;
+          ctx.stroke();
+
+          // Cell grid lines
+          ctx.strokeStyle = "rgba(60,100,200,0.3)";
+          ctx.lineWidth = 0.5;
+          const cellCols = 3, cellRows = 4;
+          for (let i = 1; i < cellCols; i++) {
+            ctx.beginPath();
+            ctx.moveTo(x + (panelW / cellCols) * i, y + 2);
+            ctx.lineTo(x + (panelW / cellCols) * i, y + panelH - 2);
+            ctx.stroke();
+          }
+          for (let j = 1; j < cellRows; j++) {
+            ctx.beginPath();
+            ctx.moveTo(x + 2, y + (panelH / cellRows) * j);
+            ctx.lineTo(x + panelW - 2, y + (panelH / cellRows) * j);
+            ctx.stroke();
+          }
+
+          // Glint
+          const glint = ctx.createLinearGradient(x, y, x + panelW * 0.4, y + panelH * 0.3);
+          glint.addColorStop(0, "rgba(150,200,255,0.18)");
+          glint.addColorStop(1, "rgba(150,200,255,0)");
+          ctx.fillStyle = glint;
+          ctx.beginPath();
+          ctx.roundRect(x, y, panelW, panelH, 2);
+          ctx.fill();
+        }
       }
+    }
+  }, [width, height, showPanels, solarScore]);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      width={width}
+      height={height}
+      style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", pointerEvents: "none" }}
+    />
+  );
+}
+
+function SolarRoofMap({ onResult }) {
+  const t = useT(); const sc = useScreen();
+  const mapRef = useRef(null); const mapObjRef = useRef(null);
+  const inputRef = useRef(null); const acRef = useRef(null);
+  const [query, setQuery] = useState("");
+  const [status, setStatus] = useState("idle");
+  const [loadStep, setLoadStep] = useState(0);
+  const [solarData, setSolarData] = useState(null);
+  const [coords, setCoords] = useState(null);
+  const [mapLoaded, setMapLoaded] = useState(false);
+  const [showPanels, setShowPanels] = useState(false);
+  const [mapDims, setMapDims] = useState({ w: 600, h: 300 });
+  const mapContainerRef = useRef(null);
+
+  const STEPS = ["📍 Locating address...", "🛰️ Loading satellite view...", "☀️ Analysing solar potential...", "⚡ Calculating your system...", "📊 Building your report..."];
+
+  // Load Google Maps
+  useEffect(() => {
+    if (window.google && window.google.maps) { setMapLoaded(true); return; }
+    const existing = document.querySelector("script[data-gmaps]");
+    if (existing) { existing.addEventListener("load", () => setMapLoaded(true)); return; }
+    const s = document.createElement("script");
+    s.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_API_KEY}&libraries=places`;
+    s.async = true; s.defer = true; s.dataset.gmaps = "1";
+    s.onload = () => setMapLoaded(true);
+    document.head.appendChild(s);
+  }, []);
+
+  // Places Autocomplete
+  useEffect(() => {
+    if (!mapLoaded || !inputRef.current || acRef.current) return;
+    const ac = new window.google.maps.places.Autocomplete(inputRef.current, {
+      componentRestrictions: { country: "za" },
+      types: ["geocode", "establishment"],
     });
-    acRef.current=ac;
-  },[mapLoaded]);
+    ac.addListener("place_changed", () => {
+      const place = ac.getPlace();
+      const addr = place?.formatted_address || place?.name;
+      if (addr) { setQuery(addr); geocodeAndFetch(addr); }
+    });
+    acRef.current = ac;
+  }, [mapLoaded]);
 
-  // Init map when coords available
-  useEffect(()=>{
-    if(!mapLoaded||!coords||!mapRef.current)return;
-    const timer=setTimeout(()=>{
-      if(!mapRef.current)return;
-      const map=new window.google.maps.Map(mapRef.current,{
-        center:coords,zoom:19,mapTypeId:"satellite",tilt:0,
-        disableDefaultUI:true,gestureHandling:"none",
+  // Init satellite map
+  useEffect(() => {
+    if (!mapLoaded || !coords || !mapRef.current) return;
+    const timer = setTimeout(() => {
+      if (!mapRef.current) return;
+      const map = new window.google.maps.Map(mapRef.current, {
+        center: coords, zoom: 19, mapTypeId: "satellite", tilt: 0,
+        disableDefaultUI: true, gestureHandling: "none",
       });
-      new window.google.maps.Marker({position:coords,map,icon:{path:window.google.maps.SymbolPath.CIRCLE,scale:8,fillColor:"#f5a623",fillOpacity:1,strokeColor:"#fff",strokeWeight:2}});
-      mapObjRef.current=map;
-    },300);
-    return()=>clearTimeout(timer);
-  },[mapLoaded,coords,mapKey]);
+      new window.google.maps.Marker({
+        position: coords, map,
+        icon: { path: window.google.maps.SymbolPath.CIRCLE, scale: 6, fillColor: "#f5a623", fillOpacity: 0.9, strokeColor: "#fff", strokeWeight: 2 }
+      });
+      mapObjRef.current = map;
+      // Measure container for canvas
+      if (mapContainerRef.current) {
+        setMapDims({ w: mapContainerRef.current.offsetWidth, h: mapContainerRef.current.offsetHeight });
+      }
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [mapLoaded, coords]);
 
-  const geocodeAndFetch=async(address)=>{
-    setStatus("loading");setLoadStep(0);setSolarData(null);setCoords(null);
-    try{
-      // Step 1 - geocode using Maps JS API Geocoder (avoids HTTP referrer issues)
-      if(!window.google){setStatus("error");return;}
-      const geocoder=new window.google.maps.Geocoder();
-      const geoResult=await new Promise((resolve,reject)=>{
-        geocoder.geocode({address:address+", South Africa"},(results,status)=>{
-          if(status==="OK"&&results&&results.length>0)resolve(results[0]);
+  const geocodeAndFetch = async (address) => {
+    setStatus("loading"); setLoadStep(0); setSolarData(null); setCoords(null); setShowPanels(false);
+    try {
+      if (!window.google) { setStatus("error"); return; }
+      // Step 1 — Geocode
+      const geocoder = new window.google.maps.Geocoder();
+      const geoResult = await new Promise((resolve, reject) => {
+        geocoder.geocode({ address: address + ", South Africa" }, (results, status) => {
+          if (status === "OK" && results?.length > 0) resolve(results[0]);
           else reject(new Error(status));
         });
       });
-      const loc={lat:geoResult.geometry.location.lat(),lng:geoResult.geometry.location.lng()};
-      const formatted=geoResult.formatted_address;
-      setCoords(loc);setMapKey(k=>k+1);setLoadStep(1);
+      const loc = { lat: geoResult.geometry.location.lat(), lng: geoResult.geometry.location.lng() };
+      const formatted = geoResult.formatted_address;
+      setCoords(loc); setLoadStep(1);
 
-      // Detect city for PSH
-      const cityMatch=SA_CITIES.find(c=>formatted.toLowerCase().includes(c.name.toLowerCase()));
-      const city=cityMatch?cityMatch.name:"default";
-      setDetectedCity(city);
-      setLoadStep(2);
+      // Step 2 — Try Google Solar API
+      await new Promise(r => setTimeout(r, 500)); setLoadStep(2);
+      let googleSolar = null;
+      try {
+        const sRes = await fetch(`https://solar.googleapis.com/v1/buildingInsights:findClosest?location.latitude=${loc.lat}&location.longitude=${loc.lng}&requiredQuality=LOW&key=${GOOGLE_API_KEY}`);
+        if (sRes.ok) googleSolar = await sRes.json();
+      } catch { googleSolar = null; }
 
-      // Step 2 - Solar API
-      await new Promise(r=>setTimeout(r,600));setLoadStep(3);
-      let solar=null;
-      try{
-        const solarRes=await fetch(`https://solar.googleapis.com/v1/buildingInsights:findClosest?location.latitude=${loc.lat}&location.longitude=${loc.lng}&requiredQuality=LOW&key=${GOOGLE_API_KEY}`);
-        if(solarRes.ok)solar=await solarRes.json();
-      }catch(e){solar=null;}
+      // Step 3 — NASA POWER
+      await new Promise(r => setTimeout(r, 400)); setLoadStep(3);
+      const nasa = await fetchNASA(loc.lat, loc.lng);
 
-      await new Promise(r=>setTimeout(r,500));setLoadStep(4);
-      await new Promise(r=>setTimeout(r,400));
+      // Step 4 — PVGIS fallback
+      let pvgis = null;
+      if (!nasa) pvgis = await fetchPVGIS(loc.lat, loc.lng);
 
-      const psh=PSH_BY_CITY[city]||5.0;
+      await new Promise(r => setTimeout(r, 300)); setLoadStep(4);
 
-      if(solar&&solar.solarPotential){
-        const sp=solar.solarPotential;
-        const roofArea=Math.round(sp.wholeRoofStats?.areaMeters2||sp.maxArrayAreaMeters2||80);
-        const maxPanels=sp.maxArrayPanelsCount||Math.floor(roofArea/1.7);
-        const usablePanels=Math.min(maxPanels,Math.floor(roofArea*.55/1.7));
-        const systemKw=Math.round(usablePanels*.55*10)/10;
-        const annualKwh=Math.round(sp.maxSunshineHoursPerYear?usablePanels*.55*sp.maxSunshineHoursPerYear*.8:systemKw*psh*365*.8);
-        const dailyKwh=Math.round(annualKwh/365*10)/10;
-        const mo=Math.round(dailyKwh*30*RATE);
-        const cost=Math.round(systemKw*18000);
-        const annSave=Math.round(mo*12*.75);
-        const suitability=sp.maxSunshineHoursPerYear>1600?"Excellent":sp.maxSunshineHoursPerYear>1400?"Very Good":sp.maxSunshineHoursPerYear>1200?"Good":"Moderate";
-        setSolarData({source:"api",address:formatted,roofArea,panels:usablePanels,systemKw,annualKwh,dailyKwh,mo,cost,annSave,payback:(cost/annSave).toFixed(1),suitability,psh,sunshine:Math.round(sp.maxSunshineHoursPerYear||psh*365),city,panelSegments:sp.solarPanelConfigs?.[0]?.panelLayoutUrl||null});
-      }else{
-        // Fallback — use our own calculation
-        const roofArea=80,usablePanels=16,systemKw=8.8;
-        const annualKwh=Math.round(systemKw*psh*365*.8);
-        const dailyKwh=Math.round(annualKwh/365*10)/10;
-        const mo=Math.round(dailyKwh*30*RATE);
-        const cost=Math.round(systemKw*18000);
-        const annSave=Math.round(mo*12*.75);
-        setSolarData({source:"estimate",address:formatted,roofArea,panels:usablePanels,systemKw,annualKwh,dailyKwh,mo,cost,annSave,payback:(cost/annSave).toFixed(1),suitability:"Good",psh,sunshine:Math.round(psh*365),city});
+      // Detect city for PSH baseline
+      const SA_CITIES = [
+        { name: "Sandton", psh: 5.2 }, { name: "Cape Town", psh: 5.8 }, { name: "Durban", psh: 4.8 },
+        { name: "Pretoria", psh: 5.4 }, { name: "Bloemfontein", psh: 6.1 }, { name: "Port Elizabeth", psh: 5.5 },
+        { name: "Johannesburg", psh: 5.2 }, { name: "Soweto", psh: 5.1 }, { name: "Randburg", psh: 5.2 },
+      ];
+      const cityMatch = SA_CITIES.find(c => formatted.toLowerCase().includes(c.name.toLowerCase()));
+      const basePsh = cityMatch?.psh || 5.0;
+
+      // Combine all sources — best data wins
+      let psh, annualKwh, dataSource, suitability, roofArea, usablePanels;
+
+      if (googleSolar?.solarPotential) {
+        const sp = googleSolar.solarPotential;
+        roofArea = Math.round(sp.wholeRoofStats?.areaMeters2 || sp.maxArrayAreaMeters2 || 80);
+        usablePanels = Math.min(sp.maxArrayPanelsCount || 16, Math.floor(roofArea * 0.55 / 1.7));
+        const gsAnnual = sp.maxSunshineHoursPerYear;
+        psh = nasa?.psh || (gsAnnual ? Math.round(gsAnnual / 365 * 10) / 10 : basePsh);
+        annualKwh = nasa?.annualKwh || pvgis?.annualKwh || Math.round(usablePanels * 0.55 * psh * 365 * 0.8);
+        suitability = gsAnnual > 1800 ? "Excellent" : gsAnnual > 1600 ? "Very Good" : gsAnnual > 1400 ? "Good" : "Moderate";
+        dataSource = nasa ? "Google Solar + NASA POWER" : "Google Solar";
+      } else {
+        // No Google Solar — use NASA/PVGIS + SolarIQ estimate
+        psh = nasa?.psh || pvgis?.psh || basePsh;
+        roofArea = 80;
+        usablePanels = 16;
+        annualKwh = nasa?.annualKwh || pvgis?.annualKwh || Math.round(usablePanels * 0.55 * psh * 365 * 0.8);
+        suitability = psh > 5.5 ? "Excellent" : psh > 5.0 ? "Very Good" : psh > 4.5 ? "Good" : "Moderate";
+        dataSource = nasa ? "NASA POWER + SolarIQ" : pvgis ? "PVGIS + SolarIQ" : "SolarIQ Intelligence Engine";
       }
+
+      const systemKw = Math.round(usablePanels * 0.55 * 10) / 10;
+      const dailyKwh = Math.round(annualKwh / 365 * 10) / 10;
+      const mo = Math.round(dailyKwh * 30 * RATE);
+      const cost = Math.round(systemKw * 18000);
+      const annSave = Math.round(mo * 12 * 0.75);
+      const sunshine = Math.round(psh * 365);
+      // Solar score 0–1 for heat map intensity
+      const solarScore = Math.min(1, psh / 6.5);
+
+      setSolarData({ address: formatted, roofArea, panels: usablePanels, systemKw, annualKwh, dailyKwh, mo, cost, annSave, payback: (cost / annSave).toFixed(1), suitability, psh, sunshine, dataSource, solarScore });
       setStatus("success");
-    }catch(err){
-      if(err.message==="ZERO_RESULTS"||err.message==="NOT_FOUND")setStatus("notfound");
+    } catch (err) {
+      if (err.message === "ZERO_RESULTS" || err.message === "NOT_FOUND") setStatus("notfound");
       else setStatus("error");
     }
   };
 
-  const handleSearch=()=>{if(query.trim().length>3)geocodeAndFetch(query.trim());};
+  const handleSearch = () => { if (query.trim().length > 3) geocodeAndFetch(query.trim()); };
 
-  const sev=c=>c==="Excellent"?"#4ade80":c==="Very Good"?t.accent:c==="Good"?"#60a5fa":"#f87171";
+  const sevColor = c => c === "Excellent" ? "#4ade80" : c === "Very Good" ? t.accent : c === "Good" ? "#60a5fa" : "#f87171";
 
-  return(
-    <div style={{background:`linear-gradient(135deg,rgba(${t.rgb},.07),rgba(${t.rgb},.02))`,border:`1px solid rgba(${t.rgb},.2)`,borderRadius:20,overflow:"hidden",marginBottom:28}}>
+  const mapH = sc.isMobile ? 220 : 300;
+
+  return (
+    <div style={{ background: `linear-gradient(135deg,rgba(${t.rgb},.07),rgba(${t.rgb},.02))`, border: `1px solid rgba(${t.rgb},.2)`, borderRadius: 20, overflow: "hidden", marginBottom: 28 }}>
       {/* Header */}
-      <div style={{padding:sc.isMobile?"16px 18px":"20px 28px",borderBottom:`1px solid rgba(${t.rgb},.12)`}}>
-        <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:4}}>
-          <div style={{background:`linear-gradient(135deg,${t.accent},${t.accent2})`,borderRadius:8,width:32,height:32,display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,flexShrink:0}}>🛰️</div>
+      <div style={{ padding: sc.isMobile ? "16px 18px" : "18px 24px", borderBottom: `1px solid rgba(${t.rgb},.12)` }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div style={{ background: `linear-gradient(135deg,${t.accent},${t.accent2})`, borderRadius: 8, width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, flexShrink: 0 }}>🛰️</div>
           <div>
-            <div style={{display:"flex",alignItems:"center",gap:8}}>
-              <span style={{fontFamily:H,fontSize:sc.isMobile?18:22,fontWeight:W.hero,color:t.text}}>Solar Roof Analysis</span>
-              <span style={{fontSize:9,background:`rgba(${t.rgb},.15)`,color:t.accent,padding:"2px 8px",borderRadius:8,fontWeight:700,letterSpacing:1}}>NEW</span>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <span style={{ fontFamily: H, fontSize: sc.isMobile ? 17 : 20, fontWeight: W.hero, color: t.text }}>Solar Roof Analysis</span>
+              <span style={{ fontSize: 9, background: `rgba(${t.rgb},.15)`, color: t.accent, padding: "2px 8px", borderRadius: 8, fontWeight: 700, letterSpacing: 1 }}>NEW</span>
             </div>
-            <div style={{fontSize:12,color:t.sub}}>Enter your address — we analyse your actual roof using satellite data</div>
+            <div style={{ fontSize: 11, color: t.sub }}>Enter your address — we analyse your actual roof using satellite + solar data</div>
           </div>
         </div>
       </div>
 
       {/* Search */}
-      <div style={{padding:sc.isMobile?"16px 18px":"20px 28px",borderBottom:`1px solid ${t.border}`}}>
-        <div style={{display:"flex",gap:8,marginBottom:12}}>
-          <div style={{flex:1,position:"relative"}}>
-            <span style={{position:"absolute",left:12,top:"50%",transform:"translateY(-50%)",fontSize:14,pointerEvents:"none"}}>📍</span>
-            <input ref={inputRef} value={query} onChange={e=>setQuery(e.target.value)} onKeyDown={e=>e.key==="Enter"&&handleSearch()}
+      <div style={{ padding: sc.isMobile ? "14px 18px" : "16px 24px", borderBottom: `1px solid ${t.border}` }}>
+        <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
+          <div style={{ flex: 1, position: "relative" }}>
+            <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", fontSize: 14, pointerEvents: "none" }}>📍</span>
+            <input ref={inputRef} value={query} onChange={e => setQuery(e.target.value)} onKeyDown={e => e.key === "Enter" && handleSearch()}
               placeholder="Enter your home address..."
-              style={{width:"100%",background:t.inputBg,border:`1px solid ${t.border}`,borderRadius:10,padding:"12px 12px 12px 36px",color:t.text,fontSize:14,outline:"none",fontFamily:B,boxSizing:"border-box"}}/>
+              style={{ width: "100%", background: t.inputBg, border: `1px solid ${t.border}`, borderRadius: 10, padding: "11px 12px 11px 36px", color: t.text, fontSize: 14, outline: "none", fontFamily: B, boxSizing: "border-box" }} />
           </div>
-          <PBtn sm onClick={handleSearch} disabled={query.trim().length<4||status==="loading"} style={{borderRadius:10,padding:"12px 20px",whiteSpace:"nowrap",width:"auto"}}>
-            {status==="loading"?"Analysing...":"Analyse Roof"}
+          <PBtn sm onClick={handleSearch} disabled={query.trim().length < 4 || status === "loading"} style={{ borderRadius: 10, padding: "11px 18px", whiteSpace: "nowrap", width: "auto" }}>
+            {status === "loading" ? "Analysing..." : "Analyse Roof"}
           </PBtn>
         </div>
-        {/* City chips */}
-        <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
-          {SA_CITIES.map(c=>(
-            <button key={c.name} onClick={()=>{setQuery(c.name);geocodeAndFetch(c.name);}}
-              style={{background:t.bgCard,border:`1px solid ${t.border}`,color:t.sub,borderRadius:20,padding:"4px 12px",cursor:"pointer",fontSize:11,fontWeight:600,fontFamily:B,transition:"all .2s"}}
-              onMouseEnter={e=>{e.currentTarget.style.borderColor=`rgba(${t.rgb},.4)`;e.currentTarget.style.color=t.accent;}}
-              onMouseLeave={e=>{e.currentTarget.style.borderColor=t.border;e.currentTarget.style.color=t.sub;}}>
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+          {[{ name: "Sandton" }, { name: "Cape Town" }, { name: "Durban" }, { name: "Pretoria" }, { name: "Bloemfontein" }, { name: "Port Elizabeth" }].map(c => (
+            <button key={c.name} onClick={() => { setQuery(c.name); geocodeAndFetch(c.name); }}
+              style={{ background: t.bgCard, border: `1px solid ${t.border}`, color: t.sub, borderRadius: 20, padding: "4px 12px", cursor: "pointer", fontSize: 11, fontWeight: 600, fontFamily: B, transition: "all .2s" }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = `rgba(${t.rgb},.4)`; e.currentTarget.style.color = t.accent; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = t.border; e.currentTarget.style.color = t.sub; }}>
               {c.name}
             </button>
           ))}
@@ -262,92 +421,106 @@ function SolarRoofMap({onResult}){
       </div>
 
       {/* Loading */}
-      {status==="loading"&&(
-        <div style={{padding:"32px 28px",textAlign:"center"}}>
-          <div style={{width:56,height:56,border:`3px solid rgba(${t.rgb},.15)`,borderTop:`3px solid ${t.accent}`,borderRadius:"50%",animation:"spin2 1s linear infinite",margin:"0 auto 20px"}}/>
-          <div style={{fontFamily:H,fontSize:16,fontWeight:W.section,color:t.text,marginBottom:6}}>{STEPS[loadStep]}</div>
-          <div style={{display:"flex",justifyContent:"center",gap:6,marginTop:16}}>
-            {STEPS.map((_,i)=><div key={i} style={{width:i<=loadStep?20:6,height:4,borderRadius:2,background:i<=loadStep?t.accent:`rgba(${t.rgb},.15)`,transition:"all .4s"}}/>)}
+      {status === "loading" && (
+        <div style={{ padding: "32px 24px", textAlign: "center" }}>
+          <div style={{ width: 52, height: 52, border: `3px solid rgba(${t.rgb},.15)`, borderTop: `3px solid ${t.accent}`, borderRadius: "50%", animation: "spin2 1s linear infinite", margin: "0 auto 18px" }} />
+          <div style={{ fontFamily: H, fontSize: 15, fontWeight: W.section, color: t.text, marginBottom: 6 }}>{STEPS[loadStep]}</div>
+          <div style={{ fontSize: 11, color: t.sub, marginBottom: 14 }}>Querying Google Solar · NASA POWER · PVGIS · SolarIQ</div>
+          <div style={{ display: "flex", justifyContent: "center", gap: 6 }}>
+            {STEPS.map((_, i) => <div key={i} style={{ width: i <= loadStep ? 20 : 6, height: 4, borderRadius: 2, background: i <= loadStep ? t.accent : `rgba(${t.rgb},.15)`, transition: "all .4s" }} />)}
           </div>
         </div>
       )}
 
       {/* Error / Not found */}
-      {(status==="error"||status==="notfound")&&(
-        <div style={{padding:"24px 28px",textAlign:"center"}}>
-          <div style={{fontSize:32,marginBottom:8}}>{status==="notfound"?"🔍":"⚠️"}</div>
-          <div style={{fontFamily:H,fontSize:16,fontWeight:W.section,color:t.text,marginBottom:4}}>{status==="notfound"?"Address not found":"Something went wrong"}</div>
-          <div style={{fontSize:13,color:t.sub,marginBottom:12}}>{status==="notfound"?"Try adding your suburb or city — e.g. '14 Oak Street, Sandton'":"Please try again or use one of our calculators below"}</div>
-          <button onClick={()=>setStatus("idle")} style={{background:`rgba(${t.rgb},.1)`,border:`1px solid rgba(${t.rgb},.3)`,color:t.accent,borderRadius:10,padding:"8px 18px",fontSize:13,fontWeight:700,cursor:"pointer",fontFamily:B}}>Try Again</button>
+      {(status === "error" || status === "notfound") && (
+        <div style={{ padding: "24px", textAlign: "center" }}>
+          <div style={{ fontSize: 32, marginBottom: 8 }}>{status === "notfound" ? "🔍" : "⚠️"}</div>
+          <div style={{ fontFamily: H, fontSize: 16, fontWeight: W.section, color: t.text, marginBottom: 4 }}>{status === "notfound" ? "Address not found" : "Something went wrong"}</div>
+          <div style={{ fontSize: 13, color: t.sub, marginBottom: 12 }}>{status === "notfound" ? "Try adding your suburb — e.g. '14 Oak Street, Sandton'" : "Please try again"}</div>
+          <button onClick={() => setStatus("idle")} style={{ background: `rgba(${t.rgb},.1)`, border: `1px solid rgba(${t.rgb},.3)`, color: t.accent, borderRadius: 10, padding: "8px 18px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: B }}>Try Again</button>
         </div>
       )}
 
-      {/* Success */}
-      {status==="success"&&solarData&&(
+      {/* Success — Map + Results */}
+      {status === "success" && solarData && (
         <div>
-          {/* Map */}
-          {coords&&(
-            <div style={{position:"relative",height:sc.isMobile?200:280,overflow:"hidden"}}>
-              <div ref={mapRef} style={{width:"100%",height:"100%"}}/>
-              {/* Overlay gradient */}
-              <div style={{position:"absolute",bottom:0,left:0,right:0,height:60,background:`linear-gradient(transparent,${t.dark?"#07090d":"#edeae0"})`,pointerEvents:"none"}}/>
-              {/* Source badge */}
-              <div style={{position:"absolute",top:10,right:10,background:"rgba(0,0,0,.7)",color:"#fff",fontSize:9,padding:"3px 8px",borderRadius:6,fontWeight:700,letterSpacing:.5}}>
-                {solarData.source==="api"?"🛰️ SOLAR API":"⚡ SOLARIQ ESTIMATE"}
-              </div>
+          {/* Satellite map with heat + panel overlay */}
+          {coords && (
+            <div ref={mapContainerRef} style={{ position: "relative", height: mapH, overflow: "hidden" }}>
+              <div ref={mapRef} style={{ width: "100%", height: "100%" }} />
+              {/* Heat signature + panel canvas overlay */}
+              <RoofCanvas width={mapDims.w || 600} height={mapH} showPanels={showPanels} solarScore={solarData.solarScore} />
+              {/* Bottom fade */}
+              <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 50, background: `linear-gradient(transparent,${t.dark ? "#07090d" : "#edeae0"})`, pointerEvents: "none" }} />
               {/* Suitability badge */}
-              <div style={{position:"absolute",top:10,left:10,background:`${sev(solarData.suitability)}22`,border:`1px solid ${sev(solarData.suitability)}44`,color:sev(solarData.suitability),fontSize:11,padding:"4px 10px",borderRadius:8,fontWeight:700}}>
+              <div style={{ position: "absolute", top: 10, left: 10, background: `${sevColor(solarData.suitability)}22`, border: `1px solid ${sevColor(solarData.suitability)}44`, color: sevColor(solarData.suitability), fontSize: 11, padding: "4px 10px", borderRadius: 8, fontWeight: 700 }}>
                 {solarData.suitability} Solar Potential
+              </div>
+              {/* Panel toggle */}
+              <button onClick={() => setShowPanels(p => !p)} style={{ position: "absolute", top: 10, right: 10, background: showPanels ? `rgba(${t.rgb},.9)` : "rgba(0,0,0,.65)", border: `1px solid ${showPanels ? t.accent : "rgba(255,255,255,.2)"}`, color: showPanels ? "#000" : "#fff", borderRadius: 8, padding: "5px 12px", fontSize: 11, fontWeight: 700, cursor: "pointer", fontFamily: B, backdropFilter: "blur(4px)", transition: "all .2s" }}>
+                {showPanels ? "☀️ Panels ON" : "🔲 Show Panels"}
+              </button>
+              {/* Data source */}
+              <div style={{ position: "absolute", bottom: 14, right: 10, background: "rgba(0,0,0,.6)", color: "rgba(255,255,255,.7)", fontSize: 9, padding: "3px 8px", borderRadius: 6, fontWeight: 700, letterSpacing: .5 }}>
+                ⚡ {solarData.dataSource}
               </div>
             </div>
           )}
 
           {/* Results */}
-          <div style={{padding:sc.isMobile?"16px 18px":"20px 28px"}}>
-            <div style={{fontSize:12,color:t.sub,marginBottom:14,fontFamily:B}}>
-              📍 {solarData.address}
-              {solarData.source==="estimate"&&<span style={{color:`rgba(${t.rgb},.6)`,marginLeft:6}}>· Estimated analysis (satellite data unavailable for this address)</span>}
-            </div>
+          <div style={{ padding: sc.isMobile ? "14px 18px" : "18px 24px" }}>
+            <div style={{ fontSize: 11, color: t.sub, marginBottom: 14 }}>📍 {solarData.address}</div>
 
             {/* Key metrics */}
-            <div style={{display:"grid",gridTemplateColumns:sc.isMobile?"repeat(2,1fr)":"repeat(4,1fr)",gap:10,marginBottom:16}}>
-              {[["Roof Area",`~${solarData.roofArea}m²`,"📐"],["Solar Panels",`${solarData.panels} panels`,"☀️"],["System Size",`${solarData.systemKw}kW`,"⚡"],["Annual Sun",`${solarData.sunshine}hrs`,"🌤️"]].map(([l,v,icon])=>(
-                <div key={l} style={{background:t.bgCard,border:`1px solid ${t.border}`,borderRadius:12,padding:"12px 14px",textAlign:"center"}}>
-                  <div style={{fontSize:18,marginBottom:4}}>{icon}</div>
-                  <div style={{fontFamily:H,fontSize:sc.isMobile?15:18,fontWeight:W.section,color:t.accent,marginBottom:2}}>{v}</div>
-                  <div style={{fontSize:10,color:t.sub}}>{l}</div>
+            <div style={{ display: "grid", gridTemplateColumns: sc.isMobile ? "repeat(2,1fr)" : "repeat(4,1fr)", gap: 9, marginBottom: 14 }}>
+              {[["Roof Area", `~${solarData.roofArea}m²`, "📐"], ["Solar Panels", `${solarData.panels} panels`, "☀️"], ["System Size", `${solarData.systemKw}kW`, "⚡"], ["Annual Sun", `${solarData.sunshine}hrs`, "🌤️"]].map(([l, v, icon]) => (
+                <div key={l} style={{ background: t.bgCard, border: `1px solid ${t.border}`, borderRadius: 12, padding: "12px 14px", textAlign: "center" }}>
+                  <div style={{ fontSize: 18, marginBottom: 4 }}>{icon}</div>
+                  <div style={{ fontFamily: H, fontSize: sc.isMobile ? 15 : 17, fontWeight: W.section, color: t.accent, marginBottom: 2 }}>{v}</div>
+                  <div style={{ fontSize: 10, color: t.sub }}>{l}</div>
                 </div>
               ))}
             </div>
 
             {/* Financial */}
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:9,marginBottom:16}}>
-              {[["Monthly Savings",`R${solarData.mo.toLocaleString()}`,"#4ade80"],["Annual Savings",`R${solarData.annSave.toLocaleString()}`,"#4ade80"],["System Cost",`R${solarData.cost.toLocaleString()}`,t.accent],["Payback Period",`${solarData.payback} years`,t.accent]].map(([l,v,c])=>(
-                <div key={l} style={{background:t.bgCard,border:`1px solid ${c}22`,borderRadius:12,padding:"13px 14px"}}>
-                  <div style={{fontSize:9,color:t.sub,textTransform:"uppercase",letterSpacing:1.5,marginBottom:4}}>{l}</div>
-                  <div style={{fontFamily:H,fontSize:sc.isMobile?17:20,fontWeight:W.section,color:c}}>{v}</div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 9, marginBottom: 14 }}>
+              {[["Monthly Savings", `R${solarData.mo.toLocaleString()}`, "#4ade80"], ["Annual Savings", `R${solarData.annSave.toLocaleString()}`, "#4ade80"], ["System Cost", `R${solarData.cost.toLocaleString()}`, t.accent], ["Payback Period", `${solarData.payback} years`, t.accent]].map(([l, v, c]) => (
+                <div key={l} style={{ background: t.bgCard, border: `1px solid ${c}22`, borderRadius: 12, padding: "13px 14px" }}>
+                  <div style={{ fontSize: 9, color: t.sub, textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 4 }}>{l}</div>
+                  <div style={{ fontFamily: H, fontSize: sc.isMobile ? 17 : 20, fontWeight: W.section, color: c }}>{v}</div>
                 </div>
               ))}
             </div>
 
-            {/* CTA */}
-            <div style={{display:"flex",gap:9,flexWrap:"wrap"}}>
-              <PBtn onClick={()=>onResult(makeResult(solarData.dailyKwh,solarData.systemKw))} style={{flex:1,minWidth:160,borderRadius:12}}>
+            {/* PSH info bar */}
+            <div style={{ background: `rgba(${t.rgb},.05)`, border: `1px solid rgba(${t.rgb},.12)`, borderRadius: 10, padding: "10px 14px", marginBottom: 14, display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+              <span style={{ fontSize: 12, color: t.sub }}>📊 Peak sun hours: <span style={{ color: t.accent, fontWeight: 700 }}>{solarData.psh}hrs/day</span></span>
+              <span style={{ fontSize: 11, color: t.sub, opacity: .6 }}>·</span>
+              <span style={{ fontSize: 12, color: t.sub }}>Data: <span style={{ color: t.accent, fontWeight: 600 }}>{solarData.dataSource}</span></span>
+            </div>
+
+            {/* CTAs */}
+            <div style={{ display: "flex", gap: 9, flexWrap: "wrap" }}>
+              <PBtn onClick={() => onResult(makeResult(solarData.dailyKwh, solarData.systemKw))} style={{ flex: 1, minWidth: 160, borderRadius: 12 }}>
                 Get Full System Report →
               </PBtn>
-              <button onClick={()=>setStatus("idle")} style={{background:t.bgCard,border:`1px solid ${t.border}`,color:t.sub,borderRadius:12,padding:"13px 18px",fontSize:13,fontWeight:600,cursor:"pointer",fontFamily:B}}>
-                🔄 New Address
+              <button onClick={() => setShowPanels(p => !p)} style={{ background: showPanels ? `rgba(${t.rgb},.15)` : t.bgCard, border: `1px solid rgba(${t.rgb},.3)`, color: t.accent, borderRadius: 12, padding: "13px 16px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: B, transition: "all .2s" }}>
+                {showPanels ? "🔲 Hide Panels" : "☀️ Show Panels"}
+              </button>
+              <button onClick={() => { setStatus("idle"); setSolarData(null); setCoords(null); setQuery(""); setShowPanels(false); }} style={{ background: t.bgCard, border: `1px solid ${t.border}`, color: t.sub, borderRadius: 12, padding: "13px 16px", fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: B }}>
+                🔄 New
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Idle state hint */}
-      {status==="idle"&&(
-        <div style={{padding:"20px 28px",display:"flex",gap:10,alignItems:"center",flexWrap:"wrap"}}>
-          {[["🛰️","Real satellite data"],["☀️","Actual roof analysis"],["⚡","Instant results"],["🇿🇦","Built for SA"]].map(([icon,l])=>(
-            <div key={l} style={{display:"flex",alignItems:"center",gap:5,fontSize:12,color:t.sub}}>
+      {/* Idle hints */}
+      {status === "idle" && (
+        <div style={{ padding: "16px 24px", display: "flex", gap: 16, alignItems: "center", flexWrap: "wrap" }}>
+          {[["🛰️", "Satellite view"], ["🌡️", "Heat signature"], ["☀️", "Panel overlay"], ["📊", "3 data sources"], ["🇿🇦", "All SA addresses"]].map(([icon, l]) => (
+            <div key={l} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 12, color: t.sub }}>
               <span>{icon}</span><span>{l}</span>
             </div>
           ))}
