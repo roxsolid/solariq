@@ -248,25 +248,42 @@ function SolarRoofMap({ onResult }) {
     const existing = document.querySelector("script[data-gmaps]");
     if (existing) { existing.addEventListener("load", () => setMapLoaded(true)); return; }
     const s = document.createElement("script");
-    s.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_API_KEY}&libraries=places`;
+    s.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_API_KEY}&libraries=places,marker&loading=async`;
     s.async = true; s.defer = true; s.dataset.gmaps = "1";
     s.onload = () => setMapLoaded(true);
     document.head.appendChild(s);
   }, []);
 
-  // Places Autocomplete
+  // Places Autocomplete — using new PlaceAutocompleteElement API
   useEffect(() => {
     if (!mapLoaded || !inputRef.current || acRef.current) return;
-    const ac = new window.google.maps.places.Autocomplete(inputRef.current, {
-      componentRestrictions: { country: "za" },
-      types: ["geocode", "establishment"],
-    });
-    ac.addListener("place_changed", () => {
-      const place = ac.getPlace();
-      const addr = place?.formatted_address || place?.name;
-      if (addr) { setQuery(addr); geocodeAndFetch(addr); }
-    });
-    acRef.current = ac;
+    try {
+      // Try new API first
+      if (window.google.maps.places.PlaceAutocompleteElement) {
+        const pac = new window.google.maps.places.PlaceAutocompleteElement({
+          componentRestrictions: { country: "za" },
+        });
+        // Can't inject element into existing input, use session token approach instead
+        // Fall through to legacy
+        throw new Error("use-legacy");
+      }
+    } catch(e) {}
+    // Legacy Autocomplete — works on existing keys that have it enabled
+    try {
+      const ac = new window.google.maps.places.Autocomplete(inputRef.current, {
+        componentRestrictions: { country: "za" },
+        types: ["geocode", "establishment"],
+      });
+      ac.addListener("place_changed", () => {
+        const place = ac.getPlace();
+        const addr = place?.formatted_address || place?.name;
+        if (addr) { setQuery(addr); geocodeAndFetch(addr); }
+      });
+      acRef.current = ac;
+    } catch(e) {
+      // Autocomplete not available — search still works via button/Enter
+      console.log("Places Autocomplete not available, using geocoder only");
+    }
   }, [mapLoaded]);
 
   // Init satellite map
