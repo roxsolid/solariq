@@ -1,0 +1,58 @@
+{
+  "name": "SolarIQ",
+  "short_name": "SolarIQ",
+  "description": "SA's complete solar platform — calculate, install, maintain, repair. Free. Always.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#07090d",
+  "theme_color": "#f5a623",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshot-mobile.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow"
+    }
+  ],
+  "categories": ["utilities", "finance", "energy"],
+  "lang": "en-ZA",
+  "dir": "ltr",
+  "shortcuts": [
+    {
+      "name": "Calculate My System",
+      "short_name": "Calculator",
+      "description": "Size your solar system instantly",
+      "url": "/?tab=calc",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Find Installers",
+      "short_name": "Installers",
+      "description": "Find verified SA solar installers",
+      "url": "/?tab=inst",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Error Code Translator",
+      "short_name": "Error Codes",
+      "description": "Diagnose your inverter error codes",
+      "url": "/?tab=serv",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

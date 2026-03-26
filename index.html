@@ -2,12 +2,49 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>solariq</title>
+
+    <!-- PWA -->
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#f5a623" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="SolarIQ" />
+    <link rel="apple-touch-icon" href="/icon-192.png" />
+
+    <!-- SEO -->
+    <title>SolarIQ — SA's Complete Solar Platform</title>
+    <meta name="description" content="Calculate your solar system, find verified SA installers, diagnose faults and read honest reviews. Free. Always." />
+    <meta name="keywords" content="solar panels South Africa, solar calculator SA, solar installers Johannesburg, load shedding solar, Eskom solar backup" />
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="SolarIQ — SA's Complete Solar Platform" />
+    <meta property="og:description" content="Calculate your solar system, find verified installers, diagnose faults. Free." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://solariq.vercel.app" />
+    <meta property="og:image" content="/og-image.png" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="SolarIQ — SA's Complete Solar Platform" />
+    <meta name="twitter:description" content="Calculate your solar system, find verified SA installers. Free." />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+    <script>
+      // Register service worker
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then(reg => console.log('SW registered'))
+            .catch(err => console.log('SW failed:', err));
+        });
+      }
+    </script>
   </body>
 </html>
