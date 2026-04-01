@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import App from "./solariq-v6.5.jsx";
+import App from "./App.jsx";
 import Admin from "./admin.jsx";
 
 const isAdmin = window.location.pathname.startsWith("/admin");
