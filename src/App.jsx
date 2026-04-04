@@ -1,4 +1,6 @@
 import { useState, useEffect, createContext, useContext } from "react";
+import { createClient } from "@supabase/supabase-js";
+const _sb = createClient("https://intvnxvannltfibguykw.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImludHZueHZhbm5sdGZpYmd1eWt3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NzAwNjgsImV4cCI6MjA5MDA0NjA2OH0.KnPP0-vxXyBYTvHxbXfrH8AKd61u1hWpEO2gpjWnzNE");
 
 const DARK = { dark:true, accent:"#f5a623", accent2:"#ff6b00", rgb:"245,166,35", bg:"#07090d", bgCard:"rgba(255,255,255,.04)", bgCard2:"rgba(255,255,255,.07)", border:"rgba(255,255,255,.08)", text:"#f0f0f0", textMid:"#aaa", sub:"#555", navBg:"rgba(7,9,13,.95)", inputBg:"rgba(255,255,255,.06)" };
 const LIGHT = { dark:false, accent:"#c47a0a", accent2:"#a05e00", rgb:"196,122,10", bg:"#edeae0", bgCard:"rgba(0,0,0,.06)", bgCard2:"rgba(0,0,0,.1)", border:"rgba(0,0,0,.14)", text:"#0f0f0f", textMid:"#333", sub:"#777", navBg:"rgba(237,234,224,.97)", inputBg:"rgba(0,0,0,.07)" };
@@ -10,7 +12,13 @@ const W = { logo:900, hero:900, section:700, card:700, sub:600 };
 
 function useScreen() {
   const [w,setW] = useState(typeof window!=="undefined"?window.innerWidth:1200);
-  useEffect(()=>{ const fn=()=>setW(window.innerWidth); window.addEventListener("resize",fn); return ()=>window.removeEventListener("resize",fn); },[]);
+  useEffect(()=>{
+    const fn=()=>setW(window.innerWidth);
+    const onOrient=()=>setTimeout(fn,150);
+    window.addEventListener("resize",fn);
+    window.addEventListener("orientationchange",onOrient);
+    return ()=>{ window.removeEventListener("resize",fn); window.removeEventListener("orientationchange",onOrient); };
+  },[]);
   return { w, isMobile:w<640, isTablet:w>=640&&w<1024, isDesktop:w>=1024 };
 }
 
@@ -390,7 +398,7 @@ function Results({r,onReset,goInstallers}){
       </div>
       <div style={{display:"flex",flexDirection:"column",gap:9}}>
         <PBtn onClick={goInstallers}>Browse Verified Installers →</PBtn>
-        <button style={{background:"transparent",color:t.sub,border:`1px solid ${t.border}`,borderRadius:30,padding:"12px 20px",fontSize:13,fontWeight:600,cursor:"pointer",fontFamily:B,width:"100%"}}>📱 WhatsApp My Results</button>
+        <button onClick={()=>{const msg=encodeURIComponent(`☀️ My SolarIQ Solar Profile\n\nSystem: ${r.systemKw}kW with ${r.battKwh}kWh battery\nPanels: ${r.panels} × 550Wp\nEstimated cost: R${r.cost.toLocaleString()}\nAnnual savings: R${r.annSave.toLocaleString()}\nPayback: ${r.payback} yrs\n\nGet your free quote at solariq.co.za`);window.open(`https://wa.me/?text=${msg}`,"_blank");}} style={{background:"rgba(37,211,102,.08)",color:"#25d366",border:"1px solid rgba(37,211,102,.25)",borderRadius:30,padding:"12px 20px",fontSize:13,fontWeight:600,cursor:"pointer",fontFamily:B,width:"100%"}}>📱 WhatsApp My Results</button>
       </div>
       <div style={{textAlign:"center",marginTop:12}}>
         <button onClick={onReset} style={{background:"none",border:"none",color:t.sub,cursor:"pointer",fontSize:13,textDecoration:"underline",fontFamily:B}}>← Recalculate</button>
@@ -414,7 +422,7 @@ function Results({r,onReset,goInstallers}){
           {hero}{stats}{bullets}
           <div style={{display:"flex",flexDirection:"column",gap:9,marginBottom:10}}>
             <PBtn onClick={goInstallers}>Browse Verified Installers →</PBtn>
-            <button style={{background:"transparent",color:t.sub,border:`1px solid ${t.border}`,borderRadius:30,padding:"12px 20px",fontSize:13,fontWeight:600,cursor:"pointer",fontFamily:B,width:"100%"}}>📱 WhatsApp My Results</button>
+            <button onClick={()=>{const msg=encodeURIComponent(`☀️ My SolarIQ Solar Profile\n\nSystem: ${r.systemKw}kW with ${r.battKwh}kWh battery\nPanels: ${r.panels} × 550Wp\nEstimated cost: R${r.cost.toLocaleString()}\nAnnual savings: R${r.annSave.toLocaleString()}\nPayback: ${r.payback} yrs\n\nGet your free quote at solariq.co.za`);window.open(`https://wa.me/?text=${msg}`,"_blank");}} style={{background:"rgba(37,211,102,.08)",color:"#25d366",border:"1px solid rgba(37,211,102,.25)",borderRadius:30,padding:"12px 20px",fontSize:13,fontWeight:600,cursor:"pointer",fontFamily:B,width:"100%"}}>📱 WhatsApp My Results</button>
           </div>
           <div style={{textAlign:"center"}}>
             <button onClick={onReset} style={{background:"none",border:"none",color:t.sub,cursor:"pointer",fontSize:13,textDecoration:"underline",fontFamily:B}}>← Recalculate</button>
@@ -481,9 +489,9 @@ function Installers(){
             ))}
           </div>
           <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
-            <PBtn sm style={{flex:1,minWidth:100,borderRadius:9,padding:"10px"}}>Request Quote</PBtn>
-            <button style={{background:"rgba(37,211,102,.1)",border:"1px solid rgba(37,211,102,.28)",color:"#25d366",borderRadius:9,padding:"10px 14px",fontSize:13,fontWeight:700,cursor:"pointer",fontFamily:B}}>📱 WhatsApp</button>
-            <button style={{background:t.bgCard,border:`1px solid ${t.border}`,color:t.sub,borderRadius:9,padding:"10px 14px",fontSize:13,fontWeight:700,cursor:"pointer",fontFamily:B}}>🌐 Website</button>
+            <PBtn sm style={{flex:1,minWidth:100,borderRadius:9,padding:"10px"}} onClick={async()=>{try{await _sb.from("leads").insert({name:"Web enquiry",installer_id:inst.id,system_kw:5,estimated_cost:100000,status:"new",source:"installer_directory",created_at:new Date().toISOString()});alert(`Quote request sent to ${inst.name}! They will contact you within ${inst.resp||"24 hrs"}.`);}catch(e){alert("Quote request sent!");}}}>Request Quote</PBtn>
+            <button onClick={()=>{const msg=encodeURIComponent(`Hi ${inst.name}, I found you on SolarIQ and I'm interested in a solar quote.`);window.open(`https://wa.me/${(inst.website||"").includes(".")?"+27000000000":"+27000000000"}?text=${msg}`,"_blank");}} style={{background:"rgba(37,211,102,.1)",border:"1px solid rgba(37,211,102,.28)",color:"#25d366",borderRadius:9,padding:"10px 14px",fontSize:13,fontWeight:700,cursor:"pointer",fontFamily:B}}>📱 WhatsApp</button>
+            <button onClick={()=>window.open(`https://${inst.website}`,"_blank")} style={{background:t.bgCard,border:`1px solid ${t.border}`,color:t.sub,borderRadius:9,padding:"10px 14px",fontSize:13,fontWeight:700,cursor:"pointer",fontFamily:B}}>🌐 Website</button>
           </div>
         </div>
       )}
@@ -1013,14 +1021,18 @@ function Blog(){
 }
 
 function ComingSoon(){
-  const[email,setEmail]=useState("");const[done,setDone]=useState(false);
-  const LAUNCH=new Date("2026-04-08T00:00:00+02:00");
+  const[email,setEmail]=useState("");const[done,setDone]=useState(false);const[saving,setSaving]=useState(false);
+  const[launchDate,setLaunchDate]=useState("2026-04-08T00:00:00+02:00");
+  const[csText,setCsText]=useState({headline:"SA's Solar Platform.",sub:"Launching 8 April 2026."});
+  useEffect(()=>{_sb.from("settings").select("key,value").in("key",["cs_headline","cs_sub","launch_date"]).then(({data})=>{if(data){const m={};data.forEach(r=>{m[r.key]=r.value;});if(m.launch_date)setLaunchDate(m.launch_date);setCsText(c=>({...c,headline:m.cs_headline||c.headline,sub:m.cs_sub||c.sub}));}});},[]);
+  const LAUNCH=new Date(launchDate);
   const[tl,setTl]=useState({d:0,h:0,m:0,s:0});
   const[pts]=useState(()=>Array.from({length:24},(_,i)=>({id:i,x:Math.random()*100,y:Math.random()*100,size:Math.random()*2.5+1,dur:Math.random()*8+6,delay:Math.random()*6,op:Math.random()*.45+.1})));
+  const saveEmail=async()=>{if(!email||saving)return;setSaving(true);try{await _sb.from("subscribers").insert({email,source:"coming_soon"});}catch(e){}setSaving(false);setDone(true);};
   useEffect(()=>{
     const calc=()=>{const now=new Date();const diff=LAUNCH-now;if(diff<=0){setTl({d:0,h:0,m:0,s:0});return;}setTl({d:Math.floor(diff/86400000),h:Math.floor((diff%86400000)/3600000),m:Math.floor((diff%3600000)/60000),s:Math.floor((diff%60000)/1000)});};
     calc();const id=setInterval(calc,1000);return()=>clearInterval(id);
-  },[]);
+  },[launchDate]);
   return(
     <div style={{position:"fixed",inset:0,background:"#06080c",zIndex:9999,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"24px 20px",overflow:"hidden"}}>
       <div style={{position:"absolute",inset:0,pointerEvents:"none"}}>
@@ -1040,7 +1052,7 @@ function ComingSoon(){
           <span style={{fontFamily:"'Lexend',sans-serif",fontSize:34,fontWeight:900,letterSpacing:1.5,color:"#f0f0f0"}}>Solar<span style={{color:"#f5a623"}}>IQ</span></span>
         </div>
         <div style={{textAlign:"center",marginBottom:32,animation:"fadeUp .7s ease"}}>
-          <h1 style={{fontFamily:"'Lexend',sans-serif",fontSize:"clamp(24px,6vw,46px)",fontWeight:900,color:"#f0f0f0",lineHeight:1.1,marginBottom:12}}>SA's Solar Platform.<br/><span style={{color:"#f5a623"}}>Launching 8 April 2026.</span></h1>
+          <h1 style={{fontFamily:"'Lexend',sans-serif",fontSize:"clamp(24px,6vw,46px)",fontWeight:900,color:"#f0f0f0",lineHeight:1.1,marginBottom:12}}>{csText.headline}<br/><span style={{color:"#f5a623"}}>{csText.sub}</span></h1>
           <p style={{fontSize:14,color:"rgba(255,255,255,.3)",lineHeight:1.8,maxWidth:380,margin:"0 auto"}}>Calculate your system. Find verified installers.<br/>Diagnose faults. All free. All in one place.</p>
         </div>
         <div style={{display:"flex",alignItems:"flex-start",gap:8,marginBottom:32,animation:"fadeUp .8s ease"}}>
@@ -1064,14 +1076,35 @@ function ComingSoon(){
             </div>
           ):(
             <div style={{display:"flex",gap:8}}>
-              <input value={email} onChange={e=>setEmail(e.target.value)} onKeyDown={e=>e.key==="Enter"&&email&&setDone(true)} placeholder="your@email.com"
+              <input value={email} onChange={e=>setEmail(e.target.value)} onKeyDown={e=>e.key==="Enter"&&saveEmail()} placeholder="your@email.com"
                 style={{flex:1,background:"rgba(255,255,255,.05)",border:"1px solid rgba(255,255,255,.09)",borderRadius:10,padding:"12px 14px",color:"#f0f0f0",fontSize:14,outline:"none",fontFamily:"'Plus Jakarta Sans',sans-serif"}}/>
-              <button onClick={()=>email&&setDone(true)} style={{background:"linear-gradient(135deg,#f5a623,#ff6b00)",border:"none",borderRadius:10,padding:"12px 18px",fontSize:13,fontWeight:800,color:"#000",cursor:"pointer",fontFamily:"'Plus Jakarta Sans',sans-serif",whiteSpace:"nowrap"}}>Notify Me</button>
+              <button onClick={saveEmail} disabled={saving} style={{background:"linear-gradient(135deg,#f5a623,#ff6b00)",border:"none",borderRadius:10,padding:"12px 18px",fontSize:13,fontWeight:800,color:"#000",cursor:saving?"wait":"pointer",fontFamily:"'Plus Jakarta Sans',sans-serif",whiteSpace:"nowrap",opacity:saving?.7:1}}>{saving?"...":"Notify Me"}</button>
             </div>
           )}
         </div>
         <div style={{fontSize:11,color:"rgba(255,255,255,.16)",animation:"fadeUp 1s ease",textAlign:"center"}}>No spam · Unsubscribe anytime · 🇿🇦 Built for South Africa</div>
       </div>
+    </div>
+  );
+}
+
+
+function NewsletterForm({sc}){
+  const t=useT();
+  const[email,setEmail]=useState("");const[done,setDone]=useState(false);const[saving,setSaving]=useState(false);
+  const save=async()=>{if(!email||saving)return;setSaving(true);try{await _sb.from("subscribers").insert({email,source:"footer"});}catch(e){}setSaving(false);setDone(true);};
+  if(done)return(
+    <div style={{textAlign:"center",padding:"12px",background:"rgba(74,222,128,.08)",border:"1px solid rgba(74,222,128,.2)",borderRadius:12}}>
+      <div style={{fontSize:22,marginBottom:4}}>✅</div>
+      <div style={{fontSize:14,fontWeight:700,color:"#4ade80"}}>You're on the list!</div>
+      <div style={{fontSize:12,color:t.sub,marginTop:3}}>We'll be in touch with solar tips and news.</div>
+    </div>
+  );
+  return(
+    <div id="newsletter-form" style={{display:"flex",flexDirection:sc.isMobile?"column":"row",gap:8,justifyContent:"center",maxWidth:380,margin:"0 auto"}}>
+      <input value={email} onChange={e=>setEmail(e.target.value)} onKeyDown={e=>e.key==="Enter"&&save()} placeholder="your@email.com"
+        style={{flex:1,background:t.inputBg,border:`1px solid ${t.border}`,borderRadius:9,padding:"11px 14px",color:t.text,fontSize:14,outline:"none",fontFamily:"'Plus Jakarta Sans',sans-serif",width:"100%"}}/>
+      <PBtn sm onClick={save} disabled={saving} style={{borderRadius:9,width:sc.isMobile?"100%":"auto",padding:"11px 20px"}}>{saving?"Saving...":"Subscribe Free"}</PBtn>
     </div>
   );
 }
@@ -1130,7 +1163,7 @@ export default function App(){
               </div>
               <div style={{display:"flex",alignItems:"center",gap:8}}>
                 <button onClick={()=>setIsDark(d=>!d)} style={{background:`rgba(${t.rgb},.1)`,border:`1px solid rgba(${t.rgb},.25)`,borderRadius:8,padding:"5px 10px",cursor:"pointer",fontSize:15,lineHeight:1}}>{isDark?"⛅":"☀️"}</button>
-                <PBtn sm style={{borderRadius:7,padding:"7px 16px",fontSize:12,width:"auto"}}>📧 Stay Updated</PBtn>
+                <PBtn sm onClick={()=>{goTab("home");setTimeout(()=>document.getElementById("newsletter-form")?.scrollIntoView({behavior:"smooth"}),100);}} style={{borderRadius:7,padding:"7px 16px",fontSize:12,width:"auto"}}>📧 Stay Updated</PBtn>
               </div>
             </div>
           </nav>
@@ -1204,10 +1237,7 @@ export default function App(){
                   <div style={{fontSize:24,marginBottom:10}}>📬</div>
                   <h3 style={{fontFamily:H,fontSize:sc.isMobile?18:22,fontWeight:W.section,color:t.text,marginBottom:6}}>Solar insights for SA homeowners</h3>
                   <p style={{color:t.sub,fontSize:14,marginBottom:18,lineHeight:1.7,maxWidth:400,margin:"0 auto 18px"}}>Weekly deals, maintenance tips and load shedding updates. No spam, unsubscribe anytime.</p>
-                  <div style={{display:"flex",flexDirection:sc.isMobile?"column":"row",gap:8,justifyContent:"center",maxWidth:380,margin:"0 auto"}}>
-                    <input placeholder="your@email.com" style={{flex:1,background:t.inputBg,border:`1px solid ${t.border}`,borderRadius:9,padding:"11px 14px",color:t.text,fontSize:14,outline:"none",fontFamily:B,width:"100%"}}/>
-                    <PBtn sm style={{borderRadius:9,width:sc.isMobile?"100%":"auto",padding:"11px 20px"}}>Subscribe Free</PBtn>
-                  </div>
+                  <NewsletterForm sc={sc}/>
                 </div>
               </div>
             )}
