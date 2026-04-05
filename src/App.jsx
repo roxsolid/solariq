@@ -1,4 +1,9 @@
 import { useState, useEffect, createContext, useContext } from "react";
+import { createClient } from "@supabase/supabase-js";
+
+const SUPABASE_URL = "https://intvnxvannltfibguykw.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImludHZueHZhbm5sdGZpYmd1eWt3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NzAwNjgsImV4cCI6MjA5MDA0NjA2OH0.KnPP0-vxXyBYTvHxbXfrH8AKd61u1hWpEO2gpjWnzNE";
+const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const DARK = { dark:true, accent:"#f5a623", accent2:"#ff6b00", rgb:"245,166,35", bg:"#07090d", bgCard:"rgba(255,255,255,.04)", bgCard2:"rgba(255,255,255,.07)", border:"rgba(255,255,255,.08)", text:"#f0f0f0", textMid:"#aaa", sub:"#555", navBg:"rgba(7,9,13,.95)", inputBg:"rgba(255,255,255,.06)" };
 const LIGHT = { dark:false, accent:"#c47a0a", accent2:"#a05e00", rgb:"196,122,10", bg:"#edeae0", bgCard:"rgba(0,0,0,.06)", bgCard2:"rgba(0,0,0,.1)", border:"rgba(0,0,0,.14)", text:"#0f0f0f", textMid:"#333", sub:"#777", navBg:"rgba(237,234,224,.97)", inputBg:"rgba(0,0,0,.07)" };
@@ -390,7 +395,7 @@ function Results({r,onReset,goInstallers}){
       </div>
       <div style={{display:"flex",flexDirection:"column",gap:9}}>
         <PBtn onClick={goInstallers}>Browse Verified Installers →</PBtn>
-        <button style={{background:"transparent",color:t.sub,border:`1px solid ${t.border}`,borderRadius:30,padding:"12px 20px",fontSize:13,fontWeight:600,cursor:"pointer",fontFamily:B,width:"100%"}}>📱 WhatsApp My Results</button>
+        <button onClick={()=>{const msg=encodeURIComponent(`Hi! I used SolarIQ and my recommended system is ${r.systemKw}kW with ${r.battKwh}kWh battery (${r.panels} panels). Estimated cost R${r.cost.toLocaleString()}. Annual savings R${r.annSave.toLocaleString()}. Can you give me a quote?`);window.open(`https://wa.me/?text=${msg}`,"_blank");}} style={{background:"rgba(37,211,102,.08)",color:"#25d366",border:"1px solid rgba(37,211,102,.25)",borderRadius:30,padding:"12px 20px",fontSize:13,fontWeight:600,cursor:"pointer",fontFamily:B,width:"100%"}}>📱 WhatsApp My Results</button>
       </div>
       <div style={{textAlign:"center",marginTop:12}}>
         <button onClick={onReset} style={{background:"none",border:"none",color:t.sub,cursor:"pointer",fontSize:13,textDecoration:"underline",fontFamily:B}}>← Recalculate</button>
@@ -414,7 +419,7 @@ function Results({r,onReset,goInstallers}){
           {hero}{stats}{bullets}
           <div style={{display:"flex",flexDirection:"column",gap:9,marginBottom:10}}>
             <PBtn onClick={goInstallers}>Browse Verified Installers →</PBtn>
-            <button style={{background:"transparent",color:t.sub,border:`1px solid ${t.border}`,borderRadius:30,padding:"12px 20px",fontSize:13,fontWeight:600,cursor:"pointer",fontFamily:B,width:"100%"}}>📱 WhatsApp My Results</button>
+            <button onClick={()=>{const msg=encodeURIComponent(`Hi! I used SolarIQ and my recommended system is ${r.systemKw}kW with ${r.battKwh}kWh battery (${r.panels} panels). Estimated cost R${r.cost.toLocaleString()}. Annual savings R${r.annSave.toLocaleString()}. Can you give me a quote?`);window.open(`https://wa.me/?text=${msg}`,"_blank");}} style={{background:"rgba(37,211,102,.08)",color:"#25d366",border:"1px solid rgba(37,211,102,.25)",borderRadius:30,padding:"12px 20px",fontSize:13,fontWeight:600,cursor:"pointer",fontFamily:B,width:"100%"}}>📱 WhatsApp My Results</button>
           </div>
           <div style={{textAlign:"center"}}>
             <button onClick={onReset} style={{background:"none",border:"none",color:t.sub,cursor:"pointer",fontSize:13,textDecoration:"underline",fontFamily:B}}>← Recalculate</button>
@@ -430,6 +435,11 @@ function Installers(){
   const[search,setSearch]=useState("");const[prov,setProv]=useState("All");const[spec,setSpec]=useState("All");
   const[brand,setBrand]=useState("All");const[sessaOnly,setSessaOnly]=useState(false);const[verOnly,setVerOnly]=useState(false);const[financeOnly,setFinanceOnly]=useState(false);
   const[sortBy,setSortBy]=useState("rating");const[open,setOpen]=useState(null);const[showF,setShowF]=useState(false);
+  const[quoteInst,setQuoteInst]=useState(null);
+  const[quoteForm,setQuoteForm]=useState({name:"",email:"",phone:"",system_kw:"",notes:""});
+  const[quoteSent,setQuoteSent]=useState(false);
+  const[quoteSaving,setQuoteSaving]=useState(false);
+
   const filtered=INSTALLERS.filter(i=>{
     if(search&&!i.name.toLowerCase().includes(search.toLowerCase())&&!i.city.toLowerCase().includes(search.toLowerCase()))return false;
     if(prov!=="All"&&i.prov!==prov)return false;if(spec!=="All"&&i.spec!==spec)return false;
@@ -441,12 +451,26 @@ function Installers(){
   const clearAll=()=>{setProv("All");setSpec("All");setBrand("All");setSessaOnly(false);setVerOnly(false);setFinanceOnly(false);};
   const sel={width:"100%",background:t.inputBg,border:`1px solid ${t.border}`,borderRadius:8,padding:"9px 10px",color:t.text,fontSize:13,outline:"none",fontFamily:B};
 
+  const submitQuote=async()=>{
+    if(!quoteForm.name||!quoteForm.phone)return;
+    setQuoteSaving(true);
+    try{
+      await sb.from("leads").insert({
+        installer_id:null,
+        name:quoteForm.name,email:quoteForm.email,phone:quoteForm.phone,
+        system_kw:parseFloat(quoteForm.system_kw)||null,
+        notes:`Quote request for ${quoteInst?.name||"installer"}. ${quoteForm.notes}`,
+        source:"quote_request",status:"new",
+      });
+    }catch(e){console.log(e);}
+    setQuoteSent(true);setQuoteSaving(false);
+  };
+
   const InstCard=({inst,i})=>(
-    <div style={{background:open===inst.id?`rgba(${t.rgb},.04)`:t.bgCard,border:`1px solid ${open===inst.id?`rgba(${t.rgb},.28)`:t.border}`,borderRadius:14,padding:"16px",cursor:"pointer",transition:"all .2s",animation:`fadeUp .3s ease ${i*.04}s both`}}
-      onClick={()=>setOpen(open===inst.id?null:inst.id)}
+    <div style={{background:open===inst.id?`rgba(${t.rgb},.04)`:t.bgCard,border:`1px solid ${open===inst.id?`rgba(${t.rgb},.28)`:t.border}`,borderRadius:14,padding:"16px",transition:"all .2s",animation:`fadeUp .3s ease ${i*.04}s both`}}
       onMouseEnter={e=>{if(open!==inst.id)e.currentTarget.style.borderColor=`rgba(${t.rgb},.2)`;}}
       onMouseLeave={e=>{if(open!==inst.id)e.currentTarget.style.borderColor=t.border;}}>
-      <div style={{display:"flex",alignItems:"flex-start",gap:10}}>
+      <div style={{display:"flex",alignItems:"flex-start",gap:10,cursor:"pointer"}} onClick={()=>setOpen(open===inst.id?null:inst.id)}>
         <div style={{width:42,height:42,borderRadius:10,background:`rgba(${t.rgb},.1)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0}}>🏢</div>
         <div style={{flex:1,minWidth:0}}>
           <div style={{display:"flex",alignItems:"center",gap:5,marginBottom:3,flexWrap:"wrap"}}>
@@ -481,9 +505,9 @@ function Installers(){
             ))}
           </div>
           <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
-            <PBtn sm style={{flex:1,minWidth:100,borderRadius:9,padding:"10px"}}>Request Quote</PBtn>
-            <button style={{background:"rgba(37,211,102,.1)",border:"1px solid rgba(37,211,102,.28)",color:"#25d366",borderRadius:9,padding:"10px 14px",fontSize:13,fontWeight:700,cursor:"pointer",fontFamily:B}}>📱 WhatsApp</button>
-            <button style={{background:t.bgCard,border:`1px solid ${t.border}`,color:t.sub,borderRadius:9,padding:"10px 14px",fontSize:13,fontWeight:700,cursor:"pointer",fontFamily:B}}>🌐 Website</button>
+            <PBtn sm style={{flex:1,minWidth:100,borderRadius:9,padding:"10px"}} onClick={e=>{e.stopPropagation();setQuoteInst(inst);setQuoteForm({name:"",email:"",phone:"",system_kw:"",notes:""});setQuoteSent(false);}}>Request Quote</PBtn>
+            <button onClick={e=>{e.stopPropagation();const msg=encodeURIComponent(`Hi ${inst.name}, I found you on SolarIQ and would like a quote for a solar installation. Please contact me.`);window.open(`https://wa.me/${inst.whatsapp||""}?text=${msg}`,"_blank");}} style={{background:"rgba(37,211,102,.1)",border:"1px solid rgba(37,211,102,.28)",color:"#25d366",borderRadius:9,padding:"10px 14px",fontSize:13,fontWeight:700,cursor:"pointer",fontFamily:B}}>📱 WhatsApp</button>
+            <button onClick={e=>{e.stopPropagation();window.open(`https://${inst.website}`,"_blank");}} style={{background:t.bgCard,border:`1px solid ${t.border}`,color:t.sub,borderRadius:9,padding:"10px 14px",fontSize:13,fontWeight:700,cursor:"pointer",fontFamily:B}}>🌐 Website</button>
           </div>
         </div>
       )}
@@ -549,6 +573,50 @@ function Installers(){
         <span style={{fontSize:13,color:t.sub}}>Are you a solar installer? </span>
         <button style={{background:"none",border:"none",color:t.accent,cursor:"pointer",fontSize:13,fontWeight:700,fontFamily:B}}>List your business free →</button>
       </div>
+
+      {/* Quote Modal */}
+      {quoteInst&&(
+        <>
+          <div onClick={()=>setQuoteInst(null)} style={{position:"fixed",inset:0,zIndex:490,background:"rgba(0,0,0,.6)",backdropFilter:"blur(4px)"}}/>
+          <div style={{position:"fixed",top:"50%",left:"50%",transform:"translate(-50%,-50%)",zIndex:500,width:"100%",maxWidth:460,background:t.dark?"#0d1018":"#f5f2e9",border:`1px solid ${t.border}`,borderRadius:20,padding:28,boxShadow:"0 32px 80px rgba(0,0,0,.5)",maxHeight:"90vh",overflowY:"auto"}}>
+            {quoteSent?(
+              <div style={{textAlign:"center",padding:"24px 0"}}>
+                <div style={{fontSize:40,marginBottom:12}}>✅</div>
+                <div style={{fontFamily:H,fontSize:20,fontWeight:800,color:"#4ade80",marginBottom:8}}>Quote Request Sent!</div>
+                <div style={{fontSize:13,color:t.sub,lineHeight:1.7,marginBottom:20}}>{quoteInst.name} will be in touch shortly. Your details have been saved.</div>
+                <button onClick={()=>setQuoteInst(null)} style={{background:`linear-gradient(135deg,${t.accent},${t.accent2})`,border:"none",borderRadius:10,padding:"11px 24px",fontSize:13,fontWeight:700,color:t.dark?"#000":"#fff",cursor:"pointer",fontFamily:B}}>Done</button>
+              </div>
+            ):(
+              <>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
+                  <div>
+                    <div style={{fontFamily:H,fontSize:17,fontWeight:800,color:t.text}}>Request a Quote</div>
+                    <div style={{fontSize:12,color:t.sub,marginTop:3}}>From {quoteInst.name} · {quoteInst.city}</div>
+                  </div>
+                  <button onClick={()=>setQuoteInst(null)} style={{background:"none",border:`1px solid ${t.border}`,borderRadius:8,padding:"6px 10px",cursor:"pointer",color:t.sub,fontSize:18,lineHeight:1}}>×</button>
+                </div>
+                {[["Your Name *","text","John Smith","name"],["Email","email","john@email.com","email"],["Phone / WhatsApp *","tel","+27 82 000 0000","phone"],["System Size (kW)","text","e.g. 5kW","system_kw"],].map(([label,type,ph,field])=>(
+                  <div key={field} style={{marginBottom:12}}>
+                    <label style={{fontSize:11,color:t.sub,textTransform:"uppercase",letterSpacing:1.2,display:"block",marginBottom:5,fontWeight:700}}>{label}</label>
+                    <input type={type} value={quoteForm[field]} onChange={e=>setQuoteForm(f=>({...f,[field]:e.target.value}))} placeholder={ph}
+                      style={{width:"100%",background:t.inputBg||"rgba(255,255,255,.06)",border:`1px solid ${t.border}`,borderRadius:9,padding:"10px 13px",color:t.text,fontSize:13,fontFamily:B,outline:"none",boxSizing:"border-box"}}/>
+                  </div>
+                ))}
+                <div style={{marginBottom:18}}>
+                  <label style={{fontSize:11,color:t.sub,textTransform:"uppercase",letterSpacing:1.2,display:"block",marginBottom:5,fontWeight:700}}>Notes (optional)</label>
+                  <textarea value={quoteForm.notes} onChange={e=>setQuoteForm(f=>({...f,notes:e.target.value}))} placeholder="Any specific requirements, current system details, budget range..."
+                    style={{width:"100%",background:t.inputBg||"rgba(255,255,255,.06)",border:`1px solid ${t.border}`,borderRadius:9,padding:"10px 13px",color:t.text,fontSize:13,fontFamily:B,outline:"none",resize:"vertical",boxSizing:"border-box"}} rows={3}/>
+                </div>
+                <button onClick={submitQuote} disabled={!quoteForm.name||!quoteForm.phone||quoteSaving}
+                  style={{width:"100%",background:`linear-gradient(135deg,${t.accent},${t.accent2})`,border:"none",borderRadius:11,padding:"13px",fontSize:14,fontWeight:800,color:t.dark?"#000":"#fff",cursor:(!quoteForm.name||!quoteForm.phone||quoteSaving)?"not-allowed":"pointer",opacity:(!quoteForm.name||!quoteForm.phone)?0.6:1,fontFamily:H}}>
+                  {quoteSaving?"Sending...":"Send Quote Request →"}
+                </button>
+                <div style={{fontSize:11,color:t.sub,textAlign:"center",marginTop:10}}>Your details are sent directly to {quoteInst.name}</div>
+              </>
+            )}
+          </div>
+        </>
+      )}
     </div>
   );
 }
@@ -592,8 +660,8 @@ function Servicing(){
       </div>
       <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
         <PBtn sm style={{flex:1,minWidth:100,borderRadius:9,padding:"9px"}}>Book Service</PBtn>
-        <button style={{background:"rgba(37,211,102,.1)",border:"1px solid rgba(37,211,102,.25)",color:"#25d366",borderRadius:9,padding:"9px 13px",fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:B}}>📱 WhatsApp</button>
-        <button style={{background:t.bgCard,border:`1px solid ${t.border}`,color:t.sub,borderRadius:9,padding:"9px 13px",fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:B}}>🌐 Website</button>
+        <button onClick={()=>{const msg=encodeURIComponent(`Hi ${tech.name}, I found you on SolarIQ. I need ${tech.spec}. Please contact me to schedule a service call.`);window.open(`https://wa.me/?text=${msg}`,"_blank");}} style={{background:"rgba(37,211,102,.1)",border:"1px solid rgba(37,211,102,.25)",color:"#25d366",borderRadius:9,padding:"9px 13px",fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:B}}>📱 WhatsApp</button>
+        <button onClick={()=>window.open(`https://${tech.website}`,"_blank")} style={{background:t.bgCard,border:`1px solid ${t.border}`,color:t.sub,borderRadius:9,padding:"9px 13px",fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:B}}>🌐 Website</button>
       </div>
     </div>
   );
@@ -1013,7 +1081,16 @@ function Blog(){
 }
 
 function ComingSoon(){
-  const[email,setEmail]=useState("");const[done,setDone]=useState(false);
+  const[email,setEmail]=useState("");const[done,setDone]=useState(false);const[saving,setSaving]=useState(false);
+
+  const saveEmail=async()=>{
+    if(!email||saving)return;
+    setSaving(true);
+    try{await sb.from("subscribers").upsert({email,source:"coming_soon",active:true},{onConflict:"email"});}
+    catch(e){console.log(e);}
+    setDone(true);setSaving(false);
+  };
+
   const LAUNCH=new Date("2026-04-08T00:00:00+02:00");
   const[tl,setTl]=useState({d:0,h:0,m:0,s:0});
   const[pts]=useState(()=>Array.from({length:24},(_,i)=>({id:i,x:Math.random()*100,y:Math.random()*100,size:Math.random()*2.5+1,dur:Math.random()*8+6,delay:Math.random()*6,op:Math.random()*.45+.1})));
@@ -1064,9 +1141,9 @@ function ComingSoon(){
             </div>
           ):(
             <div style={{display:"flex",gap:8}}>
-              <input value={email} onChange={e=>setEmail(e.target.value)} onKeyDown={e=>e.key==="Enter"&&email&&setDone(true)} placeholder="your@email.com"
+              <input value={email} onChange={e=>setEmail(e.target.value)} onKeyDown={e=>e.key==="Enter"&&saveEmail()} placeholder="your@email.com"
                 style={{flex:1,background:"rgba(255,255,255,.05)",border:"1px solid rgba(255,255,255,.09)",borderRadius:10,padding:"12px 14px",color:"#f0f0f0",fontSize:14,outline:"none",fontFamily:"'Plus Jakarta Sans',sans-serif"}}/>
-              <button onClick={()=>email&&setDone(true)} style={{background:"linear-gradient(135deg,#f5a623,#ff6b00)",border:"none",borderRadius:10,padding:"12px 18px",fontSize:13,fontWeight:800,color:"#000",cursor:"pointer",fontFamily:"'Plus Jakarta Sans',sans-serif",whiteSpace:"nowrap"}}>Notify Me</button>
+              <button onClick={saveEmail} style={{background:"linear-gradient(135deg,#f5a623,#ff6b00)",border:"none",borderRadius:10,padding:"12px 18px",fontSize:13,fontWeight:800,color:"#000",cursor:"pointer",fontFamily:"'Plus Jakarta Sans',sans-serif",whiteSpace:"nowrap"}}>{saving?"...":"Notify Me"}</button>
             </div>
           )}
         </div>
@@ -1083,8 +1160,17 @@ export default function App(){
   const[isDark,setIsDark]=useState(prefersDark);
   const[tab,setTab]=useState("home");
   const[res,setRes]=useState(null);
+  const[nlEmail,setNlEmail]=useState("");const[nlDone,setNlDone]=useState(false);const[nlSaving,setNlSaving]=useState(false);
   const sc=useScreen();
   const t=isDark?DARK:LIGHT;
+
+  const saveNewsletter=async()=>{
+    if(!nlEmail||nlSaving)return;
+    setNlSaving(true);
+    try{await sb.from("subscribers").upsert({email:nlEmail,source:"newsletter",active:true},{onConflict:"email"});}
+    catch(e){console.log(e);}
+    setNlDone(true);setNlSaving(false);
+  };
   useEffect(()=>{const mq=window.matchMedia("(prefers-color-scheme: dark)");const h=e=>setIsDark(e.matches);mq.addEventListener("change",h);return()=>mq.removeEventListener("change",h);},[]);
   const goTab=id=>{setTab(id);if(id!=="result")setRes(null);window.scrollTo({top:0,behavior:"smooth"});};
   const NAV=[{id:"home",l:"Home",icon:"🏠"},{id:"calc",l:"Calculator",icon:"☀️"},{id:"inst",l:"Installers",icon:"🗺️"},{id:"serv",l:"Servicing",icon:"🔧"},{id:"blog",l:"Guides",icon:"📖"}];
@@ -1205,8 +1291,14 @@ export default function App(){
                   <h3 style={{fontFamily:H,fontSize:sc.isMobile?18:22,fontWeight:W.section,color:t.text,marginBottom:6}}>Solar insights for SA homeowners</h3>
                   <p style={{color:t.sub,fontSize:14,marginBottom:18,lineHeight:1.7,maxWidth:400,margin:"0 auto 18px"}}>Weekly deals, maintenance tips and load shedding updates. No spam, unsubscribe anytime.</p>
                   <div style={{display:"flex",flexDirection:sc.isMobile?"column":"row",gap:8,justifyContent:"center",maxWidth:380,margin:"0 auto"}}>
-                    <input placeholder="your@email.com" style={{flex:1,background:t.inputBg,border:`1px solid ${t.border}`,borderRadius:9,padding:"11px 14px",color:t.text,fontSize:14,outline:"none",fontFamily:B,width:"100%"}}/>
-                    <PBtn sm style={{borderRadius:9,width:sc.isMobile?"100%":"auto",padding:"11px 20px"}}>Subscribe Free</PBtn>
+                    {nlDone?(
+                      <div style={{fontSize:13,color:"#4ade80",fontWeight:600,padding:"11px 0"}}>✅ You're subscribed! Thanks.</div>
+                    ):(
+                      <>
+                        <input value={nlEmail} onChange={e=>setNlEmail(e.target.value)} onKeyDown={e=>e.key==="Enter"&&saveNewsletter()} placeholder="your@email.com" style={{flex:1,background:t.inputBg,border:`1px solid ${t.border}`,borderRadius:9,padding:"11px 14px",color:t.text,fontSize:14,outline:"none",fontFamily:B,width:"100%"}}/>
+                        <PBtn sm onClick={saveNewsletter} style={{borderRadius:9,width:sc.isMobile?"100%":"auto",padding:"11px 20px"}}>{nlSaving?"...":"Subscribe Free"}</PBtn>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
