@@ -295,7 +295,7 @@ function OnboardingWizard({ installer, onComplete }) {
       <div style={{ position: "absolute", top: "30%", left: "50%", transform: "translateX(-50%)", width: "60vw", height: "50vh", background: `radial-gradient(ellipse, rgba(${T.rgb},.06) 0%, transparent 70%)`, pointerEvents: "none", animation: "breathe 8s ease infinite" }} />
       <div style={{ position: "absolute", bottom: 0, right: 0, width: "30vw", height: "30vh", background: "radial-gradient(ellipse, rgba(96,165,250,.04) 0%, transparent 70%)", pointerEvents: "none" }} />
 
-      <div style={{ width: "100%", maxWidth: 640, position: "relative", zIndex: 1, animation: "fadeUp .5s ease" }}>
+      <div style={{ width: "100%", maxWidth: sc.isDesktop ? 860 : 640, position: "relative", zIndex: 1, animation: "fadeUp .5s ease" }}>
         {/* Header */}
         <div style={{ textAlign: "center", marginBottom: 36 }}>
           <div style={{ display: "inline-flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
@@ -452,33 +452,22 @@ function OnboardingWizard({ installer, onComplete }) {
             )}
 
             {step === 4 && (
-              <div>
-                <div style={{ fontSize: 13, color: T.textMid, marginBottom: 20, lineHeight: 1.6 }}>Upload up to 8 photos of your best installations — DB boards, roof layouts, completed systems. South African homeowners buy with their eyes.</div>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10, marginBottom: 18 }}>
-                  {[...Array(8)].map((_, i) => (
-                    <label key={i} style={{ aspectRatio: "1", borderRadius: 12, border: `1px dashed rgba(${T.rgb},.25)`, background: T.card, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", cursor: "pointer", gap: 6, transition: "all .2s" }}
-                      onMouseEnter={e => { e.currentTarget.style.background = T.accentDim; e.currentTarget.style.borderColor = `rgba(${T.rgb},.5)`; }}
-                      onMouseLeave={e => { e.currentTarget.style.background = T.card; e.currentTarget.style.borderColor = `rgba(${T.rgb},.25)`; }}>
-                      <Ic.Plus s={20} c={T.sub} />
-                      <span style={{ fontSize: 9, color: T.sub, fontWeight: 600, textTransform: "uppercase", letterSpacing: 1 }}>Add Photo</span>
-                      <input type="file" accept="image/*" style={{ display: "none" }} />
-                    </label>
-                  ))}
-                </div>
-                <div style={{ padding: "12px 14px", background: `rgba(${T.rgb},.05)`, border: `1px solid rgba(${T.rgb},.12)`, borderRadius: 10, fontSize: 12, color: T.textMid, lineHeight: 1.6 }}>
-                  💡 Profiles with 5+ photos get <strong style={{ color: T.accent }}>3× more enquiries</strong>. DB board photos and clean roof layouts perform best.
-                </div>
-              </div>
+              <GalleryStep data={data} setData={setData} />
             )}
           </div>
 
           {/* Navigation */}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 28, paddingTop: 20, borderTop: `1px solid ${T.border}` }}>
-            {step > 0 ? (
-              <button onClick={() => setStep(s => s - 1)} style={{ background: "none", border: "none", color: T.sub, cursor: "pointer", fontSize: 13, fontWeight: 600, fontFamily: B }}>← Back</button>
-            ) : <div />}
-            <Btn onClick={saveAndContinue} disabled={!canProceed} loading={saving} style={{ minWidth: 140 }}>
-              {step === WIZARD_STEPS.length - 1 ? "Launch My Profile →" : `Continue →`}
+            <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+              {step > 0 ? (
+                <button onClick={() => setStep(s => s - 1)} style={{ background: "none", border: "none", color: T.sub, cursor: "pointer", fontSize: 13, fontWeight: 600, fontFamily: B }}>← Back</button>
+              ) : <div />}
+              {step === 4 && (
+                <button onClick={() => saveAndContinue()} style={{ background: "none", border: "none", color: T.sub, cursor: "pointer", fontSize: 12, fontFamily: B, textDecoration: "underline" }}>Skip gallery for now</button>
+              )}
+            </div>
+            <Btn onClick={saveAndContinue} disabled={!canProceed} loading={saving} style={{ minWidth: 160 }}>
+              {step === WIZARD_STEPS.length - 1 ? "🚀 Launch My Profile →" : `Continue →`}
             </Btn>
           </div>
         </Card>
@@ -491,7 +480,110 @@ function OnboardingWizard({ installer, onComplete }) {
   );
 }
 
-// ─── LEAD INBOX ───────────────────────────────────────────────
+// ─── GALLERY DRAG-AND-DROP ────────────────────────────────────
+function GalleryStep({ data, setData }) {
+  const [photos, setPhotos] = useState(data.gallery || []);
+  const [dragging, setDragging] = useState(false);
+  const [dragOver, setDragOver] = useState(null);
+  const dropRef = useRef(null);
+
+  const syncUp = (newPhotos) => {
+    setPhotos(newPhotos);
+    setData(d => ({ ...d, gallery: newPhotos }));
+  };
+
+  const processFiles = (files) => {
+    const imageFiles = Array.from(files).filter(f => f.type.startsWith("image/")).slice(0, 8 - photos.length);
+    imageFiles.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setPhotos(prev => {
+          if (prev.length >= 8) return prev;
+          const updated = [...prev, { id: Date.now() + Math.random(), src: e.target.result, name: file.name, caption: "" }];
+          setData(d => ({ ...d, gallery: updated }));
+          return updated;
+        });
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setDragging(false);
+    processFiles(e.dataTransfer.files);
+  };
+
+  const removePhoto = (id) => syncUp(photos.filter(p => p.id !== id));
+  const updateCaption = (id, caption) => syncUp(photos.map(p => p.id === id ? { ...p, caption } : p));
+
+  return (
+    <div>
+      <div style={{ fontSize: 13, color: T.textMid, marginBottom: 20, lineHeight: 1.6 }}>
+        Upload up to 8 photos of your best work — DB boards, roof layouts, completed systems. Profiles with 5+ photos get <strong style={{ color: T.accent }}>3× more enquiries</strong>.
+      </div>
+
+      {/* Drop zone */}
+      {photos.length < 8 && (
+        <div
+          ref={dropRef}
+          onDragOver={e => { e.preventDefault(); setDragging(true); }}
+          onDragLeave={() => setDragging(false)}
+          onDrop={handleDrop}
+          style={{ border: `2px dashed ${dragging ? T.accent : `rgba(${T.rgb},.25)`}`, background: dragging ? T.accentDim : T.card, borderRadius: 14, padding: "32px 20px", textAlign: "center", marginBottom: 18, transition: "all .2s", cursor: "pointer" }}
+          onClick={() => document.getElementById("gallery-file-input").click()}
+        >
+          <div style={{ fontSize: 32, marginBottom: 10 }}>📸</div>
+          <div style={{ fontFamily: H, fontSize: 15, fontWeight: 700, color: dragging ? T.accent : T.text, marginBottom: 6 }}>
+            {dragging ? "Drop your photos here" : "Drag & drop photos here"}
+          </div>
+          <div style={{ fontSize: 12, color: T.sub, marginBottom: 14 }}>or click to browse · JPG, PNG · max 8 photos</div>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 18px", background: T.accentDim, border: `1px solid rgba(${T.rgb},.3)`, borderRadius: 20, fontSize: 12, fontWeight: 700, color: T.accent }}>
+            <Ic.Upload s={13} c={T.accent} /> Choose Photos
+          </div>
+          <input id="gallery-file-input" type="file" multiple accept="image/*" style={{ display: "none" }} onChange={e => processFiles(e.target.files)} />
+        </div>
+      )}
+
+      {/* Photo grid */}
+      {photos.length > 0 && (
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))", gap: 10, marginBottom: 14 }}>
+          {photos.map((photo, i) => (
+            <div key={photo.id} style={{ borderRadius: 12, overflow: "hidden", border: `1px solid ${T.border}`, background: T.bg2, position: "relative" }}>
+              <img src={photo.src} alt={photo.name} style={{ width: "100%", height: 120, objectFit: "cover", display: "block" }} />
+              <button onClick={() => removePhoto(photo.id)} style={{ position: "absolute", top: 6, right: 6, width: 24, height: 24, background: "rgba(0,0,0,.7)", border: "none", borderRadius: "50%", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <Ic.X s={11} c="#fff" />
+              </button>
+              {i === 0 && <div style={{ position: "absolute", top: 6, left: 6, fontSize: 9, background: `linear-gradient(135deg, ${T.accent}, ${T.accent2})`, color: "#000", padding: "2px 7px", borderRadius: 6, fontWeight: 800 }}>HERO</div>}
+              <div style={{ padding: "6px 8px" }}>
+                <input value={photo.caption} onChange={e => updateCaption(photo.id, e.target.value)} placeholder="Add caption..." style={{ width: "100%", background: "none", border: "none", color: T.sub, fontSize: 10, fontFamily: B, outline: "none", boxSizing: "border-box" }} />
+              </div>
+            </div>
+          ))}
+          {/* Add more slot */}
+          {photos.length < 8 && (
+            <label style={{ minHeight: 140, borderRadius: 12, border: `1px dashed rgba(${T.rgb},.2)`, background: T.card, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", cursor: "pointer", gap: 6 }}
+              onMouseEnter={e => { e.currentTarget.style.background = T.accentDim; }}
+              onMouseLeave={e => { e.currentTarget.style.background = T.card; }}>
+              <Ic.Plus s={22} c={T.sub} />
+              <span style={{ fontSize: 10, color: T.sub, fontWeight: 600 }}>Add more</span>
+              <span style={{ fontSize: 9, color: T.sub }}>{8 - photos.length} left</span>
+              <input type="file" multiple accept="image/*" style={{ display: "none" }} onChange={e => processFiles(e.target.files)} />
+            </label>
+          )}
+        </div>
+      )}
+
+      {photos.length === 0 && (
+        <div style={{ padding: "10px 14px", background: `rgba(${T.rgb},.05)`, border: `1px solid rgba(${T.rgb},.12)`, borderRadius: 10, fontSize: 12, color: T.textMid, lineHeight: 1.6 }}>
+          💡 Clean DB board shots and before/after roof photos perform best. South African homeowners buy with their eyes — show your craft.
+        </div>
+      )}
+    </div>
+  );
+}
+
+
 function LeadInbox({ leads, setLeads }) {
   const sc = useScreen();
   const [filter, setFilter] = useState("all");
@@ -1458,19 +1550,23 @@ function MobileNav({ tab, setTab, newLeads }) {
 }
 
 // ─── INSTALLER AUTH ───────────────────────────────────────────
+// ─── INSTALLER AUTH — premium split-panel ────────────────────
 function InstallerAuth({ onAuth }) {
-  const [mode, setMode] = useState("login"); // login | signup
+  const sc = useScreen();
+  const [mode, setMode] = useState("login");
   const [email, setEmail] = useState("");
   const [pw, setPw] = useState("");
   const [name, setName] = useState("");
   const [err, setErr] = useState("");
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
+  const [showPw, setShowPw] = useState(false);
 
   const submit = async () => {
-    if (!email || !pw) { setErr("Please fill in all fields."); return; }
+    if (!email || !pw) { setErr("Please enter your email and password."); return; }
     setLoading(true); setErr("");
     if (mode === "signup") {
+      if (pw.length < 6) { setErr("Password must be at least 6 characters."); setLoading(false); return; }
       const { error } = await sb.auth.signUp({ email, password: pw, options: { data: { name } } });
       if (error) setErr(error.message);
       else setDone(true);
@@ -1482,93 +1578,239 @@ function InstallerAuth({ onAuth }) {
     setLoading(false);
   };
 
-  return (
-    <div style={{ minHeight: "100vh", background: T.bg, display: "flex", alignItems: "center", justifyContent: "center", padding: "24px 16px", position: "relative", overflow: "hidden" }}>
-      <div style={{ position: "absolute", top: "25%", left: "50%", transform: "translateX(-50%)", width: "50vw", height: "40vh", background: `radial-gradient(ellipse, rgba(${T.rgb},.07) 0%, transparent 70%)`, pointerEvents: "none", animation: "breathe 7s ease infinite" }} />
+  const FEATURES = [
+    { icon: "📋", title: "Live Lead Inbox", desc: "Qualified leads with system specs, budgets and urgency timers delivered direct" },
+    { icon: "📄", title: "Quote Builder", desc: "Generate branded PDF quotes from lead data in seconds" },
+    { icon: "🛡️", title: "Credentials Vault", desc: "Manage SESSA, Wireman's License and compliance documents in one place" },
+    { icon: "📊", title: "Performance Analytics", desc: "Track conversion rates, response times and your province ranking" },
+    { icon: "🏅", title: "SolarIQ Verified Badge", desc: "Earn the badge that homeowners trust — and climb the directory rankings" },
+  ];
 
-      <div style={{ width: "100%", maxWidth: 420, position: "relative", zIndex: 1, animation: "fadeUp .5s ease" }}>
-        <div style={{ textAlign: "center", marginBottom: 32 }}>
-          <div style={{ width: 56, height: 56, background: `linear-gradient(135deg, ${T.accent}, ${T.accent2})`, borderRadius: 16, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 26, margin: "0 auto 16px", boxShadow: `0 0 40px rgba(${T.rgb},.35)`, animation: "glow 3s ease infinite" }}>☀️</div>
-          <div style={{ fontFamily: H, fontSize: 28, fontWeight: 900, color: T.text }}>Solar<span style={{ color: T.accent }}>IQ</span></div>
-          <div style={{ fontSize: 12, color: T.sub, marginTop: 4, letterSpacing: 2, textTransform: "uppercase" }}>Installer Portal</div>
+  const FormPanel = () => (
+    <div style={{ width: "100%", maxWidth: 440, animation: "fadeUp .5s ease" }}>
+      {/* Logo */}
+      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 36 }}>
+        <div style={{ width: 40, height: 40, background: `linear-gradient(135deg, ${T.accent}, ${T.accent2})`, borderRadius: 11, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 19, boxShadow: `0 0 24px rgba(${T.rgb},.4)`, animation: "glow 3s ease infinite" }}>☀️</div>
+        <div>
+          <div style={{ fontFamily: H, fontSize: 20, fontWeight: 900, color: T.text, letterSpacing: .5 }}>Solar<span style={{ color: T.accent }}>IQ</span></div>
+          <div style={{ fontSize: 9, color: T.sub, letterSpacing: 2, textTransform: "uppercase" }}>Installer Portal</div>
         </div>
+      </div>
 
-        {done ? (
-          <Card style={{ padding: "32px", textAlign: "center" }}>
-            <div style={{ fontSize: 40, marginBottom: 12 }}>📬</div>
-            <div style={{ fontFamily: H, fontSize: 18, fontWeight: 800, color: T.green, marginBottom: 8 }}>Check your email</div>
-            <div style={{ fontSize: 13, color: T.sub, lineHeight: 1.7 }}>We sent a confirmation link to <strong style={{ color: T.text }}>{email}</strong>. Click it to activate your account, then sign in.</div>
-            <button onClick={() => { setMode("login"); setDone(false); }} style={{ marginTop: 20, background: "none", border: "none", color: T.accent, cursor: "pointer", fontSize: 13, fontWeight: 700, fontFamily: B }}>← Back to Sign In</button>
-          </Card>
-        ) : (
-          <Card style={{ padding: "32px" }}>
-            <div style={{ display: "flex", gap: 0, marginBottom: 24, background: T.bg2, borderRadius: 10, padding: 4 }}>
-              {[["login", "Sign In"], ["signup", "Create Account"]].map(([m, l]) => (
-                <button key={m} onClick={() => { setMode(m); setErr(""); }} style={{ flex: 1, background: mode === m ? T.card3 : "none", border: "none", borderRadius: 8, padding: "8px", fontSize: 13, fontWeight: mode === m ? 700 : 500, color: mode === m ? T.text : T.sub, cursor: "pointer", fontFamily: B, transition: "all .2s" }}>{l}</button>
+      {done ? (
+        /* Email confirmation state */
+        <div style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 20, padding: 36, textAlign: "center" }}>
+          <div style={{ width: 64, height: 64, borderRadius: "50%", background: "rgba(52,211,153,.1)", border: "2px solid rgba(52,211,153,.3)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 30, margin: "0 auto 16px" }}>📬</div>
+          <div style={{ fontFamily: H, fontSize: 20, fontWeight: 800, color: T.green, marginBottom: 10 }}>Check your inbox</div>
+          <div style={{ fontSize: 13, color: T.textMid, lineHeight: 1.8, marginBottom: 24 }}>
+            We sent a confirmation link to<br/><strong style={{ color: T.text }}>{email}</strong><br/>Click it to activate your account, then sign in here.
+          </div>
+          <Btn full variant="accent" onClick={() => { setMode("login"); setDone(false); setPw(""); }}>← Back to Sign In</Btn>
+        </div>
+      ) : (
+        <div>
+          <div style={{ marginBottom: 28 }}>
+            <div style={{ fontFamily: H, fontSize: sc.isMobile ? 24 : 30, fontWeight: 900, color: T.text, marginBottom: 6 }}>
+              {mode === "login" ? "Welcome back" : "Join SolarIQ"}
+            </div>
+            <div style={{ fontSize: 14, color: T.sub }}>
+              {mode === "login" ? "Sign in to your installer dashboard" : "Create your free installer account"}
+            </div>
+          </div>
+
+          {/* Tab switcher */}
+          <div style={{ display: "flex", background: T.bg2, borderRadius: 12, padding: 4, marginBottom: 24, border: `1px solid ${T.border}` }}>
+            {[["login", "Sign In"], ["signup", "Create Account"]].map(([m, l]) => (
+              <button key={m} onClick={() => { setMode(m); setErr(""); }} style={{ flex: 1, background: mode === m ? T.card3 : "none", border: `1px solid ${mode === m ? T.borderHi : "transparent"}`, borderRadius: 9, padding: "10px", fontSize: 13, fontWeight: mode === m ? 700 : 500, color: mode === m ? T.text : T.sub, cursor: "pointer", fontFamily: B, transition: "all .2s" }}>{l}</button>
+            ))}
+          </div>
+
+          <div style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 20, padding: sc.isMobile ? 24 : 32, backdropFilter: "blur(20px)" }}>
+            {mode === "signup" && (
+              <div style={{ marginBottom: 14 }}>
+                <label style={{ fontSize: 11, color: T.sub, textTransform: "uppercase", letterSpacing: 1.5, display: "block", marginBottom: 6, fontWeight: 700 }}>Business Name <span style={{ color: T.accent }}>*</span></label>
+                <input value={name} onChange={e => setName(e.target.value)} placeholder="SunPower SA (Pty) Ltd"
+                  style={{ width: "100%", background: T.inputBg, border: `1px solid ${T.border}`, borderRadius: 11, padding: "13px 15px", color: T.text, fontSize: 14, fontFamily: B, outline: "none", boxSizing: "border-box" }} />
+              </div>
+            )}
+
+            <div style={{ marginBottom: 14 }}>
+              <label style={{ fontSize: 11, color: T.sub, textTransform: "uppercase", letterSpacing: 1.5, display: "block", marginBottom: 6, fontWeight: 700 }}>Email address <span style={{ color: T.accent }}>*</span></label>
+              <input type="email" value={email} onChange={e => setEmail(e.target.value)} onKeyDown={e => e.key === "Enter" && submit()} placeholder="info@yourcompany.co.za"
+                style={{ width: "100%", background: T.inputBg, border: `1px solid ${T.border}`, borderRadius: 11, padding: "13px 15px", color: T.text, fontSize: 14, fontFamily: B, outline: "none", boxSizing: "border-box" }} />
+            </div>
+
+            <div style={{ marginBottom: err ? 16 : 24, position: "relative" }}>
+              <label style={{ fontSize: 11, color: T.sub, textTransform: "uppercase", letterSpacing: 1.5, display: "block", marginBottom: 6, fontWeight: 700 }}>Password <span style={{ color: T.accent }}>*</span></label>
+              <input type={showPw ? "text" : "password"} value={pw} onChange={e => setPw(e.target.value)} onKeyDown={e => e.key === "Enter" && submit()} placeholder={mode === "signup" ? "Min. 6 characters" : "••••••••••"}
+                style={{ width: "100%", background: T.inputBg, border: `1px solid ${T.border}`, borderRadius: 11, padding: "13px 46px 13px 15px", color: T.text, fontSize: 14, fontFamily: B, outline: "none", boxSizing: "border-box" }} />
+              <button onClick={() => setShowPw(s => !s)} style={{ position: "absolute", right: 14, top: 36, background: "none", border: "none", cursor: "pointer", color: T.sub, fontSize: 11, fontWeight: 600, fontFamily: B }}>
+                {showPw ? "hide" : "show"}
+              </button>
+            </div>
+
+            {err && (
+              <div style={{ display: "flex", alignItems: "center", gap: 7, background: "rgba(248,113,113,.08)", border: "1px solid rgba(248,113,113,.2)", borderRadius: 9, padding: "10px 13px", marginBottom: 16, fontSize: 12, color: T.red }}>
+                <Ic.X s={12} c={T.red} />{err}
+              </div>
+            )}
+
+            <button onClick={submit} disabled={loading} style={{ width: "100%", background: `linear-gradient(135deg, ${T.accent}, ${T.accent2})`, border: "none", borderRadius: 11, padding: "14px", fontSize: 14, fontWeight: 800, color: "#000", cursor: loading ? "not-allowed" : "pointer", opacity: loading ? .7 : 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, fontFamily: H, boxShadow: `0 4px 24px rgba(${T.rgb},.3)`, transition: "opacity .2s" }}>
+              {loading ? <><Spinner s={17} c="#000" /> {mode === "login" ? "Signing in..." : "Creating account..."}</> : mode === "login" ? "Sign In to Dashboard →" : "Create Free Account →"}
+            </button>
+
+            {mode === "login" && (
+              <div style={{ textAlign: "center", marginTop: 14 }}>
+                <button onClick={() => {}} style={{ background: "none", border: "none", color: T.sub, cursor: "pointer", fontSize: 12, fontFamily: B }}>Forgot your password?</button>
+              </div>
+            )}
+          </div>
+
+          <div style={{ textAlign: "center", marginTop: 20, fontSize: 12, color: T.sub }}>
+            {mode === "login" ? "Don't have an account?" : "Already have an account?"}{" "}
+            <button onClick={() => { setMode(mode === "login" ? "signup" : "login"); setErr(""); }} style={{ background: "none", border: "none", color: T.accent, cursor: "pointer", fontSize: 12, fontWeight: 700, fontFamily: B }}>
+              {mode === "login" ? "Create one free →" : "Sign in →"}
+            </button>
+          </div>
+
+          <div style={{ textAlign: "center", marginTop: 14, fontSize: 11, color: T.sub }}>
+            🔒 Secured by Supabase Auth · Free for SA installers
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
+  /* Wide desktop: split panel. Narrow: centered form only */
+  if (!sc.isDesktop) {
+    return (
+      <>
+        <style>{CSS}</style>
+        <div style={{ minHeight: "100vh", background: T.bg, display: "flex", alignItems: "center", justifyContent: "center", padding: "32px 20px", position: "relative", overflow: "hidden" }}>
+          <div style={{ position: "absolute", top: "30%", left: "50%", transform: "translateX(-50%)", width: "70vw", height: "50vh", background: `radial-gradient(ellipse, rgba(${T.rgb},.07) 0%, transparent 70%)`, pointerEvents: "none", animation: "breathe 8s ease infinite" }} />
+          <div style={{ position: "relative", zIndex: 1, width: "100%", maxWidth: 440 }}><FormPanel /></div>
+        </div>
+      </>
+    );
+  }
+
+  return (
+    <>
+      <style>{CSS}</style>
+      <div style={{ minHeight: "100vh", display: "flex", background: T.bg, overflow: "hidden" }}>
+        {/* Left: feature panel */}
+        <div style={{ width: "46%", minHeight: "100vh", background: T.bg2, borderRight: `1px solid ${T.border}`, display: "flex", flexDirection: "column", padding: "52px 56px", position: "relative", overflow: "hidden" }}>
+          {/* Decorative glow */}
+          <div style={{ position: "absolute", top: "20%", left: "30%", width: "60%", height: "40%", background: `radial-gradient(ellipse, rgba(${T.rgb},.09) 0%, transparent 70%)`, pointerEvents: "none", animation: "breathe 8s ease infinite" }} />
+          <div style={{ position: "absolute", bottom: "10%", right: "10%", width: "40%", height: "30%", background: "radial-gradient(ellipse, rgba(96,165,250,.05) 0%, transparent 70%)", pointerEvents: "none" }} />
+
+          {/* Subtle grid pattern */}
+          <div style={{ position: "absolute", inset: 0, backgroundImage: `linear-gradient(rgba(255,255,255,.015) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.015) 1px, transparent 1px)`, backgroundSize: "40px 40px", pointerEvents: "none" }} />
+
+          <div style={{ position: "relative", zIndex: 1 }}>
+            {/* Brand */}
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 56 }}>
+              <div style={{ width: 42, height: 42, background: `linear-gradient(135deg, ${T.accent}, ${T.accent2})`, borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, boxShadow: `0 0 28px rgba(${T.rgb},.35)`, animation: "glow 3s ease infinite" }}>☀️</div>
+              <div>
+                <div style={{ fontFamily: H, fontSize: 22, fontWeight: 900, color: T.text, letterSpacing: .5 }}>Solar<span style={{ color: T.accent }}>IQ</span></div>
+                <div style={{ fontSize: 9, color: T.sub, letterSpacing: 2.5, textTransform: "uppercase" }}>Installer Portal</div>
+              </div>
+            </div>
+
+            {/* Hero text */}
+            <div style={{ marginBottom: 44 }}>
+              <div style={{ fontFamily: H, fontSize: 36, fontWeight: 900, color: T.text, lineHeight: 1.1, marginBottom: 14 }}>
+                SA's leads.<br/><span style={{ color: T.accent }}>Your pipeline.</span>
+              </div>
+              <div style={{ fontSize: 15, color: T.textMid, lineHeight: 1.8, maxWidth: 380 }}>
+                SolarIQ connects pre-qualified homeowners — complete with system specs and budgets — directly to your inbox.
+              </div>
+            </div>
+
+            {/* Features */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+              {FEATURES.map((f, i) => (
+                <div key={i} style={{ display: "flex", gap: 14, alignItems: "flex-start", animation: `fadeUp .4s ease ${i * .07}s both` }}>
+                  <div style={{ width: 38, height: 38, borderRadius: 10, background: `rgba(${T.rgb},.1)`, border: `1px solid rgba(${T.rgb},.15)`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 17, flexShrink: 0 }}>{f.icon}</div>
+                  <div>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: T.text, marginBottom: 3, fontFamily: H }}>{f.title}</div>
+                    <div style={{ fontSize: 12, color: T.sub, lineHeight: 1.6 }}>{f.desc}</div>
+                  </div>
+                </div>
               ))}
             </div>
 
-            {mode === "signup" && <Inp label="Business Name" value={name} onChange={setName} placeholder="SunPower SA" required />}
-            <Inp label="Email" value={email} onChange={setEmail} type="email" placeholder="info@yourcompany.co.za" required />
-            <div style={{ marginBottom: err ? 14 : 22 }}>
-              <label style={{ fontSize: 11, color: T.sub, textTransform: "uppercase", letterSpacing: 1.5, display: "block", marginBottom: 6, fontWeight: 700 }}>Password <span style={{ color: T.accent }}>*</span></label>
-              <input type="password" value={pw} onChange={e => setPw(e.target.value)} onKeyDown={e => e.key === "Enter" && submit()} placeholder="••••••••••"
-                style={{ width: "100%", background: T.inputBg, border: `1px solid ${T.border}`, borderRadius: 10, padding: "11px 14px", color: T.text, fontSize: 14, fontFamily: B, outline: "none", boxSizing: "border-box" }} />
+            {/* Social proof */}
+            <div style={{ marginTop: 44, padding: "16px 20px", background: `rgba(${T.rgb},.06)`, border: `1px solid rgba(${T.rgb},.12)`, borderRadius: 14 }}>
+              <div style={{ fontSize: 13, color: T.textMid, lineHeight: 1.7, fontStyle: "italic" }}>
+                "SolarIQ sends me customers who've already run the numbers. They know the system size, the cost, and they're ready to talk."
+              </div>
+              <div style={{ fontSize: 12, color: T.sub, marginTop: 8 }}>— SunPower SA, Johannesburg · <span style={{ color: T.accent }}>847 installations</span></div>
             </div>
+          </div>
+        </div>
 
-            {err && <div style={{ fontSize: 12, color: T.red, marginBottom: 14, display: "flex", alignItems: "center", gap: 6 }}><Ic.X s={12} c={T.red} />{err}</div>}
-
-            <Btn full onClick={submit} loading={loading}>
-              {mode === "login" ? "Sign In →" : "Create Account →"}
-            </Btn>
-
-            <div style={{ textAlign: "center", marginTop: 16, fontSize: 11, color: T.sub, lineHeight: 1.6 }}>
-              {mode === "login" ? "New to SolarIQ?" : "Already have an account?"}{" "}
-              <button onClick={() => { setMode(mode === "login" ? "signup" : "login"); setErr(""); }} style={{ background: "none", border: "none", color: T.accent, cursor: "pointer", fontSize: 11, fontWeight: 700, fontFamily: B }}>
-                {mode === "login" ? "Create free account →" : "Sign In →"}
-              </button>
-            </div>
-          </Card>
-        )}
-        <div style={{ textAlign: "center", marginTop: 16, fontSize: 11, color: T.sub }}>🔒 Secured by Supabase Auth · Free to join</div>
+        {/* Right: form panel */}
+        <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "52px 56px" }}>
+          <FormPanel />
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 
 // ─── MAIN INSTALLER APP ───────────────────────────────────────
 export default function Installer() {
   const [session, setSession] = useState(null);
-  const [loading, setLoading] = useState(true);
+  // "loading" covers BOTH auth check AND profile fetch — nothing renders until both are done
+  const [appState, setAppState] = useState("booting"); // booting | auth | onboarding | ready
   const [tab, setTab] = useState("leads");
   const [installer, setInstaller] = useState(null);
-  const [onboarded, setOnboarded] = useState(false);
   const [leads, setLeads] = useState(MOCK_LEADS);
   const sc = useScreen();
 
   useEffect(() => {
-    sb.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setLoading(false);
+    sb.auth.getSession().then(async ({ data: { session: s } }) => {
+      if (!s) {
+        setSession(null);
+        setAppState("auth");
+        return;
+      }
+      setSession(s);
+      await loadProfile(s);
     });
-    const { data: { subscription } } = sb.auth.onAuthStateChange((_, s) => setSession(s));
+    const { data: { subscription } } = sb.auth.onAuthStateChange(async (event, s) => {
+      if (!s) { setSession(null); setAppState("auth"); return; }
+      setSession(s);
+      if (event === "SIGNED_IN") await loadProfile(s);
+    });
     return () => subscription.unsubscribe();
   }, []);
 
-  useEffect(() => {
-    if (!session) return;
-    // Load installer profile
-    sb.from("installers").select("*").eq("user_id", session.user.id).single()
-      .then(({ data }) => {
-        if (data) { setInstaller(data); setOnboarded(true); }
-        else setOnboarded(false);
-      });
-    // Load real leads
-    sb.from("leads").select("*").order("created_at", { ascending: false })
-      .then(({ data }) => { if (data && data.length > 0) setLeads(data); });
-  }, [session]);
+  const loadProfile = async (s) => {
+    try {
+      const { data } = await sb.from("installers").select("*").eq("user_id", s.user.id).single();
+      if (data) {
+        setInstaller(data);
+        // Load this installer's actual leads
+        const { data: leadData } = await sb.from("leads").select("*").order("created_at", { ascending: false });
+        if (leadData && leadData.length > 0) setLeads(leadData);
+        setAppState("ready");
+      } else {
+        setAppState("onboarding");
+      }
+    } catch (e) {
+      // No installer profile found — go to onboarding
+      setAppState("onboarding");
+    }
+  };
 
-  const signOut = async () => { await sb.auth.signOut(); setSession(null); };
+  const signOut = async () => {
+    await sb.auth.signOut();
+    setSession(null);
+    setInstaller(null);
+    setAppState("auth");
+  };
 
   const completeOnboarding = async (data) => {
     const { data: inst, error } = await sb.from("installers").insert({
@@ -1590,36 +1832,43 @@ export default function Installer() {
       finance_available: data.finance_available,
       status: "pending",
     }).select().single();
-    if (!error) { setInstaller(inst); setOnboarded(true); }
+    if (!error && inst) {
+      setInstaller(inst);
+      setAppState("ready");
+    }
   };
 
   const newLeads = leads.filter(l => l.status === "new").length;
 
-  if (loading) return (
+  // ── BOOTING ──
+  if (appState === "booting") return (
     <>
       <style>{CSS}</style>
-      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 14, background: T.bg }}>
-        <div style={{ width: 44, height: 44, background: `linear-gradient(135deg, ${T.accent}, ${T.accent2})`, borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, animation: "glow 2s ease infinite" }}>☀️</div>
-        <Spinner s={24} />
-        <div style={{ fontSize: 13, color: T.sub }}>Loading SolarIQ Portal...</div>
+      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 16, background: T.bg }}>
+        <div style={{ width: 52, height: 52, background: `linear-gradient(135deg, ${T.accent}, ${T.accent2})`, borderRadius: 14, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, boxShadow: `0 0 32px rgba(${T.rgb},.4)`, animation: "glow 2s ease infinite" }}>☀️</div>
+        <Spinner s={22} />
+        <div style={{ fontSize: 13, color: T.sub, letterSpacing: .5 }}>Loading SolarIQ Portal...</div>
       </div>
     </>
   );
 
-  if (!session) return (
-    <>
-      <style>{CSS}</style>
-      <InstallerAuth onAuth={() => sb.auth.getSession().then(({ data: { session } }) => setSession(session))} />
-    </>
+  // ── AUTH ──
+  if (appState === "auth") return (
+    <InstallerAuth onAuth={async () => {
+      const { data: { session: s } } = await sb.auth.getSession();
+      if (s) { setSession(s); await loadProfile(s); }
+    }} />
   );
 
-  if (!onboarded) return (
+  // ── ONBOARDING ──
+  if (appState === "onboarding") return (
     <>
       <style>{CSS}</style>
       <OnboardingWizard installer={installer} onComplete={completeOnboarding} />
     </>
   );
 
+  // ── READY — full portal ──
   const PAGES = {
     leads:       <LeadInbox leads={leads} setLeads={setLeads} />,
     quotes:      <QuoteBuilder leads={leads} />,
@@ -1632,39 +1881,44 @@ export default function Installer() {
     <>
       <style>{CSS}</style>
       <div style={{ display: "flex", minHeight: "100vh", background: T.bg }}>
-        {!sc.isMobile && <InstallerSidebar tab={tab} setTab={setTab} installer={installer} onSignOut={signOut} newLeads={newLeads} />}
+        {!sc.isMobile && (
+          <InstallerSidebar tab={tab} setTab={setTab} installer={installer} onSignOut={signOut} newLeads={newLeads} />
+        )}
 
-        {/* Main content */}
-        <div style={{ flex: 1, marginLeft: sc.isMobile ? 0 : T.navW, minWidth: 0, minHeight: "100vh", paddingBottom: sc.isMobile ? 80 : 0 }}>
+        <div style={{ flex: 1, marginLeft: sc.isMobile ? 0 : T.navW, minWidth: 0, minHeight: "100vh", paddingBottom: sc.isMobile ? 80 : 0, transition: "margin-left .25s" }}>
           {/* Top bar */}
-          <div style={{ position: "sticky", top: 0, zIndex: 100, background: T.nav, borderBottom: `1px solid ${T.border}`, backdropFilter: "blur(20px)", height: 54, display: "flex", alignItems: "center", padding: "0 24px", gap: 12 }}>
+          <div style={{ position: "sticky", top: 0, zIndex: 100, background: T.nav, borderBottom: `1px solid ${T.border}`, backdropFilter: "blur(20px)", height: 54, display: "flex", alignItems: "center", padding: "0 28px", gap: 12 }}>
             {sc.isMobile && (
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <div style={{ width: 26, height: 26, background: `linear-gradient(135deg, ${T.accent}, ${T.accent2})`, borderRadius: 7, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12 }}>☀️</div>
-                <span style={{ fontFamily: H, fontSize: 15, fontWeight: 900, color: T.text }}>Solar<span style={{ color: T.accent }}>IQ</span></span>
+                <div style={{ width: 27, height: 27, background: `linear-gradient(135deg, ${T.accent}, ${T.accent2})`, borderRadius: 7, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13 }}>☀️</div>
+                <span style={{ fontFamily: H, fontSize: 16, fontWeight: 900, color: T.text }}>Solar<span style={{ color: T.accent }}>IQ</span></span>
               </div>
             )}
             <div style={{ flex: 1 }} />
-            {/* Pending approval banner */}
+
+            {/* Status badge */}
             {installer?.status === "pending" && (
-              <div style={{ display: "flex", alignItems: "center", gap: 7, padding: "5px 13px", background: `rgba(${T.rgb},.08)`, border: `1px solid rgba(${T.rgb},.2)`, borderRadius: 20 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "5px 13px", background: `rgba(${T.rgb},.08)`, border: `1px solid rgba(${T.rgb},.2)`, borderRadius: 20 }}>
                 <div style={{ width: 6, height: 6, borderRadius: "50%", background: T.accent, animation: "pulse 2s infinite" }} />
                 <span style={{ fontSize: 11, color: T.accent, fontWeight: 700 }}>Pending Review</span>
               </div>
             )}
             {installer?.status === "approved" && (
-              <div style={{ display: "flex", alignItems: "center", gap: 7, padding: "5px 13px", background: "rgba(52,211,153,.08)", border: "1px solid rgba(52,211,153,.2)", borderRadius: 20 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "5px 13px", background: "rgba(52,211,153,.08)", border: "1px solid rgba(52,211,153,.2)", borderRadius: 20 }}>
                 <div style={{ width: 6, height: 6, borderRadius: "50%", background: T.green, animation: "pulse 2s infinite" }} />
                 <span style={{ fontSize: 11, color: T.green, fontWeight: 700 }}>✓ Verified & Live</span>
               </div>
             )}
-            {!sc.isMobile && <button onClick={signOut} style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 8, padding: "6px 12px", cursor: "pointer", display: "flex", alignItems: "center", gap: 6, color: T.sub, fontSize: 12, fontFamily: B }}>
-              <Ic.Out s={13} c={T.sub} /> Sign Out
-            </button>}
+
+            {!sc.isMobile && (
+              <button onClick={signOut} style={{ display: "flex", alignItems: "center", gap: 7, padding: "6px 14px", background: T.card, border: `1px solid ${T.border}`, borderRadius: 9, cursor: "pointer", color: T.sub, fontSize: 12, fontWeight: 600, fontFamily: B }}>
+                <Ic.Out s={13} c={T.sub} /> Sign Out
+              </button>
+            )}
           </div>
 
-          {/* Page content */}
-          <div style={{ padding: sc.isMobile ? "16px 14px" : sc.isTablet ? "24px 28px" : "28px 36px", maxWidth: 1400, margin: "0 auto" }}>
+          {/* Content */}
+          <div style={{ padding: sc.isMobile ? "16px 14px" : sc.isTablet ? "24px 28px" : "30px 40px", maxWidth: 1440, margin: "0 auto" }}>
             {PAGES[tab] || PAGES.leads}
           </div>
         </div>
