@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { createClient } from "@supabase/supabase-js";
 
 const SUPABASE_URL = "https://intvnxvannltfibguykw.supabase.co";
@@ -18,8 +18,12 @@ const H = "'Lexend',sans-serif";
 const B = "'Plus Jakarta Sans',sans-serif";
 
 function useScreen() {
-  const [w,setW]=useState(window.innerWidth);
-  useEffect(()=>{ const fn=()=>setW(window.innerWidth); window.addEventListener("resize",fn); return ()=>window.removeEventListener("resize",fn); },[]);
+  const [w,setW]=useState(typeof window!=="undefined"?window.innerWidth:1200);
+  useEffect(()=>{
+    const fn=()=>setW(window.innerWidth);
+    window.addEventListener("resize",fn);
+    return ()=>window.removeEventListener("resize",fn);
+  },[]);
   return {w,isMobile:w<768,isTablet:w>=768&&w<1100,isDesktop:w>=1100};
 }
 
@@ -550,15 +554,17 @@ function OnboardingWizard({installer,onComplete}){
           {/* Card */}
           <Card style={{padding:sc.isMobile?"20px":"32px"}}>
             <div key={step} style={{animation:"slideIn .3s ease"}}>
+              {(() => { const StepIcon = WIZARD_STEPS[step].Icon; return (
               <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:22,paddingBottom:16,borderBottom:`1px solid ${T.border}`}}>
                 <div style={{width:38,height:38,borderRadius:10,background:T.accentDim,border:`1px solid rgba(${T.rgb},.2)`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
-                  {React.createElement(WIZARD_STEPS[step].Icon,{s:17,c:T.accent})}
+                  <StepIcon s={17} c={T.accent}/>
                 </div>
                 <div>
                   <div style={{fontFamily:H,fontSize:16,fontWeight:800,color:T.text}}>{WIZARD_STEPS[step].label}</div>
                   <div style={{fontSize:12,color:T.sub,marginTop:2}}>{WIZARD_STEPS[step].desc}</div>
                 </div>
               </div>
+              ); })()}
 
               {/* STEP 0: Business Type */}
               {step===0&&(
@@ -1692,10 +1698,37 @@ function BootScreen(){
   );
 }
 
+// ─── ERROR BOUNDARY ──────────────────────────────────────────
+class ErrorBoundary extends React.Component {
+  constructor(props){super(props);this.state={error:null};}
+  static getDerivedStateFromError(e){return {error:e};}
+  render(){
+    if(this.state.error){
+      return(
+        <div style={{minHeight:"100vh",background:"#060810",display:"flex",alignItems:"center",justifyContent:"center",padding:32,fontFamily:"'Plus Jakarta Sans',sans-serif"}}>
+          <div style={{maxWidth:480,textAlign:"center"}}>
+            <div style={{width:48,height:48,borderRadius:12,background:"rgba(248,113,113,.1)",border:"1px solid rgba(248,113,113,.25)",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 20px"}}>
+              <svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke="#f87171" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            </div>
+            <div style={{fontFamily:"'Lexend',sans-serif",fontSize:20,fontWeight:800,color:"#f87171",marginBottom:10}}>Something went wrong</div>
+            <div style={{fontSize:12,color:"#4a5068",lineHeight:1.7,marginBottom:20,background:"rgba(255,255,255,.04)",border:"1px solid rgba(255,255,255,.07)",borderRadius:10,padding:"12px 16px",textAlign:"left",fontFamily:"monospace"}}>
+              {this.state.error?.message||"Unknown error"}
+            </div>
+            <button onClick={()=>window.location.reload()} style={{background:"linear-gradient(135deg,#f5a623,#ff6b00)",border:"none",borderRadius:10,padding:"10px 24px",fontSize:13,fontWeight:700,color:"#000",cursor:"pointer",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>
+              Reload Page
+            </button>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 // ─── MAIN INSTALLER APP ──────────────────────────────────────
 // appState machine: "booting" → "auth" → "onboarding" → "ready"
 // All state transitions happen in one place — no race conditions.
-export default function Installer(){
+function InstallerApp(){
   const [appState,setAppState]=useState("booting");
   const [session,setSession]=useState(null);
   const [installer,setInstaller]=useState(null);
@@ -1843,5 +1876,13 @@ export default function Installer(){
         {sc.isMobile&&<MobileBottomNav tab={tab} setTab={setTab} newLeads={newLeads}/>}
       </div>
     </>
+  );
+}
+
+export default function Installer(){
+  return(
+    <ErrorBoundary>
+      <InstallerApp/>
+    </ErrorBoundary>
   );
 }
