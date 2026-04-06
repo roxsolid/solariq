@@ -891,7 +891,7 @@ function LeadInbox({ leads, setLeads }) {
             style={{ width: "100%", background: T.inputBg, border: `1px solid ${T.border}`, borderRadius: 10, padding: "11px 14px", color: T.text, fontSize: 13, fontFamily: B, resize: "vertical", outline: "none", boxSizing: "border-box", lineHeight: 1.6 }} rows={4} />
           <div style={{ display: "flex", gap: 8, marginTop: 8, alignItems: "center" }}>
             <Btn sm onClick={handleSaveNote}>Save Note</Btn>
-            {noteSaved && <span style={{ fontSize: 12, color: T.green }}>✓ Saved</span>}
+            {noteSaved && <span style={{ fontSize: 12, color: T.green }}>Saved</span>}
           </div>
         </div>
 
@@ -921,7 +921,7 @@ function LeadInbox({ leads, setLeads }) {
         <div style={{ display: "flex", gap: 7, alignItems: "center" }}>
           <div style={{ position: "relative" }}>
             <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search leads..." style={{ background: T.inputBg, border: `1px solid ${T.border}`, borderRadius: 9, padding: "8px 12px 8px 32px", color: T.text, fontSize: 12, fontFamily: B, outline: "none", width: 180 }} />
-            <span style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", fontSize: 13, color: T.sub }}>🔍</span>
+            
           </div>
         </div>
       </div>
@@ -941,7 +941,7 @@ function LeadInbox({ leads, setLeads }) {
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           {filtered.length === 0 ? (
             <Card style={{ padding: "48px", textAlign: "center" }}>
-              <div style={{ fontSize: 40, marginBottom: 12 }}>📭</div>
+              <div style={{ width:48,height:48,borderRadius:14,background:T.card,border:`1px solid ${T.border}`,display:"flex",alignItems:"center",justifyContent:"center",marginBottom:12 }}><Ic.Inbox s={22} c={T.sub}/></div>
               <div style={{ fontFamily: H, fontSize: 16, fontWeight: 700, color: T.textMid, marginBottom: 6 }}>{filter === "all" ? "No leads yet" : `No ${STATUS[filter]?.label.toLowerCase()} leads`}</div>
               <div style={{ fontSize: 13, color: T.sub, lineHeight: 1.6 }}>Leads appear here when homeowners request a quote through SolarIQ.</div>
             </Card>
@@ -956,7 +956,7 @@ function LeadInbox({ leads, setLeads }) {
             <Card style={{ padding: "22px" }}>
               {selected ? <LeadDetail lead={selected} /> : (
                 <div style={{ padding: "60px 20px", textAlign: "center" }}>
-                  <div style={{ fontSize: 48, marginBottom: 16, opacity: .3 }}>👆</div>
+                  <div style={{ marginBottom:16,opacity:.3 }}><Ic.Left s={40} c={T.sub}/></div>
                   <div style={{ fontFamily: H, fontSize: 16, fontWeight: 700, color: T.sub }}>Select a lead to view details</div>
                   <div style={{ fontSize: 12, color: T.sub, marginTop: 6 }}>Click any lead card on the left</div>
                 </div>
@@ -992,10 +992,10 @@ function CredentialsVault({ installer }) {
   ]);
 
   const statusConfig = {
-    verified: { color: T.green, label: "Verified", icon: "✓", bg: "rgba(52,211,153,.08)", border: "rgba(52,211,153,.2)" },
+    verified: { color: T.green, label: "Verified", icon: "check", bg: "rgba(52,211,153,.08)", border: "rgba(52,211,153,.2)" },
     pending:  { color: T.accent, label: "Pending Review", icon: "⏳", bg: `rgba(${T.rgb},.06)`, border: `rgba(${T.rgb},.2)` },
-    expiring: { color: T.orange, label: "Expiring Soon", icon: "⚠️", bg: "rgba(251,146,60,.08)", border: "rgba(251,146,60,.2)" },
-    expired:  { color: T.red, label: "Expired", icon: "✗", bg: "rgba(248,113,113,.08)", border: "rgba(248,113,113,.2)" },
+    expiring: { color: T.orange, label: "Expiring Soon", icon: "!", bg: "rgba(251,146,60,.08)", border: "rgba(251,146,60,.2)" },
+    expired:  { color: T.red, label: "Expired", icon: "x", bg: "rgba(248,113,113,.08)", border: "rgba(248,113,113,.2)" },
     missing:  { color: T.sub, label: "Not uploaded", icon: "○", bg: T.card, border: T.border },
   };
 
@@ -1019,7 +1019,7 @@ function CredentialsVault({ installer }) {
           </div>
           <div style={{ flex: 1 }}>
             <div style={{ fontFamily: H, fontSize: 17, fontWeight: 800, color: T.text, marginBottom: 4 }}>
-              {pct === 100 ? "✨ Fully Verified" : pct >= 67 ? "Almost there" : "Get verified to receive leads"}
+              {pct === 100 ? "Fully Verified" : pct >= 67 ? "Almost there" : "Get verified to receive leads"}
             </div>
             <div style={{ fontSize: 12, color: T.sub, marginBottom: 10 }}>{reqVerified} of {required} required documents verified</div>
             <div style={{ height: 6, background: T.bg2, borderRadius: 3, overflow: "hidden" }}>
@@ -1029,7 +1029,7 @@ function CredentialsVault({ installer }) {
         </div>
         {pct < 100 && (
           <div style={{ marginTop: 14, padding: "10px 14px", background: T.bg2, borderRadius: 9, fontSize: 12, color: T.textMid, lineHeight: 1.6 }}>
-            ⚡ <strong style={{ color: T.accent }}>Missing documents = no leads.</strong> Unverified installers are hidden from homeowner search results until all required certificates are uploaded and approved.
+            <strong style={{ color: T.accent }}>Missing documents = no leads.</strong> Unverified installers are hidden from homeowner search results until all required certificates are uploaded and approved.
           </div>
         )}
       </Card>
@@ -1055,7 +1055,7 @@ function CredentialsVault({ installer }) {
                   <div style={{ fontSize: 11, color: T.sub, marginBottom: doc.file ? 10 : 0 }}>{doc.desc}</div>
                   {doc.status !== "missing" && (
                     <div style={{ display: "flex", gap: 10, alignItems: "center", marginTop: 8 }}>
-                      <div style={{ fontSize: 11, color: T.textMid }}>📄 Certificate_2025.pdf</div>
+                      <div style={{ fontSize: 11, color: T.textMid, display:"flex",alignItems:"center",gap:5 }}><Ic.FileText s={11} c={T.textMid}/> Certificate_2025.pdf</div>
                       <div style={{ fontSize: 11, color: T.sub }}>Uploaded Jan 2025</div>
                       {doc.expiry && <div style={{ fontSize: 11, color: doc.status === "expiring" ? T.orange : T.sub }}>Expires: {doc.expiry}</div>}
                     </div>
@@ -1135,14 +1135,14 @@ function ProfileEditor({ installer, setInstaller }) {
     <div style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 16, padding: "18px", position: "sticky", top: 80 }}>
       <div style={{ fontSize: 11, color: T.accent, textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 14, fontWeight: 700 }}>Live Preview</div>
       <div style={{ display: "flex", alignItems: "flex-start", gap: 12, marginBottom: 14 }}>
-        <div style={{ width: 46, height: 46, borderRadius: 12, background: `rgba(${T.rgb},.1)`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, flexShrink: 0 }}>🏢</div>
+        <div style={{ width: 46, height: 46, borderRadius: 12, background: `rgba(${T.rgb},.1)`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}><Ic.User s={20} c={T.accent}/></div>
         <div style={{ flex: 1 }}>
           <div style={{ fontFamily: H, fontSize: 15, fontWeight: 800, color: T.text, marginBottom: 3 }}>{form.name || "Your Business Name"}</div>
           <div style={{ fontSize: 11, color: T.sub }}>{form.city}, {form.province} · {form.years_experience} yrs</div>
           <div style={{ display: "flex", gap: 5, marginTop: 6, flexWrap: "wrap" }}>
             <span style={{ fontSize: 9, background: "rgba(52,211,153,.12)", color: T.green, padding: "2px 7px", borderRadius: 6, fontWeight: 700 }}>✓ SESSA</span>
             <span style={{ fontSize: 9, background: "rgba(96,165,250,.12)", color: T.blue, padding: "2px 7px", borderRadius: 6, fontWeight: 700 }}>✓ Verified</span>
-            {form.finance_available && <span style={{ fontSize: 9, background: "rgba(167,139,250,.12)", color: T.purple, padding: "2px 7px", borderRadius: 6, fontWeight: 700 }}>💳 Finance</span>}
+            {form.finance_available && <span style={{ fontSize: 9, background: "rgba(167,139,250,.12)", color: T.purple, padding: "2px 7px", borderRadius: 6, fontWeight: 700 }}>Finance</span>}
           </div>
         </div>
       </div>
@@ -1169,7 +1169,7 @@ function ProfileEditor({ installer, setInstaller }) {
         </div>
         <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
           <Btn onClick={save} loading={saving}>Save Profile</Btn>
-          {saved && <span style={{ fontSize: 12, color: T.green, fontWeight: 600 }}>✓ Profile saved</span>}
+          {saved && <span style={{ fontSize: 12, color: T.green, fontWeight: 600 }}>Profile saved</span>}
         </div>
       </div>
 
@@ -1269,7 +1269,7 @@ function PerformanceDashboard({ leads, installer }) {
     { label: "Converted", value: converted, color: T.green, icon: "trophy", delta: `${convRate}% conversion` },
     { label: "Avg Response", value: `${avgResponse}h`, color: avgResponse <= 2 ? T.green : avgResponse <= 4 ? T.orange : T.red, icon: "zap", delta: avgResponse <= 2 ? "Excellent" : "Needs improvement" },
     { label: "Profile Views", value: "147", color: T.blue, icon: "eye", delta: "+18% this week" },
-    { label: "Rating", value: `${installer?.rating || 4.9}★`, color: T.accent, icon: "star", delta: `${installer?.review_count || 312} reviews` },
+    { label: "Rating", value: `${installer?.rating || 4.9}`, color: T.accent, icon: "star", delta: `${installer?.review_count || 312} reviews` },
     { label: "Province Rank", value: "#2", color: T.purple, icon: "medal", delta: "in Gauteng" },
   ];
 
@@ -1296,15 +1296,19 @@ function PerformanceDashboard({ leads, installer }) {
 
       {/* Stat grid */}
       <div style={{ display: "grid", gridTemplateColumns: sc.isMobile ? "1fr 1fr" : sc.isTablet ? "repeat(3, 1fr)" : "repeat(6, 1fr)", gap: 10, marginBottom: 20 }}>
-        {statCards.map((s, i) => (
-          <div key={s.label} style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 14, padding: "16px", animation: `fadeUp .3s ease ${i * .06}s both`, overflow: "hidden", position: "relative" }}>
-            <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: `linear-gradient(90deg, ${s.color}, transparent)` }} />
-            <div style={{ fontSize: 18, marginBottom: 8 }}>{s.icon}</div>
-            <div style={{ fontFamily: H, fontSize: 26, fontWeight: 900, color: s.color, lineHeight: 1, marginBottom: 4 }}>{s.value}</div>
-            <div style={{ fontSize: 11, color: T.sub, marginBottom: 3 }}>{s.label}</div>
-            <div style={{ fontSize: 10, color: T.textMid, fontWeight: 600 }}>{s.delta}</div>
-          </div>
-        ))}
+        {statCards.map((s, i) => {
+          const IconMap = { list: Ic.FileText, trophy: Ic.Trophy, zap: Ic.Zap, eye: Ic.Eye, star: Ic.Star, medal: Ic.Trophy, chart: Ic.Chart };
+          const IcComp = IconMap[s.icon] || Ic.Chart;
+          return (
+            <div key={s.label} style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 14, padding: "16px", animation: `fadeUp .3s ease ${i * .06}s both`, overflow: "hidden", position: "relative" }}>
+              <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: `linear-gradient(90deg, ${s.color}, transparent)` }} />
+              <div style={{ marginBottom: 10 }}><IcComp s={18} c={s.color}/></div>
+              <div style={{ fontFamily: H, fontSize: 26, fontWeight: 900, color: s.color, lineHeight: 1, marginBottom: 4 }}>{s.value}</div>
+              <div style={{ fontSize: 11, color: T.sub, marginBottom: 3 }}>{s.label}</div>
+              <div style={{ fontSize: 10, color: T.textMid, fontWeight: 600 }}>{s.delta}</div>
+            </div>
+          );
+        })}
       </div>
 
       {/* Revenue + Funnel row */}
@@ -1343,7 +1347,7 @@ function PerformanceDashboard({ leads, installer }) {
             ))}
           </div>
           <div style={{ marginTop: 16, padding: "10px 14px", background: T.bg2, borderRadius: 9, fontSize: 12, color: T.textMid, lineHeight: 1.6 }}>
-            💡 <strong style={{ color: T.text }}>Pro tip:</strong> Installers who respond within 2 hours close <strong style={{ color: T.accent }}>4× more deals</strong>.
+            <strong style={{ color: T.text }}>Pro tip:</strong> Installers who respond within 2 hours close <strong style={{ color: T.accent }}>4× more deals</strong>.
           </div>
         </Card>
       </div>
@@ -1456,7 +1460,7 @@ function QuoteBuilder({ leads }) {
             </div>
             {selectedLead && (
               <div style={{ marginTop: 10, padding: "10px 13px", background: T.bg2, borderRadius: 9, fontSize: 12, color: T.textMid }}>
-                ✅ Pre-filling with {selectedLead.name}'s system: {selectedLead.system_kw}kW, {selectedLead.battery_kwh}kWh, {selectedLead.panels} panels
+                Pre-filling with {selectedLead.name}'s system: {selectedLead.system_kw}kW, {selectedLead.battery_kwh}kWh, {selectedLead.panels} panels
               </div>
             )}
           </Card>
@@ -1510,7 +1514,9 @@ function QuoteBuilder({ leads }) {
                 <div style={{ fontSize: 11, color: T.sub }}>Valid until: {validUntil}</div>
               </div>
               <div style={{ textAlign: "right" }}>
-                <div style={{ width: 36, height: 36, background: `linear-gradient(135deg, ${T.accent}, ${T.accent2})`, borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, marginLeft: "auto", marginBottom: 4 }}</div>
+                <div style={{ width: 36, height: 36, background: `linear-gradient(135deg, ${T.accent}, ${T.accent2})`, borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", marginLeft: "auto", marginBottom: 4 }}>
+                  <Ic.Logo s={22}/>
+                </div>
                 <div style={{ fontSize: 9, color: T.sub, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1 }}>SolarIQ Verified</div>
               </div>
             </div>
@@ -1554,7 +1560,7 @@ function QuoteBuilder({ leads }) {
             {/* Savings */}
             {selectedLead && (
               <div style={{ padding: "12px 14px", background: "rgba(52,211,153,.07)", border: "1px solid rgba(52,211,153,.15)", borderRadius: 10, marginBottom: 18 }}>
-                <div style={{ fontSize: 11, color: T.green, fontWeight: 700, marginBottom: 4 }}>📈 ROI for {selectedLead.name.split(" ")[0]}</div>
+                <div style={{ fontSize: 11, color: T.green, fontWeight: 700, marginBottom: 4 }}>ROI for {selectedLead.name.split(" ")[0]}</div>
                 <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
                   <div><div style={{ fontFamily: H, fontSize: 16, fontWeight: 800, color: T.green }}>R{Math.round(selectedLead.monthly_bill * 0.75).toLocaleString()}/mo</div><div style={{ fontSize: 10, color: T.sub }}>estimated savings</div></div>
                   <div><div style={{ fontFamily: H, fontSize: 16, fontWeight: 800, color: T.accent }}>{(total / (selectedLead.monthly_bill * 0.75 * 12)).toFixed(1)} yrs</div><div style={{ fontSize: 10, color: T.sub }}>payback period</div></div>
