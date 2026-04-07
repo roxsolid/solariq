@@ -13,6 +13,53 @@ const H = "'Lexend',sans-serif";
 const B = "'Plus Jakarta Sans',sans-serif";
 const W = { logo:900, hero:900, section:700, card:700, sub:600 };
 
+// ─── SVG ICONS ────────────────────────────────────────────────
+const Ico = {
+  Sun:      ({s=20,c="#f5a623"})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="5" fill={c}/><line x1="12" y1="2" x2="12" y2="5" stroke={c} strokeWidth="2" strokeLinecap="round"/><line x1="12" y1="19" x2="12" y2="22" stroke={c} strokeWidth="2" strokeLinecap="round"/><line x1="2" y1="12" x2="5" y2="12" stroke={c} strokeWidth="2" strokeLinecap="round"/><line x1="19" y1="12" x2="22" y2="12" stroke={c} strokeWidth="2" strokeLinecap="round"/><line x1="4.22" y1="4.22" x2="6.34" y2="6.34" stroke={c} strokeWidth="2" strokeLinecap="round"/><line x1="17.66" y1="17.66" x2="19.78" y2="19.78" stroke={c} strokeWidth="2" strokeLinecap="round"/><line x1="19.78" y1="4.22" x2="17.66" y2="6.34" stroke={c} strokeWidth="2" strokeLinecap="round"/><line x1="6.34" y1="17.66" x2="4.22" y2="19.78" stroke={c} strokeWidth="2" strokeLinecap="round"/></svg>,
+  Zap:      ({s=20,c="currentColor"})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>,
+  Battery:  ({s=20,c="currentColor"})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="16" height="10" rx="2"/><line x1="22" y1="11" x2="22" y2="13"/></svg>,
+  Home:     ({s=20,c="currentColor"})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>,
+  Building: ({s=20,c="currentColor"})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="18" rx="1"/><line x1="8" y1="7" x2="8" y2="7.01"/><line x1="12" y1="7" x2="12" y2="7.01"/><line x1="16" y1="7" x2="16" y2="7.01"/><line x1="8" y1="11" x2="8" y2="11.01"/><line x1="12" y1="11" x2="12" y2="11.01"/><line x1="16" y1="11" x2="16" y2="11.01"/><line x1="8" y1="15" x2="8" y2="15.01"/><line x1="12" y1="15" x2="12" y2="15.01"/></svg>,
+  Plug:     ({s=20,c="currentColor"})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18"/><path d="m6 6 12 12"/></svg>,
+  Wrench:   ({s=20,c="currentColor"})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>,
+  FileText: ({s=20,c="currentColor"})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>,
+  Book:     ({s=20,c="currentColor"})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>,
+  Map:      ({s=20,c="currentColor"})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>,
+  Search:   ({s=16,c="currentColor"})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>,
+  Settings: ({s=16,c="currentColor"})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>,
+  Phone:    ({s=16,c="currentColor"})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.56 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>,
+  Globe:    ({s=16,c="currentColor"})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>,
+  Check:    ({s=16,c="currentColor"})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>,
+  TrendUp:  ({s=16,c="currentColor"})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>,
+  Shield:   ({s=16,c="currentColor"})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>,
+  Stethoscope:({s=20,c="currentColor"})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3"/><path d="M8 15v1a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6v-4"/><circle cx="20" cy="10" r="2"/></svg>,
+  AlertTriangle:({s=20,c="currentColor"})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>,
+  Calendar: ({s=20,c="currentColor"})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>,
+  CreditCard:({s=16,c="currentColor"})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>,
+  Leaf:     ({s=20,c="currentColor"})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>,
+  // Appliance icons
+  Lightbulb:({s=22,c="currentColor"})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="9" y1="18" x2="15" y2="18"/><line x1="10" y1="22" x2="14" y2="22"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"/></svg>,
+  Tv:       ({s=22,c="currentColor"})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="15" rx="2"/><polyline points="17 2 12 7 7 2"/></svg>,
+  Fridge:   ({s=22,c="currentColor"})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 6a4 4 0 0 1 4-4h6a4 4 0 0 1 4 4v14H5V6z"/><line x1="5" y1="10" x2="19" y2="10"/><line x1="9" y1="14" x2="9" y2="17"/><line x1="9" y1="5" x2="9" y2="8"/></svg>,
+  Wifi:     ({s=22,c="currentColor"})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>,
+  Laptop:   ({s=22,c="currentColor"})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 16V7a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9m16 0H4m16 0 1.28 2.55a1 1 0 0 1-.9 1.45H3.62a1 1 0 0 1-.9-1.45L4 16"/></svg>,
+  Monitor:  ({s=22,c="currentColor"})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>,
+  Printer:  ({s=22,c="currentColor"})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>,
+  WashMachine:({s=22,c="currentColor"})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="2"/><circle cx="12" cy="13" r="4"/><line x1="7" y1="6" x2="7.01" y2="6"/><line x1="11" y1="6" x2="11.01" y2="6"/></svg>,
+  Flame:    ({s=22,c="currentColor"})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>,
+  Droplets: ({s=22,c="currentColor"})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M7 16.3c2.2 0 4-1.83 4-4.05 0-1.16-.57-2.26-1.71-3.19S7.29 6.75 7 5.3c-.29 1.45-1.14 2.84-2.29 3.76S3 11.1 3 12.25c0 2.22 1.8 4.05 4 4.05z"/><path d="M12.56 6.6A10.97 10.97 0 0 0 14 3.02c.5 2.5 2 4.9 4 6.5s3 3.5 3 5.5a6.98 6.98 0 0 1-11.91 4.97"/></svg>,
+  Wind:     ({s=22,c="currentColor"})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"/></svg>,
+  Waves:    ({s=22,c="currentColor"})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 6c.6.5 1.2 1 2.5 1C7 7 7 5 9.5 5c2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2"/><path d="M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2"/><path d="M2 18c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2"/></svg>,
+  Lock:     ({s=16,c="currentColor"})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>,
+  DoorOpen: ({s=22,c="currentColor"})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M13 4h3a2 2 0 0 1 2 2v14"/><path d="M2 20h3"/><path d="M13 20h9"/><path d="M10 12v.01"/><path d="M13 4.562v16.157a1 1 0 0 1-1.242.97L5 20V5.562a2 2 0 0 1 1.515-1.94l4-1A2 2 0 0 1 13 4.561z"/></svg>,
+  Sparkles: ({s=22,c="currentColor"})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3z"/></svg>,
+  Scale:    ({s=20,c="currentColor"})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1z"/><path d="M7 21h10"/><line x1="12" y1="3" x2="12" y2="21"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/></svg>,
+  DollarSign:({s=20,c="currentColor"})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>,
+  Coins:    ({s=20,c="currentColor"})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/><path d="m16.71 13.88.7.71-2.82 2.82"/></svg>,
+  ArrowRight:({s=14,c="currentColor"})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>,
+  Chart:    ({s=14,c="currentColor"})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/></svg>,
+};
+
 function useScreen() {
   const [w,setW] = useState(typeof window!=="undefined"?window.innerWidth:1200);
   useEffect(()=>{ const fn=()=>setW(window.innerWidth); window.addEventListener("resize",fn); return ()=>window.removeEventListener("resize",fn); },[]);
@@ -21,20 +68,44 @@ function useScreen() {
 
 const RATE=3.20;
 const APPLIANCES=[
-  {id:"lights",icon:"💡",name:"Lights",w:10,h:6,cat:"essentials"},{id:"tv",icon:"📺",name:"TV",w:120,h:4,cat:"essentials"},
-  {id:"fridge",icon:"🧊",name:"Fridge",w:150,h:24,cat:"essentials"},{id:"wifi",icon:"📶",name:"WiFi Router",w:15,h:24,cat:"essentials"},
-  {id:"phone",icon:"📱",name:"Phone",w:20,h:3,cat:"essentials"},{id:"laptop",icon:"💻",name:"Laptop",w:65,h:6,cat:"work"},
-  {id:"desktop",icon:"🖥️",name:"Desktop PC",w:300,h:6,cat:"work"},{id:"printer",icon:"🖨️",name:"Printer",w:50,h:1,cat:"work"},
-  {id:"washing",icon:"🫧",name:"Washing Machine",w:500,h:1,cat:"home"},{id:"microwave",icon:"📡",name:"Microwave",w:1000,h:.5,cat:"home"},
-  {id:"kettle",icon:"☕",name:"Kettle",w:2000,h:.25,cat:"home"},{id:"geyser",icon:"🚿",name:"Geyser",w:3000,h:2,cat:"home"},
-  {id:"aircon",icon:"❄️",name:"Air Con",w:1500,h:4,cat:"comfort"},{id:"pool",icon:"🏊",name:"Pool Pump",w:1100,h:6,cat:"comfort"},
-  {id:"security",icon:"🔒",name:"Security",w:30,h:24,cat:"comfort"},{id:"gate",icon:"🚪",name:"Gate Motor",w:200,h:.5,cat:"comfort"},
+  {id:"lights",  Icon:Ico.Lightbulb, name:"Lights",          w:10,  h:6,  cat:"essentials"},
+  {id:"tv",      Icon:Ico.Tv,        name:"TV",               w:120, h:4,  cat:"essentials"},
+  {id:"fridge",  Icon:Ico.Fridge,    name:"Fridge",           w:150, h:24, cat:"essentials"},
+  {id:"wifi",    Icon:Ico.Wifi,      name:"WiFi Router",      w:15,  h:24, cat:"essentials"},
+  {id:"phone",   Icon:Ico.Phone,     name:"Phone",            w:20,  h:3,  cat:"essentials"},
+  {id:"laptop",  Icon:Ico.Laptop,    name:"Laptop",           w:65,  h:6,  cat:"work"},
+  {id:"desktop", Icon:Ico.Monitor,   name:"Desktop PC",       w:300, h:6,  cat:"work"},
+  {id:"printer", Icon:Ico.Printer,   name:"Printer",          w:50,  h:1,  cat:"work"},
+  {id:"washing", Icon:Ico.WashMachine,name:"Washing Machine", w:500, h:1,  cat:"home"},
+  {id:"microwave",Icon:Ico.Flame,    name:"Microwave",        w:1000,h:.5, cat:"home"},
+  {id:"kettle",  Icon:Ico.Flame,     name:"Kettle",           w:2000,h:.25,cat:"home"},
+  {id:"geyser",  Icon:Ico.Droplets,  name:"Geyser",           w:3000,h:2,  cat:"home"},
+  {id:"aircon",  Icon:Ico.Wind,      name:"Air Con",          w:1500,h:4,  cat:"comfort"},
+  {id:"pool",    Icon:Ico.Waves,     name:"Pool Pump",        w:1100,h:6,  cat:"comfort"},
+  {id:"security",Icon:Ico.Lock,      name:"Security",         w:30,  h:24, cat:"comfort"},
+  {id:"gate",    Icon:Ico.DoorOpen,  name:"Gate Motor",       w:200, h:.5, cat:"comfort"},
 ];
 const QUIZ=[
-  {id:"size",q:"What size is your home?",hint:"Helps estimate your total energy needs",opts:[{label:"Studio / 1 Bed",icon:"🏠",v:"s",kwh:8},{label:"2–3 Bedroom",icon:"🏡",v:"m",kwh:18},{label:"4+ Bedroom",icon:"🏘️",v:"l",kwh:30},{label:"Small Business",icon:"🏢",v:"b",kwh:45}]},
-  {id:"bill",q:"Your average monthly Eskom bill?",hint:"Roughly is fine",opts:[{label:"Under R800",icon:"💚",v:"lo",mult:.6},{label:"R800–R2 000",icon:"💛",v:"md",mult:1},{label:"R2 000–R5 000",icon:"🟠",v:"hi",mult:1.8},{label:"Over R5 000",icon:"🔴",v:"xh",mult:3}]},
-  {id:"goal",q:"What matters most to you?",hint:"This shapes the whole recommendation",opts:[{label:"Survive load shedding",icon:"🔋",v:"bk",kw:3},{label:"Cut my bill",icon:"💸",v:"sv",kw:5},{label:"Mostly off-grid",icon:"🌞",v:"og",kw:8},{label:"Full independence",icon:"⚡",v:"fo",kw:12}]},
-  {id:"ls",q:"How bad is load shedding?",hint:"Determines your battery backup size",opts:[{label:"Rarely (Stage 1–2)",icon:"😌",v:"mi",bf:1},{label:"Often (Stage 3–4)",icon:"😤",v:"mo",bf:1.5},{label:"Daily (Stage 5–6)",icon:"😡",v:"sv",bf:2},{label:"Farm / Rural",icon:"🌾",v:"ru",bf:2.5}]},
+  {id:"size",q:"What size is your home?",hint:"Helps estimate your total energy needs",opts:[
+    {label:"Studio / 1 Bed",  Icon:Ico.Home,     v:"s",kwh:8},
+    {label:"2–3 Bedroom",     Icon:Ico.Home,     v:"m",kwh:18},
+    {label:"4+ Bedroom",      Icon:Ico.Building, v:"l",kwh:30},
+    {label:"Small Business",  Icon:Ico.Building, v:"b",kwh:45}]},
+  {id:"bill",q:"Your average monthly Eskom bill?",hint:"Roughly is fine",opts:[
+    {label:"Under R800",      Icon:Ico.Coins,       v:"lo",mult:.6},
+    {label:"R800–R2 000",     Icon:Ico.Coins,       v:"md",mult:1},
+    {label:"R2 000–R5 000",   Icon:Ico.DollarSign,  v:"hi",mult:1.8},
+    {label:"Over R5 000",     Icon:Ico.DollarSign,  v:"xh",mult:3}]},
+  {id:"goal",q:"What matters most to you?",hint:"This shapes the whole recommendation",opts:[
+    {label:"Survive load shedding", Icon:Ico.Battery, v:"bk",kw:3},
+    {label:"Cut my bill",           Icon:Ico.Coins,   v:"sv",kw:5},
+    {label:"Mostly off-grid",       Icon:Ico.Sun,     v:"og",kw:8},
+    {label:"Full independence",     Icon:Ico.Zap,     v:"fo",kw:12}]},
+  {id:"ls",q:"How bad is load shedding?",hint:"Determines your battery backup size",opts:[
+    {label:"Rarely (Stage 1–2)", Icon:Ico.TrendUp,  v:"mi",bf:1},
+    {label:"Often (Stage 3–4)",  Icon:Ico.Zap,      v:"mo",bf:1.5},
+    {label:"Daily (Stage 5–6)",  Icon:Ico.Zap,      v:"sv",bf:2},
+    {label:"Farm / Rural",       Icon:Ico.Leaf,     v:"ru",bf:2.5}]},
 ];
 const INSTALLERS=[
   {id:1,name:"SunPower SA",city:"Johannesburg",prov:"Gauteng",rating:4.9,rev:312,sessa:true,jobs:847,yrs:12,badge:"Top Rated",resp:"2 hrs",spec:"Residential",brands:["Sunsynk","Victron"],price:"R80k–R200k",verified:true,about:"12 years installing solar across Gauteng. Specialise in hybrid systems for load shedding resilience. All installations include 5-year workmanship warranty.",website:"sunpowersa.co.za",finance:true,photos:["🏠","🔋","⚡"]},
@@ -112,9 +183,9 @@ function ProCalc({onResult}){
     </div>
   );
 
-  const SecHead=({id,icon,label})=>(
+  const SecHead=({id,SvgIcon,label})=>(
     <button onClick={()=>tog(id)} style={{width:"100%",background:"none",border:"none",display:"flex",alignItems:"center",gap:8,cursor:"pointer",padding:"7px 0",marginBottom:open[id]?10:0}}>
-      <span style={{fontSize:14}}>{icon}</span>
+      <SvgIcon s={14} c={t.accent}/>
       <span style={{fontSize:10,color:t.accent,fontWeight:700,textTransform:"uppercase",letterSpacing:2,fontFamily:B,flex:1,textAlign:"left"}}>{label}</span>
       <span style={{fontSize:14,color:t.sub,transition:"transform .25s",display:"inline-block",transform:open[id]?"rotate(90deg)":"rotate(0deg)"}}>›</span>
     </button>
@@ -122,7 +193,7 @@ function ProCalc({onResult}){
 
   const results=(
     <div style={{background:`linear-gradient(135deg,rgba(${t.rgb},.1),rgba(${t.rgb},.04))`,border:`1px solid rgba(${t.rgb},.2)`,borderRadius:16,padding:"18px"}}>
-      <div style={{fontSize:10,color:t.accent,fontWeight:700,textTransform:"uppercase",letterSpacing:2,marginBottom:14,fontFamily:B}}>📊 Live Results</div>
+      <div style={{fontSize:10,color:t.accent,fontWeight:700,textTransform:"uppercase",letterSpacing:2,marginBottom:14,fontFamily:B,display:"flex",alignItems:"center",gap:6}}><Ico.Chart s={12} c={t.accent}/> Live Results</div>
       <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10,marginBottom:14}}>
         {[["Panels",`${panels}×`,"550Wp"],["Array",`${syskw.toFixed(1)}kWp`,"Total"],["Battery",`${batKwh.toFixed(1)}kWh`,"Usable"],["Backup",`${backupH}h`,"Avg load"],["Inverter",`${v.invKva}kVA`,"Min"],["Cost",`R${(cost/1000).toFixed(0)}k`,"Installed"]].map(([l,val,s])=>(
           <div key={l} style={{textAlign:"center"}}>
@@ -156,18 +227,18 @@ function ProCalc({onResult}){
   const inputs=(
     <div>
       <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:10}}>
-        <div style={{width:36,height:36,borderRadius:9,background:`rgba(${t.rgb},.12)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:17,flexShrink:0}}>⚙️</div>
+        <div style={{width:36,height:36,borderRadius:9,background:`rgba(${t.rgb},.12)`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><Ico.Settings s={18} c={t.accent}/></div>
         <div>
           <div style={{fontFamily:H,fontSize:22,fontWeight:W.hero,color:t.text}}>Pro Calculator</div>
           <div style={{fontSize:12,color:t.sub}}>Full technical parameters — for engineers and enthusiasts</div>
         </div>
       </div>
       <div style={{background:`rgba(${t.rgb},.05)`,border:`1px solid rgba(${t.rgb},.15)`,borderRadius:10,padding:"9px 14px",marginBottom:16,display:"flex",gap:8,alignItems:"center"}}>
-        <span>💡</span><span style={{fontSize:12,color:t.sub}}>Tap + / − to adjust. Results update live.</span>
+        <Ico.Lightbulb s={14} c={t.accent}/><span style={{fontSize:12,color:t.sub}}>Tap + / − to adjust. Results update live.</span>
       </div>
       {/* Load & Generation */}
       <div style={{marginBottom:4}}>
-        <SecHead id="load" icon="⚡" label="Load & Generation"/>
+        <SecHead id="load" SvgIcon={Ico.Zap} label="Load & Generation"/>
         {open.load&&(
           <div style={{display:"grid",gridTemplateColumns:sc.isMobile?"1fr":"1fr 1fr",gap:8,marginBottom:14}}>
             <NI k="kwh" label="Daily Consumption" desc="Total kWh/day" min={1} max={150} step={0.5} unit="kWh/day"/>
@@ -179,7 +250,7 @@ function ProCalc({onResult}){
       </div>
       {/* Battery Bank — single column on mobile so buttons never clip */}
       <div style={{marginBottom:4}}>
-        <SecHead id="battery" icon="🔋" label="Battery Bank"/>
+        <SecHead id="battery" SvgIcon={Ico.Battery} label="Battery Bank"/>
         {open.battery&&(
           <div style={{display:"grid",gridTemplateColumns:"1fr",gap:8,marginBottom:14}}>
             <NI k="batAh" label="Capacity (Amp-hours)" desc="Total Ah" min={50} max={2000} step={25} unit="Ah"/>
@@ -190,13 +261,13 @@ function ProCalc({onResult}){
       </div>
       {/* System Type */}
       <div style={{marginBottom:14}}>
-        <SecHead id="type" icon="🔌" label="System Type"/>
+        <SecHead id="type" SvgIcon={Ico.Settings} label="System Type"/>
         {open.type&&(
           <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:8,marginBottom:4}}>
             {[["hybrid","Hybrid","SA sweet spot"],["gridtied","Grid-Tied","No battery"],["offgrid","Off-Grid","Full independence"]].map(([k,lbl,desc])=>(
               <div key={k} onClick={()=>up("type",k)} style={{background:v.type===k?`rgba(${t.rgb},.1)`:t.bgCard,border:`1px solid ${v.type===k?`rgba(${t.rgb},.35)`:t.border}`,borderRadius:12,padding:"12px 10px",cursor:"pointer",textAlign:"center",transition:"all .2s"}}>
                 <div style={{width:14,height:14,borderRadius:3,background:v.type===k?t.accent:"transparent",border:`2px solid ${v.type===k?t.accent:t.sub}`,display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 6px"}}>
-                  {v.type===k&&<span style={{fontSize:8,color:t.dark?"#000":"#fff",fontWeight:900}}>✓</span>}
+                  {v.type===k&&<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke={t.dark?"#000":"#fff"} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>}
                 </div>
                 <div style={{fontSize:13,fontWeight:W.card,color:v.type===k?t.accent:t.text,fontFamily:H}}>{lbl}</div>
                 <div style={{fontSize:10,color:t.sub,marginTop:2}}>{desc}</div>
@@ -239,12 +310,12 @@ function Calculator({onResult}){
         <p style={{color:t.sub,fontSize:14,maxWidth:400,margin:"0 auto",lineHeight:1.7}}>Four ways to calculate — pick the one that suits you.</p>
       </div>
       <div style={{display:"grid",gridTemplateColumns:sc.isDesktop?"repeat(4,1fr)":"1fr 1fr",gap:12}}>
-        {[{k:"simple",icon:"✨",title:"Quick & Easy",sub:"4 questions. 60 seconds.",badge:"Most Popular"},{k:"appliance",icon:"🔌",title:"By Appliances",sub:"Pick every device you own.",badge:"Most Accurate"},{k:"bill",icon:"📄",title:"From My Bill",sub:"Enter your Eskom bill.",badge:"Fastest"},{k:"engineer",icon:"⚙️",title:"Pro Calculator",sub:"Full technical inputs.",badge:"Pro"}].map(c=>(
+        {[{k:"simple",Icon:Ico.Sparkles,title:"Quick & Easy",sub:"4 questions. 60 seconds.",badge:"Most Popular"},{k:"appliance",Icon:Ico.Plug,title:"By Appliances",sub:"Pick every device you own.",badge:"Most Accurate"},{k:"bill",Icon:Ico.FileText,title:"From My Bill",sub:"Enter your Eskom bill.",badge:"Fastest"},{k:"engineer",Icon:Ico.Settings,title:"Pro Calculator",sub:"Full technical inputs.",badge:"Pro"}].map(c=>(
           <div key={c.k} onClick={()=>go(()=>setMode(c.k))} style={{background:t.bgCard,border:`1px solid ${t.border}`,borderRadius:16,padding:"22px 18px",cursor:"pointer",transition:"all .2s",position:"relative"}}
             onMouseEnter={e=>{e.currentTarget.style.borderColor=`rgba(${t.rgb},.4)`;e.currentTarget.style.transform="translateY(-3px)";}}
             onMouseLeave={e=>{e.currentTarget.style.borderColor=t.border;e.currentTarget.style.transform="none";}}>
             <div style={{position:"absolute",top:10,right:10,fontSize:9,background:`rgba(${t.rgb},.15)`,color:t.accent,padding:"2px 7px",borderRadius:10,fontWeight:700}}>{c.badge}</div>
-            <div style={{fontSize:30,marginBottom:12}}>{c.icon}</div>
+            <div style={{display:"flex",alignItems:"center",justifyContent:"center",width:48,height:48,borderRadius:14,background:`rgba(${t.rgb},.1)`,marginBottom:12}}><c.Icon s={22} c={t.accent}/></div>
             <div style={{fontFamily:H,fontSize:18,fontWeight:W.card,color:t.text,marginBottom:5}}>{c.title}</div>
             <div style={{fontSize:12,color:t.sub,lineHeight:1.5}}>{c.sub}</div>
           </div>
@@ -259,7 +330,7 @@ function Calculator({onResult}){
     <div style={{opacity:fade?0:1,transition:"opacity .2s",animation:"fadeUp .4s ease"}}>
       <BackBtn onClick={()=>go(()=>setMode(null))}/>
       <div style={{maxWidth:520,margin:"0 auto",textAlign:"center"}}>
-        <div style={{fontSize:36,marginBottom:10}}>📄</div>
+        <div style={{display:"flex",justifyContent:"center",marginBottom:10}}><svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
         <h3 style={{fontFamily:H,fontSize:26,fontWeight:W.section,color:t.text,marginBottom:5}}>Your Monthly Bill</h3>
         <p style={{color:t.sub,fontSize:14,marginBottom:22}}>Enter approximately what you pay Eskom per month</p>
         <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:8,marginBottom:16}}>
@@ -295,7 +366,7 @@ function Calculator({onResult}){
           return(
             <div key={app.id} style={{background:active?`rgba(${t.rgb},.08)`:t.bgCard,border:`1px solid ${active?`rgba(${t.rgb},.4)`:t.border}`,borderRadius:14,padding:12,textAlign:"center",transition:"all .2s",cursor:"pointer"}}
               onClick={active?undefined:()=>setApps({...apps,[app.id]:app.h})}>
-              <div style={{fontSize:24,marginBottom:4}}>{app.icon}</div>
+              <div style={{display:"flex",alignItems:"center",justifyContent:"center",width:40,height:40,borderRadius:10,background:active?`rgba(${t.rgb},.12)`:t.bgCard2,margin:"0 auto 6px"}}><app.Icon s={20} c={active?t.accent:t.sub}/></div>
               <div style={{fontSize:12,fontWeight:600,color:active?t.text:t.sub,marginBottom:2,fontFamily:B}}>{app.name}</div>
               <div style={{fontSize:10,color:t.sub,opacity:.7}}>{app.w}W</div>
               {active&&(
@@ -335,7 +406,7 @@ function Calculator({onResult}){
               style={{background:sel?`rgba(${t.rgb},.12)`:t.bgCard,border:`1px solid ${sel?t.accent:t.border}`,borderRadius:14,padding:"18px 14px",cursor:"pointer",textAlign:"left",transition:"all .2s"}}
               onMouseEnter={e=>{if(!sel){e.currentTarget.style.borderColor=`rgba(${t.rgb},.3)`;e.currentTarget.style.transform="translateY(-2px)";}}}
               onMouseLeave={e=>{if(!sel){e.currentTarget.style.borderColor=t.border;e.currentTarget.style.transform="none";}}}>
-              <div style={{fontSize:26,marginBottom:8}}>{o.icon}</div>
+              <div style={{display:"flex",alignItems:"center",justifyContent:"center",width:44,height:44,borderRadius:12,background:`rgba(${t.rgb},.1)`,marginBottom:8}}><o.Icon s={22} c={t.accent}/></div>
               <div style={{fontFamily:H,fontSize:sc.isMobile?14:16,fontWeight:W.card,color:sel?t.accent:t.text}}>{o.label}</div>
             </button>
           );})}
@@ -377,8 +448,10 @@ function Results({r,onReset,goInstallers}){
   );
   const bullets=(
     <div style={{background:t.bgCard,border:`1px solid ${t.border}`,borderRadius:13,padding:"16px",marginBottom:12}}>
-      {[`✅ Lights, WiFi, TV & fridge through all load shedding`,`✅ Save ~R${Math.round(r.annSave/12).toLocaleString()} every month`,`✅ Pays for itself in ${r.payback} years — then free electricity`,`✅ Claim up to R15,000 back from SARS on panel costs`,`✅ Property value increases R50k–R150k`].map(txt=>(
-        <div key={txt} style={{fontSize:13,color:t.sub,marginBottom:7,lineHeight:1.6}}>{txt}</div>
+      {[`Lights, WiFi, TV & fridge through all load shedding`,`Save ~R${Math.round(r.annSave/12).toLocaleString()} every month`,`Pays for itself in ${r.payback} years — then free electricity`,`Claim up to R15,000 back from SARS on panel costs`,`Property value increases R50k–R150k`].map(txt=>(
+        <div key={txt} style={{fontSize:13,color:t.sub,marginBottom:7,lineHeight:1.6,display:"flex",alignItems:"flex-start",gap:8}}>
+          <span style={{marginTop:2,flexShrink:0}}><Ico.Check s={13} c={"#4ade80"}/></span>{txt}
+        </div>
       ))}
     </div>
   );
@@ -395,7 +468,7 @@ function Results({r,onReset,goInstallers}){
       </div>
       <div style={{display:"flex",flexDirection:"column",gap:9}}>
         <PBtn onClick={goInstallers}>Browse Verified Installers →</PBtn>
-        <button onClick={()=>{const msg=encodeURIComponent(`Hi! I used SolarIQ and my recommended system is ${r.systemKw}kW with ${r.battKwh}kWh battery (${r.panels} panels). Estimated cost R${r.cost.toLocaleString()}. Annual savings R${r.annSave.toLocaleString()}. Can you give me a quote?`);window.open(`https://wa.me/?text=${msg}`,"_blank");}} style={{background:"rgba(37,211,102,.08)",color:"#25d366",border:"1px solid rgba(37,211,102,.25)",borderRadius:30,padding:"12px 20px",fontSize:13,fontWeight:600,cursor:"pointer",fontFamily:B,width:"100%"}}>📱 WhatsApp My Results</button>
+        <button onClick={()=>{const msg=encodeURIComponent(`Hi! I used SolarIQ and my recommended system is ${r.systemKw}kW with ${r.battKwh}kWh battery (${r.panels} panels). Estimated cost R${r.cost.toLocaleString()}. Annual savings R${r.annSave.toLocaleString()}. Can you give me a quote?`);window.open(`https://wa.me/?text=${msg}`,"_blank");}} style={{background:"rgba(37,211,102,.08)",color:"#25d366",border:"1px solid rgba(37,211,102,.25)",borderRadius:30,padding:"12px 20px",fontSize:13,fontWeight:600,cursor:"pointer",fontFamily:B,width:"100%"}}style={{display:"flex",alignItems:"center",justifyContent:"center",gap:7}}>WhatsApp My Results</button>
       </div>
       <div style={{textAlign:"center",marginTop:12}}>
         <button onClick={onReset} style={{background:"none",border:"none",color:t.sub,cursor:"pointer",fontSize:13,textDecoration:"underline",fontFamily:B}}>← Recalculate</button>
@@ -405,7 +478,7 @@ function Results({r,onReset,goInstallers}){
   return(
     <div style={{animation:"fadeUp .5s ease"}}>
       <div style={{textAlign:"center",marginBottom:24}}>
-        <div style={{fontSize:38,marginBottom:9}}>☀️</div>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"center",marginBottom:9}}><Ico.Sun s={44} c={t.accent}/></div>
         <h2 style={{fontFamily:H,fontSize:"clamp(22px,4vw,38px)",fontWeight:W.hero,color:t.text,marginBottom:5}}>Your Solar Profile Is Ready</h2>
         <p style={{color:t.sub,fontSize:14}}>Here's exactly what your home needs</p>
       </div>
@@ -419,7 +492,7 @@ function Results({r,onReset,goInstallers}){
           {hero}{stats}{bullets}
           <div style={{display:"flex",flexDirection:"column",gap:9,marginBottom:10}}>
             <PBtn onClick={goInstallers}>Browse Verified Installers →</PBtn>
-            <button onClick={()=>{const msg=encodeURIComponent(`Hi! I used SolarIQ and my recommended system is ${r.systemKw}kW with ${r.battKwh}kWh battery (${r.panels} panels). Estimated cost R${r.cost.toLocaleString()}. Annual savings R${r.annSave.toLocaleString()}. Can you give me a quote?`);window.open(`https://wa.me/?text=${msg}`,"_blank");}} style={{background:"rgba(37,211,102,.08)",color:"#25d366",border:"1px solid rgba(37,211,102,.25)",borderRadius:30,padding:"12px 20px",fontSize:13,fontWeight:600,cursor:"pointer",fontFamily:B,width:"100%"}}>📱 WhatsApp My Results</button>
+            <button onClick={()=>{const msg=encodeURIComponent(`Hi! I used SolarIQ and my recommended system is ${r.systemKw}kW with ${r.battKwh}kWh battery (${r.panels} panels). Estimated cost R${r.cost.toLocaleString()}. Annual savings R${r.annSave.toLocaleString()}. Can you give me a quote?`);window.open(`https://wa.me/?text=${msg}`,"_blank");}} style={{background:"rgba(37,211,102,.08)",color:"#25d366",border:"1px solid rgba(37,211,102,.25)",borderRadius:30,padding:"12px 20px",fontSize:13,fontWeight:600,cursor:"pointer",fontFamily:B,width:"100%"}}style={{display:"flex",alignItems:"center",justifyContent:"center",gap:7}}>WhatsApp My Results</button>
           </div>
           <div style={{textAlign:"center"}}>
             <button onClick={onReset} style={{background:"none",border:"none",color:t.sub,cursor:"pointer",fontSize:13,textDecoration:"underline",fontFamily:B}}>← Recalculate</button>
@@ -471,20 +544,20 @@ function Installers(){
       onMouseEnter={e=>{if(open!==inst.id)e.currentTarget.style.borderColor=`rgba(${t.rgb},.2)`;}}
       onMouseLeave={e=>{if(open!==inst.id)e.currentTarget.style.borderColor=t.border;}}>
       <div style={{display:"flex",alignItems:"flex-start",gap:10,cursor:"pointer"}} onClick={()=>setOpen(open===inst.id?null:inst.id)}>
-        <div style={{width:42,height:42,borderRadius:10,background:`rgba(${t.rgb},.1)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0}}>🏢</div>
+        <div style={{width:42,height:42,borderRadius:10,background:`rgba(${t.rgb},.1)`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><Ico.Building s={20} c={t.accent}/></div>
         <div style={{flex:1,minWidth:0}}>
           <div style={{display:"flex",alignItems:"center",gap:5,marginBottom:3,flexWrap:"wrap"}}>
             <span style={{fontFamily:H,fontSize:15,fontWeight:W.card,color:t.text}}>{inst.name}</span>
             {inst.badge&&<Tag>{inst.badge}</Tag>}
-            {inst.sessa&&<Tag color="#22c55e">✓ SESSA</Tag>}
-            {inst.verified&&<Tag color="#60a5fa">✓ Verified</Tag>}
-            {inst.finance&&<Tag color="#c084fc">💳 Finance</Tag>}
+            {inst.sessa&&<Tag color="#22c55e">SESSA</Tag>}
+            {inst.verified&&<Tag color="#60a5fa">Verified</Tag>}
+            {inst.finance&&<Tag color="#c084fc">Finance</Tag>}
           </div>
           <div style={{fontSize:11,color:t.sub,marginBottom:4}}>{inst.city}, {inst.prov} · {inst.yrs} yrs</div>
           <div style={{display:"flex",gap:8,flexWrap:"wrap",alignItems:"center"}}>
             <Stars n={inst.rating}/><span style={{fontSize:11,color:t.sub}}> ({inst.rev})</span>
-            <span style={{fontSize:11,color:t.sub}}>⚡ {inst.resp}</span>
-            <span style={{fontSize:11,color:t.sub}}>💰 {inst.price}</span>
+            <span style={{fontSize:11,color:t.sub,display:"flex",alignItems:"center",gap:3}}><Ico.Zap s={10} c={t.sub}/>{inst.resp}</span>
+            <span style={{fontSize:11,color:t.sub,display:"flex",alignItems:"center",gap:3}}><Ico.Coins s={10} c={t.sub}/>{inst.price}</span>
           </div>
         </div>
         <span style={{fontSize:14,color:t.sub,transition:"transform .2s",transform:open===inst.id?"rotate(90deg)":"none",flexShrink:0,marginTop:4}}>›</span>
@@ -493,7 +566,7 @@ function Installers(){
         <div style={{marginTop:13,paddingTop:13,borderTop:`1px solid ${t.border}`,animation:"fadeUp .25s ease"}}>
           <p style={{fontSize:13,color:t.sub,lineHeight:1.7,marginBottom:12}}>{inst.about}</p>
           <div style={{display:"flex",gap:7,marginBottom:12,flexWrap:"wrap"}}>
-            {inst.photos.map((p,i)=><div key={i} style={{width:60,height:60,background:`rgba(${t.rgb},.08)`,border:`1px solid ${t.border}`,borderRadius:10,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22}}>{p}</div>)}
+            {[Ico.Sun,Ico.Battery,Ico.Zap].map((IcoC,i)=><div key={i} style={{width:60,height:60,background:`rgba(${t.rgb},.08)`,border:`1px solid ${t.border}`,borderRadius:10,display:"flex",alignItems:"center",justifyContent:"center"}}><IcoC s={22} c={t.accent}/></div>)}
             <div style={{flex:1,minWidth:80,background:`rgba(${t.rgb},.04)`,border:`1px dashed rgba(${t.rgb},.2)`,borderRadius:10,display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,color:t.sub,padding:8,textAlign:"center"}}>View all →</div>
           </div>
           <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(100px,1fr))",gap:7,marginBottom:12}}>
@@ -506,8 +579,8 @@ function Installers(){
           </div>
           <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
             <PBtn sm style={{flex:1,minWidth:100,borderRadius:9,padding:"10px"}} onClick={e=>{e.stopPropagation();setQuoteInst(inst);setQuoteForm({name:"",email:"",phone:"",system_kw:"",notes:""});setQuoteSent(false);}}>Request Quote</PBtn>
-            <button onClick={e=>{e.stopPropagation();const msg=encodeURIComponent(`Hi ${inst.name}, I found you on SolarIQ and would like a quote for a solar installation. Please contact me.`);window.open(`https://wa.me/${inst.whatsapp||""}?text=${msg}`,"_blank");}} style={{background:"rgba(37,211,102,.1)",border:"1px solid rgba(37,211,102,.28)",color:"#25d366",borderRadius:9,padding:"10px 14px",fontSize:13,fontWeight:700,cursor:"pointer",fontFamily:B}}>📱 WhatsApp</button>
-            <button onClick={e=>{e.stopPropagation();window.open(`https://${inst.website}`,"_blank");}} style={{background:t.bgCard,border:`1px solid ${t.border}`,color:t.sub,borderRadius:9,padding:"10px 14px",fontSize:13,fontWeight:700,cursor:"pointer",fontFamily:B}}>🌐 Website</button>
+            <button onClick={e=>{e.stopPropagation();const msg=encodeURIComponent(`Hi ${inst.name}, I found you on SolarIQ and would like a quote for a solar installation. Please contact me.`);window.open(`https://wa.me/${inst.whatsapp||""}?text=${msg}`,"_blank");}} style={{background:"rgba(37,211,102,.1)",border:"1px solid rgba(37,211,102,.28)",color:"#25d366",borderRadius:9,padding:"10px 14px",fontSize:13,fontWeight:700,cursor:"pointer",fontFamily:B,display:"flex",alignItems:"center",gap:6}}><Ico.Phone s={13} c="#25d366"/> WhatsApp</button>
+            <button onClick={e=>{e.stopPropagation();window.open(`https://${inst.website}`,"_blank");}} style={{background:t.bgCard,border:`1px solid ${t.border}`,color:t.sub,borderRadius:9,padding:"10px 14px",fontSize:13,fontWeight:700,cursor:"pointer",fontFamily:B,display:"flex",alignItems:"center",gap:6}}><Ico.Globe s={13} c={t.sub}/> Website</button>
           </div>
         </div>
       )}
@@ -521,11 +594,11 @@ function Installers(){
       <p style={{color:t.sub,fontSize:14,marginBottom:16}}>SESSA-accredited solar installers with real reviews from SA homeowners</p>
       <div style={{display:"flex",gap:8,marginBottom:10,flexWrap:"wrap"}}>
         <div style={{flex:1,minWidth:180,position:"relative"}}>
-          <span style={{position:"absolute",left:11,top:"50%",transform:"translateY(-50%)",fontSize:13,color:t.sub,pointerEvents:"none"}}>🔍</span>
+          <span style={{position:"absolute",left:11,top:"50%",transform:"translateY(-50%)",pointerEvents:"none",display:"flex"}}><Ico.Search s={14} c={t.sub}/></span>
           <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search name or city..." style={{...sel,paddingLeft:32,borderRadius:10,padding:"10px 12px 10px 32px"}}/>
         </div>
         <button onClick={()=>setShowF(o=>!o)} style={{background:showF||ac>0?`rgba(${t.rgb},.12)`:t.bgCard,border:`1px solid ${showF||ac>0?`rgba(${t.rgb},.4)`:t.border}`,color:showF||ac>0?t.accent:t.sub,borderRadius:10,padding:"10px 14px",cursor:"pointer",fontSize:13,fontWeight:600,display:"flex",alignItems:"center",gap:6,fontFamily:B}}>
-          ⚙️ Filters {ac>0&&<span style={{background:t.accent,color:t.dark?"#000":"#fff",borderRadius:"50%",width:17,height:17,fontSize:10,display:"inline-flex",alignItems:"center",justifyContent:"center",fontWeight:900}}>{ac}</span>}
+          <Ico.Settings s={14} c={showF||ac>0?t.accent:t.sub}/> Filters {ac>0&&<span style={{background:t.accent,color:t.dark?"#000":"#fff",borderRadius:"50%",width:17,height:17,fontSize:10,display:"inline-flex",alignItems:"center",justifyContent:"center",fontWeight:900}}>{ac}</span>}
         </button>
         <select value={sortBy} onChange={e=>setSortBy(e.target.value)} style={{...sel,width:"auto",padding:"10px 12px",borderRadius:10}}>
           <option value="rating">Top Rated</option><option value="reviews">Most Reviews</option><option value="jobs">Most Jobs</option><option value="experience">Experience</option>
@@ -553,7 +626,7 @@ function Installers(){
       {/* Two columns on desktop */}
       {filtered.length===0?(
         <div style={{background:t.bgCard,border:`1px solid ${t.border}`,borderRadius:13,padding:"28px",textAlign:"center"}}>
-          <div style={{fontSize:28,marginBottom:8}}>🔍</div>
+          <div style={{display:"flex",justifyContent:"center",marginBottom:8}}><Ico.Search s={28} c={t.sub}/></div>
           <div style={{fontFamily:H,fontSize:17,fontWeight:W.section,color:t.text,marginBottom:8}}>No Results Found</div>
           <button onClick={()=>{clearAll();setSearch("");}} style={{background:`rgba(${t.rgb},.1)`,border:`1px solid rgba(${t.rgb},.3)`,color:t.accent,borderRadius:10,padding:"9px 18px",fontSize:13,fontWeight:700,cursor:"pointer",fontFamily:B}}>Clear All Filters</button>
         </div>
@@ -564,7 +637,7 @@ function Installers(){
       )}
       <div style={{marginTop:16,background:`linear-gradient(135deg,rgba(${t.rgb},.08),rgba(${t.rgb},.03))`,border:`1px solid rgba(${t.rgb},.18)`,borderRadius:14,padding:"16px 18px"}}>
         <div style={{display:"flex",alignItems:"center",gap:12,flexWrap:"wrap"}}>
-          <div style={{fontSize:26}}>📋</div>
+          <div style={{width:44,height:44,borderRadius:12,background:`rgba(${t.rgb},.12)`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><Ico.FileText s={20} c={t.accent}/></div>
           <div style={{flex:1}}><div style={{fontFamily:H,fontSize:15,fontWeight:W.card,color:t.text,marginBottom:2}}>Installer? Generate PDF Proposals</div><div style={{fontSize:13,color:t.sub}}>Branded quotes from SolarIQ results. <span style={{color:t.accent,fontWeight:700}}>Coming soon.</span></div></div>
           <button style={{background:t.bgCard,border:`1px solid rgba(${t.rgb},.3)`,color:t.accent,borderRadius:10,padding:"9px 16px",fontSize:13,fontWeight:700,cursor:"pointer",fontFamily:B}}>Join Waitlist →</button>
         </div>
@@ -581,7 +654,7 @@ function Installers(){
           <div style={{position:"fixed",top:"50%",left:"50%",transform:"translate(-50%,-50%)",zIndex:500,width:"100%",maxWidth:460,background:t.dark?"#0d1018":"#f5f2e9",border:`1px solid ${t.border}`,borderRadius:20,padding:28,boxShadow:"0 32px 80px rgba(0,0,0,.5)",maxHeight:"90vh",overflowY:"auto"}}>
             {quoteSent?(
               <div style={{textAlign:"center",padding:"24px 0"}}>
-                <div style={{fontSize:40,marginBottom:12}}>✅</div>
+                <div style={{width:64,height:64,borderRadius:"50%",background:"rgba(74,222,128,.12)",border:"2px solid rgba(74,222,128,.3)",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 12px"}}><Ico.Check s={28} c="#4ade80"/></div>
                 <div style={{fontFamily:H,fontSize:20,fontWeight:800,color:"#4ade80",marginBottom:8}}>Quote Request Sent!</div>
                 <div style={{fontSize:13,color:t.sub,lineHeight:1.7,marginBottom:20}}>{quoteInst.name} will be in touch shortly. Your details have been saved.</div>
                 <button onClick={()=>setQuoteInst(null)} style={{background:`linear-gradient(135deg,${t.accent},${t.accent2})`,border:"none",borderRadius:10,padding:"11px 24px",fontSize:13,fontWeight:700,color:t.dark?"#000":"#fff",cursor:"pointer",fontFamily:B}}>Done</button>
@@ -640,11 +713,11 @@ function Servicing(){
   const TechCard=({tech,i})=>(
     <div style={{background:t.bgCard,border:`1px solid ${t.border}`,borderRadius:13,padding:"16px",animation:`fadeUp .35s ease ${i*.07}s both`}}>
       <div style={{display:"flex",alignItems:"flex-start",gap:10,marginBottom:12}}>
-        <div style={{width:42,height:42,borderRadius:10,background:`rgba(${t.rgb},.1)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0}}>🔧</div>
+        <div style={{width:42,height:42,borderRadius:10,background:`rgba(${t.rgb},.1)`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><Ico.Wrench s={20} c={t.accent}/></div>
         <div style={{flex:1,minWidth:0}}>
           <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:2,flexWrap:"wrap"}}>
             <span style={{fontFamily:H,fontSize:15,fontWeight:W.card,color:t.text}}>{tech.name}</span>
-            {tech.emergency&&<span style={{fontSize:9,background:"rgba(239,68,68,.15)",color:"#f87171",padding:"2px 7px",borderRadius:8,fontWeight:700}}>🚨 24/7</span>}
+            {tech.emergency&&<span style={{fontSize:9,background:"rgba(239,68,68,.15)",color:"#f87171",padding:"2px 7px",borderRadius:8,fontWeight:700,display:"inline-flex",alignItems:"center",gap:3}}><Ico.AlertTriangle s={8} c="#f87171"/> 24/7</span>}
           </div>
           <div style={{fontSize:12,color:t.sub,marginBottom:3}}>{tech.spec} · {tech.city}, {tech.prov}</div>
           <Stars n={tech.rating}/><span style={{fontSize:11,color:t.sub}}> ({tech.rev} reviews)</span>
@@ -656,12 +729,12 @@ function Servicing(){
       </div>
       <p style={{fontSize:12,color:t.sub,lineHeight:1.6,marginBottom:12}}>{tech.about}</p>
       <div style={{display:"flex",gap:7,marginBottom:12}}>
-        {tech.photos.map((p,i)=><div key={i} style={{width:48,height:48,background:`rgba(${t.rgb},.08)`,border:`1px solid ${t.border}`,borderRadius:8,display:"flex",alignItems:"center",justifyContent:"center",fontSize:20}}>{p}</div>)}
+        {[Ico.Wrench,Ico.Zap,Ico.Settings].map((IcoC,i)=><div key={i} style={{width:48,height:48,background:`rgba(${t.rgb},.08)`,border:`1px solid ${t.border}`,borderRadius:8,display:"flex",alignItems:"center",justifyContent:"center"}}><IcoC s={18} c={t.accent}/></div>)}
       </div>
       <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
         <PBtn sm style={{flex:1,minWidth:100,borderRadius:9,padding:"9px"}}>Book Service</PBtn>
-        <button onClick={()=>{const msg=encodeURIComponent(`Hi ${tech.name}, I found you on SolarIQ. I need ${tech.spec}. Please contact me to schedule a service call.`);window.open(`https://wa.me/?text=${msg}`,"_blank");}} style={{background:"rgba(37,211,102,.1)",border:"1px solid rgba(37,211,102,.25)",color:"#25d366",borderRadius:9,padding:"9px 13px",fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:B}}>📱 WhatsApp</button>
-        <button onClick={()=>window.open(`https://${tech.website}`,"_blank")} style={{background:t.bgCard,border:`1px solid ${t.border}`,color:t.sub,borderRadius:9,padding:"9px 13px",fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:B}}>🌐 Website</button>
+        <button onClick={()=>{const msg=encodeURIComponent(`Hi ${tech.name}, I found you on SolarIQ. I need ${tech.spec}. Please contact me to schedule a service call.`);window.open(`https://wa.me/?text=${msg}`,"_blank");}} style={{background:"rgba(37,211,102,.1)",border:"1px solid rgba(37,211,102,.25)",color:"#25d366",borderRadius:9,padding:"9px 13px",fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:B,display:"flex",alignItems:"center",gap:5}}><Ico.Phone s={12} c="#25d366"/> WhatsApp</button>
+        <button onClick={()=>window.open(`https://${tech.website}`,"_blank")} style={{background:t.bgCard,border:`1px solid ${t.border}`,color:t.sub,borderRadius:9,padding:"9px 13px",fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:B,display:"flex",alignItems:"center",gap:5}}><Ico.Globe s={12} c={t.sub}/> Website</button>
       </div>
     </div>
   );
@@ -672,12 +745,12 @@ function Servicing(){
       <h2 style={{fontFamily:H,fontSize:sc.isMobile?22:28,fontWeight:W.section,color:t.text,marginBottom:5}}>Solar Servicing & Repair</h2>
       <p style={{color:t.sub,fontSize:14,marginBottom:20}}>Keep your system at peak performance — for the lifetime of your investment.</p>
       <div style={{display:"grid",gridTemplateColumns:sc.isDesktop?"repeat(4,1fr)":sc.isMobile?"1fr 1fr":"repeat(auto-fill,minmax(200px,1fr))",gap:12,marginBottom:16}}>
-        {[{id:"health",icon:"🩺",title:"Health Check",desc:"6 questions to diagnose your system.",badge:"AI",color:"#4ade80"},{id:"error",icon:"⚠️",title:"Error Code Translator",desc:"Type any inverter code. Plain English instantly.",badge:"Instant",color:t.accent},{id:"techs",icon:"🔧",title:"Find a Technician",desc:"Verified repair specialists near you.",badge:null,color:"#60a5fa"},{id:"reminder",icon:"📅",title:"Service Reminders",desc:"WhatsApp reminders when service is due.",badge:"Free",color:"#c084fc"}].map((c,i)=>(
+        {[{id:"health",SvgIcon:Ico.Stethoscope,title:"Health Check",desc:"6 questions to diagnose your system.",badge:"AI",color:"#4ade80"},{id:"error",SvgIcon:Ico.AlertTriangle,title:"Error Code Translator",desc:"Type any inverter code. Plain English instantly.",badge:"Instant",color:t.accent},{id:"techs",SvgIcon:Ico.Wrench,title:"Find a Technician",desc:"Verified repair specialists near you.",badge:null,color:"#60a5fa"},{id:"reminder",SvgIcon:Ico.Calendar,title:"Service Reminders",desc:"WhatsApp reminders when service is due.",badge:"Free",color:"#c084fc"}].map((c,i)=>(
           <div key={c.id} onClick={()=>setPage(c.id)} style={{background:t.bgCard,border:`1px solid ${t.border}`,borderRadius:16,padding:sc.isDesktop?"22px":"16px 14px",cursor:"pointer",transition:"all .22s",position:"relative",animation:`fadeUp .35s ease ${i*.07}s both`,display:"flex",flexDirection:"column"}}
             onMouseEnter={e=>{e.currentTarget.style.borderColor=`${c.color}44`;e.currentTarget.style.transform="translateY(-3px)";}}
             onMouseLeave={e=>{e.currentTarget.style.borderColor=t.border;e.currentTarget.style.transform="none";}}>
             {c.badge&&<div style={{position:"absolute",top:12,right:12,fontSize:9,background:`${c.color}18`,color:c.color,padding:"2px 7px",borderRadius:8,fontWeight:700}}>{c.badge}</div>}
-            <div style={{fontSize:sc.isDesktop?32:24,marginBottom:12}}>{c.icon}</div>
+            <div style={{width:48,height:48,borderRadius:14,background:`${c.color}12`,display:"flex",alignItems:"center",justifyContent:"center",marginBottom:12}}><c.SvgIcon s={sc.isDesktop?24:20} c={c.color}/></div>
             <div style={{fontFamily:H,fontSize:sc.isDesktop?17:15,fontWeight:W.card,color:t.text,marginBottom:5}}>{c.title}</div>
             <div style={{fontSize:12,color:t.sub,lineHeight:1.6,marginBottom:12,flex:1}}>{c.desc}</div>
             <div style={{fontSize:12,color:c.color,fontWeight:600}}>Open →</div>
@@ -685,7 +758,7 @@ function Servicing(){
         ))}
       </div>
       <div style={{background:"rgba(239,68,68,.06)",border:"1px solid rgba(239,68,68,.15)",borderRadius:12,padding:"14px 18px",display:"flex",alignItems:"center",gap:12}}>
-        <span style={{fontSize:22}}>🚨</span>
+        <div style={{width:38,height:38,borderRadius:10,background:"rgba(239,68,68,.12)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><Ico.AlertTriangle s={20} c="#f87171"/></div>
         <div style={{flex:1}}><div style={{fontFamily:H,fontSize:14,fontWeight:W.card,color:"#f87171",marginBottom:2}}>System Completely Offline?</div><div style={{fontSize:13,color:t.sub}}>Emergency technicians available 24/7 across SA.</div></div>
         <button onClick={()=>setPage("techs")} style={{background:"rgba(239,68,68,.15)",border:"1px solid rgba(239,68,68,.3)",color:"#f87171",borderRadius:9,padding:"10px 16px",fontSize:13,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap",fontFamily:B}}>Find Now</button>
       </div>
@@ -713,7 +786,7 @@ function Servicing(){
           <div style={{animation:"fadeUp .35s ease"}}>
             {errRes.notFound?(
               <div style={{background:t.bgCard,border:`1px solid ${t.border}`,borderRadius:13,padding:"20px",textAlign:"center"}}>
-                <div style={{fontSize:28,marginBottom:8}}>🤔</div>
+                <div style={{display:"flex",justifyContent:"center",marginBottom:8}}><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
                 <div style={{fontFamily:H,fontSize:17,fontWeight:W.section,color:t.text,marginBottom:4}}>Code "{errRes.code}" Not Found</div>
                 <div style={{fontSize:13,color:t.sub,marginBottom:12}}>We add new codes daily. A technician can diagnose on the spot.</div>
                 <button onClick={()=>setPage("techs")} style={{background:`rgba(${t.rgb},.1)`,border:`1px solid rgba(${t.rgb},.3)`,color:t.accent,borderRadius:10,padding:"9px 18px",fontSize:13,fontWeight:700,cursor:"pointer",fontFamily:B}}>Find a Technician →</button>
@@ -731,14 +804,14 @@ function Servicing(){
                 <div style={{fontSize:14,color:t.sub,lineHeight:1.7,marginBottom:10}}>{errRes.fix}</div>
                 <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
                   <div style={{flex:1,background:errRes.diy?"rgba(74,222,128,.07)":"rgba(239,68,68,.07)",border:`1px solid ${errRes.diy?"rgba(74,222,128,.2)":"rgba(239,68,68,.2)"}`,borderRadius:10,padding:"10px 13px",display:"flex",alignItems:"center",gap:8}}>
-                    <span>{errRes.diy?"✅":"⚠️"}</span>
+                    <span style={{display:"flex",alignItems:"center"}}>{errRes.diy?<Ico.Check s={14} c="#4ade80"/>:<Ico.AlertTriangle s={14} c="#f87171"}/>}</span>
                     <span style={{fontSize:12,color:errRes.diy?"#4ade80":"#f87171",fontWeight:600,fontFamily:B}}>{errRes.diy?"You can resolve this yourself":"Requires a qualified technician"}</span>
                   </div>
                   {!errRes.diy&&<PBtn sm onClick={()=>setPage("techs")} style={{borderRadius:10,width:"auto",padding:"10px 16px"}}>Find Technician →</PBtn>}
                 </div>
                 {errRes.specs&&errRes.specs.length>0&&(
                   <div style={{marginTop:10,background:t.bgCard,border:`1px solid ${t.border}`,borderRadius:10,padding:"11px 14px"}}>
-                    <div style={{fontSize:11,color:t.sub,marginBottom:6}}>🔧 Recommended specialist:</div>
+                    <div style={{fontSize:11,color:t.sub,marginBottom:6}}>Recommended specialist:</div>
                     <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
                       {errRes.specs.map(s=><button key={s} onClick={()=>{setTSpec(s);setPage("techs");}} style={{background:`rgba(${t.rgb},.1)`,border:`1px solid rgba(${t.rgb},.3)`,color:t.accent,borderRadius:8,padding:"5px 12px",fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:B}}>{s} →</button>)}
                     </div>
@@ -790,7 +863,7 @@ function Servicing(){
           </div>
           {hResult.needsSpecs.length>0&&(
             <div style={{background:`rgba(${t.rgb},.05)`,border:`1px solid rgba(${t.rgb},.2)`,borderRadius:10,padding:"11px 14px",marginBottom:14}}>
-              <div style={{fontSize:12,color:t.sub,marginBottom:6}}>🔧 We recommend:</div>
+              <div style={{fontSize:12,color:t.sub,marginBottom:6}}>We recommend:</div>
               <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
                 {hResult.needsSpecs.map(s=><button key={s} onClick={()=>{setTSpec(s);setPage("techs");}} style={{background:`rgba(${t.rgb},.1)`,border:`1px solid rgba(${t.rgb},.3)`,color:t.accent,borderRadius:8,padding:"5px 12px",fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:B}}>{s} →</button>)}
               </div>
@@ -872,7 +945,7 @@ function Servicing(){
           </div>
         ))}
       </div>
-      <PBtn style={{width:"100%"}}>📱 Register My System Free</PBtn>
+      <PBtn style={{width:"100%"}}style={{display:"flex",alignItems:"center",justifyContent:"center",gap:7}}>Register My System Free</PBtn>
       <div style={{fontSize:11,color:t.sub,textAlign:"center",marginTop:10}}>WhatsApp only · No spam · Unsubscribe anytime</div>
     </div>
   );
@@ -899,7 +972,7 @@ function ArticleView({article,onBack}){
     <div>
       <div style={{display:"flex",gap:7,alignItems:"center",marginBottom:14}}>
         <Tag>{article.tag}</Tag>
-        {article.hot&&<span style={{fontSize:11,color:"#f87171"}}>🔥 Trending</span>}
+        {article.hot&&<span style={{fontSize:11,color:"#f87171"}}>Trending</span>}
         <span style={{fontSize:12,color:t.sub,marginLeft:"auto"}}>{article.min} min · {article.views} views</span>
       </div>
       <h1 style={{fontFamily:H,fontSize:"clamp(20px,3vw,34px)",fontWeight:W.hero,color:t.text,lineHeight:1.15,marginBottom:16}}>{article.title}</h1>
@@ -960,7 +1033,7 @@ function ArticleView({article,onBack}){
                 <div style={{fontFamily:H,fontSize:15,fontWeight:W.card,color:t.accent,marginBottom:3}}>{article.affiliate.label}</div>
                 <div style={{fontSize:11,color:t.sub}}>Best current price · Usually ships in 3–5 days</div>
               </div>
-              <span style={{fontSize:20,flexShrink:0}}>🛒</span>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{flexShrink:0}}><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
             </a>
           </div>
           <div style={{fontSize:10,color:t.sub,marginBottom:24,lineHeight:1.6,padding:"8px 10px",background:t.bgCard,borderRadius:8,border:`1px solid ${t.border}`}}>
@@ -975,7 +1048,7 @@ function ArticleView({article,onBack}){
       <div style={{background:`linear-gradient(135deg,rgba(${t.rgb},.1),rgba(${t.rgb},.04))`,border:`1px solid rgba(${t.rgb},.2)`,borderRadius:14,padding:"18px",textAlign:"center",marginBottom:14}}>
         <div style={{fontFamily:H,fontSize:15,fontWeight:W.section,color:t.text,marginBottom:5}}>Ready to Calculate?</div>
         <p style={{color:t.sub,fontSize:13,marginBottom:13}}>Personalised result in under 2 minutes. Free.</p>
-        <PBtn sm style={{width:"100%",padding:"10px"}}>☀️ Calculate My System</PBtn>
+        <PBtn sm style={{width:"100%",padding:"10px"}} style={{display:"flex",alignItems:"center",justifyContent:"center",gap:6}}><span style={{display:"flex"}}><Ico.Sun s={14} c={typeof isDark !== "undefined" && isDark?"#000":"#fff"}/></span> Calculate My System</PBtn>
       </div>
       {related.length>0&&(
         <div>
@@ -1004,7 +1077,7 @@ function ArticleView({article,onBack}){
           {body}
           <div style={{background:`linear-gradient(135deg,rgba(${t.rgb},.1),rgba(${t.rgb},.04))`,border:`1px solid rgba(${t.rgb},.2)`,borderRadius:14,padding:"18px",textAlign:"center",marginBottom:20}}>
             <div style={{fontFamily:H,fontSize:15,fontWeight:W.section,color:t.text,marginBottom:4}}>Ready to Calculate?</div>
-            <PBtn sm style={{width:"100%",padding:"10px"}}>☀️ Calculate My System</PBtn>
+            <PBtn sm style={{width:"100%",padding:"10px"}} style={{display:"flex",alignItems:"center",justifyContent:"center",gap:6}}><span style={{display:"flex"}}><Ico.Sun s={14} c={typeof isDark !== "undefined" && isDark?"#000":"#fff"}/></span> Calculate My System</PBtn>
           </div>
           {related.length>0&&(
             <div>
@@ -1045,7 +1118,7 @@ function Blog(){
         <div style={{padding:sc.isDesktop?"22px 24px":"16px 18px"}}>
           <div style={{display:"flex",gap:7,marginBottom:10,alignItems:"center"}}>
             <Tag>FEATURED</Tag><Tag>{list[0].tag}</Tag>
-            {list[0].hot&&<span style={{fontSize:11,color:"#f87171"}}>🔥 {list[0].views} reads</span>}
+            {list[0].hot&&<span style={{fontSize:11,color:"#f87171"}}>{list[0].views} reads</span>}
           </div>
           <h3 style={{fontFamily:H,fontSize:sc.isDesktop?"clamp(18px,2vw,24px)":"clamp(15px,3vw,20px)",fontWeight:W.section,color:t.text,marginBottom:8,lineHeight:1.2}}>{list[0].title}</h3>
           <p style={{fontSize:13,color:t.sub,lineHeight:1.7,marginBottom:12,maxWidth:700}}>{list[0].intro}</p>
@@ -1064,7 +1137,7 @@ function Blog(){
             {p.coverImg&&<img src={p.coverImg} alt="" style={{width:"100%",height:120,objectFit:"cover",display:"block"}}/>}
             <div style={{padding:"14px"}}>
               <div style={{display:"flex",gap:6,marginBottom:8,alignItems:"center"}}>
-                <Tag>{p.tag}</Tag>{p.hot&&<span style={{fontSize:11,color:"#f87171"}}>🔥</span>}
+                <Tag>{p.tag}</Tag>{p.hot&&<span style={{fontSize:9,background:"rgba(248,113,113,.15)",color:"#f87171",padding:"1px 6px",borderRadius:6,fontWeight:700}}>HOT</span>}
                 <span style={{fontSize:10,color:t.sub,marginLeft:"auto"}}>{p.views}</span>
               </div>
               <h4 style={{fontFamily:H,fontSize:13,fontWeight:W.card,color:t.text,lineHeight:1.35,marginBottom:10}}>{p.title}</h4>
@@ -1113,7 +1186,7 @@ function ComingSoon(){
       </div>
       <div style={{position:"relative",zIndex:1,display:"flex",flexDirection:"column",alignItems:"center",width:"100%",maxWidth:520}}>
         <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:24,animation:"fadeUp .6s ease"}}>
-          <div style={{width:44,height:44,background:"linear-gradient(135deg,#f5a623,#ff6b00)",borderRadius:12,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,animation:"float 3s ease infinite",boxShadow:"0 0 30px rgba(245,166,35,.35)"}}>☀️</div>
+          <div style={{width:44,height:44,background:"linear-gradient(135deg,#f5a623,#ff6b00)",borderRadius:12,display:"flex",alignItems:"center",justifyContent:"center",animation:"float 3s ease infinite",boxShadow:"0 0 30px rgba(245,166,35,.35)"}}><svg width="24" height="24" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="7" fill="#000"/><line x1="16" y1="2" x2="16" y2="6" stroke="#000" strokeWidth="2.2" strokeLinecap="round"/><line x1="16" y1="26" x2="16" y2="30" stroke="#000" strokeWidth="2.2" strokeLinecap="round"/><line x1="2" y1="16" x2="6" y2="16" stroke="#000" strokeWidth="2.2" strokeLinecap="round"/><line x1="26" y1="16" x2="30" y2="16" stroke="#000" strokeWidth="2.2" strokeLinecap="round"/><line x1="5.5" y1="5.5" x2="8.4" y2="8.4" stroke="#000" strokeWidth="2.2" strokeLinecap="round"/><line x1="23.6" y1="23.6" x2="26.5" y2="26.5" stroke="#000" strokeWidth="2.2" strokeLinecap="round"/><line x1="26.5" y1="5.5" x2="23.6" y2="8.4" stroke="#000" strokeWidth="2.2" strokeLinecap="round"/><line x1="8.4" y1="23.6" x2="5.5" y2="26.5" stroke="#000" strokeWidth="2.2" strokeLinecap="round"/></svg></div>
           <span style={{fontFamily:"'Lexend',sans-serif",fontSize:34,fontWeight:900,letterSpacing:1.5,color:"#f0f0f0"}}>Solar<span style={{color:"#f5a623"}}>IQ</span></span>
         </div>
         <div style={{textAlign:"center",marginBottom:32,animation:"fadeUp .7s ease"}}>
@@ -1135,7 +1208,7 @@ function ComingSoon(){
         <div style={{width:"100%",maxWidth:380,marginBottom:12,animation:"fadeUp .9s ease"}}>
           {done?(
             <div style={{background:"rgba(74,222,128,.08)",border:"1px solid rgba(74,222,128,.2)",borderRadius:12,padding:"16px",textAlign:"center"}}>
-              <div style={{fontSize:22,marginBottom:4}}>✅</div>
+              <div style={{display:"flex",justifyContent:"center",marginBottom:8}}><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#4ade80" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
               <div style={{fontFamily:"'Lexend',sans-serif",fontSize:16,fontWeight:700,color:"#4ade80",marginBottom:2}}>You're on the list</div>
               <div style={{fontSize:13,color:"rgba(255,255,255,.3)"}}>We'll notify you on launch day.</div>
             </div>
@@ -1147,7 +1220,7 @@ function ComingSoon(){
             </div>
           )}
         </div>
-        <div style={{fontSize:11,color:"rgba(255,255,255,.16)",animation:"fadeUp 1s ease",textAlign:"center"}}>No spam · Unsubscribe anytime · 🇿🇦 Built for South Africa</div>
+        <div style={{fontSize:11,color:"rgba(255,255,255,.16)",animation:"fadeUp 1s ease",textAlign:"center"}}>No spam · Unsubscribe anytime · Built for South Africa</div>
       </div>
     </div>
   );
@@ -1173,8 +1246,14 @@ export default function App(){
   };
   useEffect(()=>{const mq=window.matchMedia("(prefers-color-scheme: dark)");const h=e=>setIsDark(e.matches);mq.addEventListener("change",h);return()=>mq.removeEventListener("change",h);},[]);
   const goTab=id=>{setTab(id);if(id!=="result")setRes(null);window.scrollTo({top:0,behavior:"smooth"});};
-  const NAV=[{id:"home",l:"Home",icon:"🏠"},{id:"calc",l:"Calculator",icon:"☀️"},{id:"inst",l:"Installers",icon:"🗺️"},{id:"serv",l:"Servicing",icon:"🔧"},{id:"blog",l:"Guides",icon:"📖"}];
-  const TICKS=["☀️ Solar tax rebate: claim 25% back from SARS","🔋 Load shedding prep — is your system sized right?","⚙️ Pro Calculator now live","🩺 Free System Health Check — 2 minutes","🔧 Verified repair technicians across SA","📋 Installer proposal generator — coming soon"];
+  const NAV=[
+    {id:"home", l:"Home",      SvgIcon:Ico.Home},
+    {id:"calc", l:"Calculator",SvgIcon:Ico.Sun},
+    {id:"inst", l:"Installers",SvgIcon:Ico.Map},
+    {id:"serv", l:"Servicing", SvgIcon:Ico.Wrench},
+    {id:"blog", l:"Guides",    SvgIcon:Ico.Book},
+  ];
+  const TICKS=["Solar tax rebate: claim 25% back from SARS","Load shedding prep — is your system sized right?","Pro Calculator now live","Free System Health Check — 2 minutes","Verified repair technicians across SA","Installer proposal generator — coming soon"];
   const css=`
     @import url('https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -1207,7 +1286,7 @@ export default function App(){
           <nav style={{background:t.navBg,backdropFilter:"blur(20px)",borderBottom:`1px solid ${t.border}`,padding:"0 28px",position:"sticky",top:0,zIndex:200,flexShrink:0}}>
             <div style={{maxWidth:1360,margin:"0 auto",display:"flex",alignItems:"center",justifyContent:"space-between",height:52,width:"100%"}}>
               <div onClick={()=>goTab("home")} style={{display:"flex",alignItems:"center",gap:8,cursor:"pointer",flexShrink:0}}>
-                <div style={{width:26,height:26,background:`linear-gradient(135deg,${t.accent},${t.accent2})`,borderRadius:7,display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,animation:"float 3s ease infinite"}}>☀️</div>
+                <div style={{width:26,height:26,background:`linear-gradient(135deg,${t.accent},${t.accent2})`,borderRadius:7,display:"flex",alignItems:"center",justifyContent:"center",animation:"float 3s ease infinite"}}><Ico.Sun s={15} c="#000"/></div>
                 <span style={{fontFamily:H,fontSize:20,fontWeight:W.logo,letterSpacing:1,color:t.text}}>Solar<span style={{color:t.accent}}>IQ</span></span>
                 <span style={{fontSize:9,background:`rgba(${t.rgb},.15)`,color:t.accent,padding:"1px 6px",borderRadius:8,fontWeight:700,letterSpacing:1}}>BETA</span>
               </div>
@@ -1215,8 +1294,8 @@ export default function App(){
                 {NAV.map(x=><button key={x.id} onClick={()=>goTab(x.id)} style={{background:tab===x.id?`rgba(${t.rgb},.08)`:"none",border:`1px solid ${tab===x.id?`rgba(${t.rgb},.22)`:"transparent"}`,color:tab===x.id?t.accent:t.sub,padding:"5px 16px",borderRadius:7,cursor:"pointer",fontSize:12,fontWeight:600,transition:"all .2s",fontFamily:B}}>{x.l}</button>)}
               </div>
               <div style={{display:"flex",alignItems:"center",gap:8}}>
-                <button onClick={()=>setIsDark(d=>!d)} style={{background:`rgba(${t.rgb},.1)`,border:`1px solid rgba(${t.rgb},.25)`,borderRadius:8,padding:"5px 10px",cursor:"pointer",fontSize:15,lineHeight:1}}>{isDark?"⛅":"☀️"}</button>
-                <PBtn sm style={{borderRadius:7,padding:"7px 16px",fontSize:12,width:"auto"}}>📧 Stay Updated</PBtn>
+                <button onClick={()=>setIsDark(d=>!d)} style={{background:`rgba(${t.rgb},.1)`,border:`1px solid rgba(${t.rgb},.25)`,borderRadius:8,padding:"5px 10px",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}><Ico.Sun s={16} c={t.accent}/></button>
+                <PBtn sm style={{borderRadius:7,padding:"7px 16px",fontSize:12,width:"auto",display:"flex",alignItems:"center",gap:6}}><Ico.ArrowRight s={12} c={isDark?"#000":"#fff"}/> Stay Updated</PBtn>
               </div>
             </div>
           </nav>
@@ -1224,10 +1303,10 @@ export default function App(){
         {sc.isMobile&&(
           <div style={{background:t.navBg,backdropFilter:"blur(20px)",borderBottom:`1px solid ${t.border}`,padding:"0 16px",position:"sticky",top:0,zIndex:200,height:50,display:"flex",alignItems:"center",justifyContent:"space-between",flexShrink:0}}>
             <div onClick={()=>goTab("home")} style={{display:"flex",alignItems:"center",gap:7,cursor:"pointer"}}>
-              <div style={{width:24,height:24,background:`linear-gradient(135deg,${t.accent},${t.accent2})`,borderRadius:6,display:"flex",alignItems:"center",justifyContent:"center",fontSize:11}}>☀️</div>
+              <div style={{width:24,height:24,background:`linear-gradient(135deg,${t.accent},${t.accent2})`,borderRadius:6,display:"flex",alignItems:"center",justifyContent:"center"}}><Ico.Sun s={13} c="#000"/></div>
               <span style={{fontFamily:H,fontSize:18,fontWeight:W.logo,letterSpacing:1,color:t.text}}>Solar<span style={{color:t.accent}}>IQ</span></span>
             </div>
-            <button onClick={()=>setIsDark(d=>!d)} style={{background:`rgba(${t.rgb},.1)`,border:`1px solid rgba(${t.rgb},.25)`,borderRadius:7,padding:"5px 10px",cursor:"pointer",fontSize:14,lineHeight:1}}>{isDark?"⛅":"☀️"}</button>
+            <button onClick={()=>setIsDark(d=>!d)} style={{background:`rgba(${t.rgb},.1)`,border:`1px solid rgba(${t.rgb},.25)`,borderRadius:7,padding:"5px 8px",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}><Ico.Sun s={14} c={t.accent}/></button>
           </div>
         )}
         <div style={{flex:1,width:"100%"}}>
@@ -1245,21 +1324,21 @@ export default function App(){
                     </h1>
                     <p style={{fontSize:sc.isMobile?14:16,color:t.sub,lineHeight:1.8,marginBottom:24,maxWidth:420}}>The only platform SA solar owners need — calculate, install, maintain, repair. Free. Always.</p>
                     <div style={{display:"flex",flexDirection:"column",gap:11,maxWidth:380}}>
-                      <PBtn onClick={()=>goTab("calc")} style={{fontSize:15,padding:"14px 28px"}}>☀️ Calculate My System</PBtn>
-                      <button onClick={()=>goTab("serv")} style={{background:`rgba(${t.rgb},.08)`,border:`1px solid rgba(${t.rgb},.2)`,color:t.accent,borderRadius:30,padding:"13px 20px",fontSize:14,fontWeight:600,cursor:"pointer",fontFamily:B,width:"100%"}}>🔧 Service My Solar</button>
+                      <PBtn onClick={()=>goTab("calc")} style={{fontSize:15,padding:"14px 28px",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}><Ico.Sun s={17} c={isDark?"#000":"#fff"}/> Calculate My System</PBtn>
+                      <button onClick={()=>goTab("serv")} style={{background:`rgba(${t.rgb},.08)`,border:`1px solid rgba(${t.rgb},.2)`,color:t.accent,borderRadius:30,padding:"13px 20px",fontSize:14,fontWeight:600,cursor:"pointer",fontFamily:B,width:"100%",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}><Ico.Wrench s={15} c={t.accent}/> Service My Solar</button>
                     </div>
                     <div style={{display:"flex",gap:sc.isMobile?16:32,marginTop:24,flexWrap:"wrap"}}>
-                      {[["4","Calc modes"],["R0","Always free"],["🇿🇦","SA built"],["24/7","Support"]].map(([v,l])=>(
+                      {[["4","Calc modes"],["R0","Always free"],["SA","Built for SA"],["24/7","Support"]].map(([v,l])=>(
                         <div key={l}><div style={{fontFamily:H,fontSize:20,fontWeight:W.section,color:t.text}}>{v}</div><div style={{fontSize:11,color:t.sub,marginTop:2}}>{l}</div></div>
                       ))}
                     </div>
                   </div>
                   <div style={{display:"flex",flexDirection:"column",gap:8}}>
-                    {[{icon:"✨",l:"Quick Calculator",s:"4 simple questions — 60 seconds",tab:"calc"},{icon:"⚙️",l:"Pro Calculator",s:"Full kW/kWh/Ah technical inputs",tab:"calc"},{icon:"🗺️",l:"Installer Directory",s:"SESSA-accredited, verified + finance options",tab:"inst"},{icon:"🩺",l:"Health Check",s:"AI-powered system diagnostic",tab:"serv",badge:"AI"},{icon:"⚠️",l:"Error Code Translator",s:"Plain English inverter explanations",tab:"serv"},{icon:"🔧",l:"Find a Technician",s:"Matched to your issue, near you",tab:"serv"}].map((x,i)=>(
+                    {[{SvgIcon:Ico.Sparkles,l:"Quick Calculator",s:"4 simple questions — 60 seconds",tab:"calc"},{SvgIcon:Ico.Settings,l:"Pro Calculator",s:"Full kW/kWh/Ah technical inputs",tab:"calc"},{SvgIcon:Ico.Map,l:"Installer Directory",s:"SESSA-accredited, verified + finance options",tab:"inst"},{SvgIcon:Ico.Stethoscope,l:"Health Check",s:"AI-powered system diagnostic",tab:"serv",badge:"AI"},{SvgIcon:Ico.AlertTriangle,l:"Error Code Translator",s:"Plain English inverter explanations",tab:"serv"},{SvgIcon:Ico.Wrench,l:"Find a Technician",s:"Matched to your issue, near you",tab:"serv"}].map((x,i)=>(
                       <div key={x.l} onClick={()=>goTab(x.tab)} style={{display:"flex",alignItems:"center",gap:12,background:t.bgCard,border:`1px solid ${t.border}`,borderRadius:12,padding:"12px 14px",cursor:"pointer",transition:"all .2s",animation:`fadeUp .4s ease ${i*.05}s both`}}
                         onMouseEnter={e=>{e.currentTarget.style.borderColor=`rgba(${t.rgb},.3)`;e.currentTarget.style.transform="translateX(4px)";}}
                         onMouseLeave={e=>{e.currentTarget.style.borderColor=t.border;e.currentTarget.style.transform="none";}}>
-                        <div style={{width:34,height:34,borderRadius:9,background:`rgba(${t.rgb},.08)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:15,flexShrink:0}}>{x.icon}</div>
+                        <div style={{width:34,height:34,borderRadius:9,background:`rgba(${t.rgb},.08)`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><x.SvgIcon s={16} c={t.accent}/></div>
                         <div style={{flex:1,minWidth:0}}><div style={{fontSize:13,fontWeight:600,color:t.text,marginBottom:2,fontFamily:H}}>{x.l}</div><div style={{fontSize:11,color:t.sub}}>{x.s}</div></div>
                         {x.badge&&<span style={{fontSize:9,background:`rgba(${t.rgb},.12)`,color:t.accent,padding:"2px 6px",borderRadius:7,fontWeight:700,flexShrink:0}}>{x.badge}</span>}
                         <span style={{fontSize:13,color:t.sub,flexShrink:0}}>›</span>
@@ -1273,12 +1352,12 @@ export default function App(){
                     <h2 style={{fontFamily:H,fontSize:sc.isMobile?19:26,fontWeight:W.section,color:t.text}}>SolarIQ is with you at every stage</h2>
                   </div>
                   <div style={{display:"grid",gridTemplateColumns:sc.isMobile?"1fr 1fr":"repeat(5,1fr)",gap:10}}>
-                    {[{n:"01",l:"Research",icon:"🔍",d:"Calculate what you need",c:t.accent},{n:"02",l:"Compare",icon:"⚖️",d:"Find the best installers",c:t.accent2},{n:"03",l:"Install",icon:"⚡",d:"Accredited professionals",c:"#4ade80"},{n:"04",l:"Maintain",icon:"🔧",d:"Reminders & cleaning tips",c:"#60a5fa"},{n:"05",l:"Repair",icon:"🩺",d:"Error codes & health checks",c:"#c084fc"}].map((s,i)=>(
+                    {[{n:"01",l:"Research",SvgIcon:Ico.Search,d:"Calculate what you need",c:t.accent},{n:"02",l:"Compare",SvgIcon:Ico.Scale,d:"Find the best installers",c:t.accent2},{n:"03",l:"Install",SvgIcon:Ico.Zap,d:"Accredited professionals",c:"#4ade80"},{n:"04",l:"Maintain",SvgIcon:Ico.Wrench,d:"Reminders & cleaning tips",c:"#60a5fa"},{n:"05",l:"Repair",SvgIcon:Ico.Stethoscope,d:"Error codes & health checks",c:"#c084fc"}].map((s,i)=>(
                       <div key={s.n} style={{background:t.bgCard,border:`1px solid ${t.border}`,borderRadius:12,padding:"16px 14px",animation:`fadeUp .4s ease ${i*.07}s both`}}>
                         <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:8}}>
                           <span style={{fontFamily:H,fontSize:10,fontWeight:W.logo,color:s.c,opacity:.4}}>{s.n}</span>
                           <div style={{flex:1,height:1,background:`${s.c}20`}}/>
-                          <span style={{fontSize:16}}>{s.icon}</span>
+                          <s.SvgIcon s={16} c={s.c}/>
                         </div>
                         <div style={{fontFamily:H,fontSize:14,fontWeight:W.card,color:s.c,marginBottom:4}}>{s.l}</div>
                         <div style={{fontSize:12,color:t.sub,lineHeight:1.5}}>{s.d}</div>
@@ -1287,12 +1366,12 @@ export default function App(){
                   </div>
                 </div>
                 <div style={{background:`linear-gradient(135deg,rgba(${t.rgb},.08),rgba(${t.rgb},.03))`,border:`1px solid rgba(${t.rgb},.15)`,borderRadius:16,padding:sc.isMobile?"20px":"32px",textAlign:"center"}}>
-                  <div style={{fontSize:24,marginBottom:10}}>📬</div>
+                  <div style={{display:"flex",justifyContent:"center",marginBottom:10}}><Ico.ArrowRight s={24} c={t.accent}/></div>
                   <h3 style={{fontFamily:H,fontSize:sc.isMobile?18:22,fontWeight:W.section,color:t.text,marginBottom:6}}>Solar insights for SA homeowners</h3>
                   <p style={{color:t.sub,fontSize:14,marginBottom:18,lineHeight:1.7,maxWidth:400,margin:"0 auto 18px"}}>Weekly deals, maintenance tips and load shedding updates. No spam, unsubscribe anytime.</p>
                   <div style={{display:"flex",flexDirection:sc.isMobile?"column":"row",gap:8,justifyContent:"center",maxWidth:380,margin:"0 auto"}}>
                     {nlDone?(
-                      <div style={{fontSize:13,color:"#4ade80",fontWeight:600,padding:"11px 0"}}>✅ You're subscribed! Thanks.</div>
+                      <div style={{fontSize:13,color:"#4ade80",fontWeight:600,padding:"11px 0",display:"flex",alignItems:"center",justifyContent:"center",gap:6}}><Ico.Check s={14} c="#4ade80"/> You're subscribed! Thanks.</div>
                     ):(
                       <>
                         <input value={nlEmail} onChange={e=>setNlEmail(e.target.value)} onKeyDown={e=>e.key==="Enter"&&saveNewsletter()} placeholder="your@email.com" style={{flex:1,background:t.inputBg,border:`1px solid ${t.border}`,borderRadius:9,padding:"11px 14px",color:t.text,fontSize:14,outline:"none",fontFamily:B,width:"100%"}}/>
@@ -1312,15 +1391,15 @@ export default function App(){
         </div>
         <div style={{borderTop:`1px solid ${t.border}`,padding:"20px 28px",textAlign:"center",paddingBottom:sc.isMobile?80:20,flexShrink:0}}>
           <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:7,marginBottom:4}}>
-            <span>☀️</span><span style={{fontFamily:H,fontSize:14,fontWeight:W.logo,letterSpacing:1,color:t.text}}>Solar<span style={{color:t.accent}}>IQ</span></span>
+            <Ico.Sun s={16} c={t.accent}/><span style={{fontFamily:H,fontSize:14,fontWeight:W.logo,letterSpacing:1,color:t.text}}>Solar<span style={{color:t.accent}}>IQ</span></span>
           </div>
-          <div style={{fontSize:12,color:t.sub}}>South Africa's complete solar platform. 🇿🇦</div>
+          <div style={{fontSize:12,color:t.sub}}>South Africa's complete solar platform.</div>
         </div>
         {sc.isMobile&&(
           <div style={{position:"fixed",bottom:0,left:0,right:0,background:t.navBg,backdropFilter:"blur(20px)",borderTop:`1px solid ${t.border}`,display:"flex",zIndex:200,paddingBottom:"env(safe-area-inset-bottom,0px)"}}>
             {NAV.map(x=>(
               <button key={x.id} onClick={()=>goTab(x.id)} style={{flex:1,background:"none",border:"none",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"8px 4px",cursor:"pointer",gap:3}}>
-                <span style={{fontSize:16,filter:tab===x.id?"none":"grayscale(1)",opacity:tab===x.id?1:.45}}>{x.icon}</span>
+                <x.SvgIcon s={18} c={tab===x.id?t.accent:t.sub}/>
                 <span style={{fontSize:9,fontWeight:600,color:tab===x.id?t.accent:t.sub,fontFamily:B,letterSpacing:.3}}>{x.l}</span>
               </button>
             ))}

@@ -44,6 +44,10 @@ const CSS=`
   @keyframes slideIn{from{transform:translateX(-8px);opacity:0}to{transform:translateX(0);opacity:1}}
   @keyframes breathe{0%,100%{transform:scale(1);opacity:.6}50%{transform:scale(1.06);opacity:1}}
   input:focus,textarea:focus,select:focus{border-color:rgba(${T.rgb},.5)!important}
+  @media (max-width:767px) and (orientation:landscape){
+    html,body{overflow-y:auto}
+    .mobile-bottom-nav{height:48px!important}
+  }
 `;
 
 // ─── ICONS (all SVG, no emoji) ───────────────────────────────
@@ -79,6 +83,12 @@ const Ic = {
   Grid:    ({s=16,c="currentColor"})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>,
   Trash:   ({s=14,c="currentColor"})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>,
   Refresh: ({s=14,c="currentColor"})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>,
+  Quote:   ({s=14,c="currentColor"})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>,
+  Doc:     ({s=14,c="currentColor"})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>,
+  Download:({s=14,c="currentColor"})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>,
+  Info:    ({s=14,c="currentColor"})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>,
+  Alert:   ({s=14,c="currentColor"})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>,
+  Circle:  ({s=14,c="currentColor"})=><svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="10"/></svg>,
 };
 
 // ─── PRIMITIVES ──────────────────────────────────────────────
@@ -138,6 +148,7 @@ const SA_PROVINCES=["Gauteng","Western Cape","KwaZulu-Natal","Eastern Cape","Fre
 const BRANDS_LIST=["Sunsynk","Deye","Victron","Growatt","Pylontech","BSL","Freedom Won","Canadian Solar","JA Solar","Longi","Huawei","SolarEdge"];
 const INSTALL_SPECS=["Residential","Commercial","Agricultural","Off-Grid","Hybrid","Industrial"];
 const REPAIR_SPECS=["Inverter Repair","Battery Replacement","Panel Cleaning","Full System Service","Emergency Callouts","Fault Finding"];
+const SPECS_LIST=["Residential","Commercial","Agricultural","Off-Grid","Hybrid","Industrial","Emergency Callouts","Repair & Maintenance"];
 
 const STATUS={
   new:{label:"New",color:T.accent,bg:`rgba(${T.rgb},.12)`},
@@ -465,14 +476,14 @@ const WIZARD_STEPS=[
   {id:"gallery", label:"Gallery",       Icon:Ic.Camera, desc:"Show your best work"},
 ];
 
-function OnboardingWizard({installer,onComplete,onBack}){
+function OnboardingWizard({installer,onComplete,onSignOut}){
   const sc=useScreen();
   const [step,setStep]=useState(0);
   const [saving,setSaving]=useState(false);
   const [saveErr,setSaveErr]=useState("");
 
   const [data,setData]=useState({
-    businessType:"installer",
+    businessType:"installer", // installer | technician | both
     name:installer?.name||"",
     about:installer?.about||"",
     phone:installer?.phone||"",
@@ -507,12 +518,8 @@ function OnboardingWizard({installer,onComplete,onBack}){
   const saveAndContinue=async()=>{
     if(step<WIZARD_STEPS.length-1){setStep(s=>s+1);return;}
     setSaving(true);setSaveErr("");
-    try{
-      await onComplete(data);
-    } catch(e){
-      setSaveErr(e?.message||"Could not save profile. Check your connection and try again.");
-      setSaving(false);
-    }
+    try{await onComplete(data);}
+    catch(e){setSaveErr("Something went wrong. Please try again.");setSaving(false);}
   };
 
   const progress=Math.round((step/(WIZARD_STEPS.length-1))*100);
@@ -528,7 +535,7 @@ function OnboardingWizard({installer,onComplete,onBack}){
 
         <div style={{width:"100%",maxWidth:sc.isDesktop?900:640,position:"relative",zIndex:1,animation:"fadeUp .5s ease"}}>
           {/* Header */}
-          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,marginBottom:32}}>
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:32}}>
             <div style={{display:"flex",alignItems:"center",gap:10}}>
               <Ic.Logo s={36}/>
               <div>
@@ -536,11 +543,9 @@ function OnboardingWizard({installer,onComplete,onBack}){
                 <div style={{fontSize:9,color:T.sub,letterSpacing:2,textTransform:"uppercase"}}>Installer Portal</div>
               </div>
             </div>
-            {onBack&&(
-              <button onClick={onBack} style={{background:"none",border:`1px solid ${T.border}`,borderRadius:8,padding:"6px 14px",cursor:"pointer",color:T.sub,fontSize:12,fontWeight:600,fontFamily:B,display:"flex",alignItems:"center",gap:6}}>
-                <Ic.Left s={12} c={T.sub}/> Back to Sign In
-              </button>
-            )}
+            <button onClick={onSignOut} style={{display:"flex",alignItems:"center",gap:6,padding:"7px 13px",background:T.card,border:`1px solid ${T.border}`,borderRadius:9,cursor:"pointer",color:T.sub,fontSize:12,fontWeight:600,fontFamily:B}}>
+              <Ic.Out s={13} c={T.sub}/> Sign Out
+            </button>
           </div>
           <div style={{fontFamily:H,fontSize:sc.isMobile?20:26,fontWeight:800,color:T.text,marginBottom:6}}>Set up your installer profile</div>
           <div style={{fontSize:13,color:T.sub,marginBottom:28}}>Complete your profile to unlock leads and get listed on SolarIQ.</div>
@@ -718,12 +723,13 @@ function OnboardingWizard({installer,onComplete,onBack}){
     </>
   );
 }
-function LeadInbox({ leads, setLeads }) {
+function LeadInbox({ leads, setLeads, setTab }) {
   const sc = useScreen();
   const [filter, setFilter] = useState("all");
   const [selected, setSelected] = useState(null);
   const [noteText, setNoteText] = useState("");
   const [search, setSearch] = useState("");
+  const [noteSaved, setNoteSaved] = useState(false);
 
   const filtered = leads.filter(l => {
     if (filter !== "all" && l.status !== filter) return false;
@@ -731,14 +737,21 @@ function LeadInbox({ leads, setLeads }) {
     return true;
   });
 
-  const updateStatus = (id, status) => {
+  const updateStatus = async (id, status) => {
     setLeads(prev => prev.map(l => l.id === id ? { ...l, status } : l));
     if (selected?.id === id) setSelected(prev => ({ ...prev, status }));
+    // Persist to Supabase (skip for mock leads with numeric ids)
+    if (typeof id === "string" && id.length > 5) {
+      await sb.from("leads").update({ status }).eq("id", id);
+    }
   };
 
-  const saveNote = (id) => {
-    setLeads(prev => prev.map(l => l.id === id ? { ...l, notes: noteText } : l));
-    if (selected?.id === id) setSelected(prev => ({ ...prev, notes: noteText }));
+  const saveNote = async (id, text) => {
+    setLeads(prev => prev.map(l => l.id === id ? { ...l, notes: text } : l));
+    if (selected?.id === id) setSelected(prev => ({ ...prev, notes: text }));
+    if (typeof id === "string" && id.length > 5) {
+      await sb.from("leads").update({ notes: text }).eq("id", id);
+    }
   };
 
   const counts = Object.fromEntries(Object.keys(STATUS).map(k => [k, leads.filter(l => l.status === k).length]));
@@ -833,8 +846,9 @@ function LeadInbox({ leads, setLeads }) {
     const [noteSaved, setNoteSaved] = useState(false);
     const st = STATUS[lead.status] || STATUS.new;
 
-    const handleSaveNote = () => {
-      saveNote(lead.id);
+    const handleSaveNote = async () => {
+      setNoteSaved(false);
+      await saveNote(lead.id, localNote);
       setNoteSaved(true);
       setTimeout(() => setNoteSaved(false), 2000);
     };
@@ -917,7 +931,7 @@ function LeadInbox({ leads, setLeads }) {
           <Btn full onClick={() => { const m = encodeURIComponent(`Hi ${lead.name.split(" ")[0]}, I'm reaching out about your solar quote request on SolarIQ. Your recommended system is a ${lead.system_kw}kW system with ${lead.battery_kwh}kWh battery. I'd love to discuss how we can help. When would be a good time to chat?`); window.open(`https://wa.me/${lead.phone?.replace(/\s/g, "")}?text=${m}`, "_blank"); }} style={{ background: "rgba(37,211,102,.1)", border: "1px solid rgba(37,211,102,.3)", color: "#25d366" }}>
             WhatsApp {lead.name.split(" ")[0]}
           </Btn>
-          <Btn sm variant="accent" onClick={() => window.location.hash = `#quote-${lead.id}`}><Ic.Quote s={12} c={T.accent} /> Build Quote</Btn>
+          <Btn sm variant="accent" onClick={() => setTab && setTab("quotes")}><Ic.Quote s={12} c={T.accent} /> Build Quote</Btn>
           <Btn sm variant="ghost" onClick={() => lead.phone && (window.location.href = `tel:${lead.phone}`)}><Ic.Phone s={12} c={T.textMid} /> Call</Btn>
         </div>
       </div>
@@ -1009,11 +1023,11 @@ function CredentialsVault({ installer }) {
   ]);
 
   const statusConfig = {
-    verified: { color: T.green, label: "Verified", icon: "check", bg: "rgba(52,211,153,.08)", border: "rgba(52,211,153,.2)" },
-    pending:  { color: T.accent, label: "Pending Review", icon: "⏳", bg: `rgba(${T.rgb},.06)`, border: `rgba(${T.rgb},.2)` },
-    expiring: { color: T.orange, label: "Expiring Soon", icon: "!", bg: "rgba(251,146,60,.08)", border: "rgba(251,146,60,.2)" },
-    expired:  { color: T.red, label: "Expired", icon: "x", bg: "rgba(248,113,113,.08)", border: "rgba(248,113,113,.2)" },
-    missing:  { color: T.sub, label: "Not uploaded", icon: "○", bg: T.card, border: T.border },
+    verified: { color: T.green,  label: "Verified",      Icon: Ic.Check,  bg: "rgba(52,211,153,.08)",  border: "rgba(52,211,153,.2)" },
+    pending:  { color: T.accent, label: "Pending Review", Icon: Ic.Clock,  bg: `rgba(${T.rgb},.06)`,   border: `rgba(${T.rgb},.2)` },
+    expiring: { color: T.orange, label: "Expiring Soon",  Icon: Ic.Alert,  bg: "rgba(251,146,60,.08)", border: "rgba(251,146,60,.2)" },
+    expired:  { color: T.red,    label: "Expired",        Icon: Ic.X,      bg: "rgba(248,113,113,.08)",border: "rgba(248,113,113,.2)" },
+    missing:  { color: T.sub,    label: "Not uploaded",   Icon: Ic.Circle, bg: T.card,                 border: T.border },
   };
 
   const verified = docs.filter(d => d.status === "verified").length;
@@ -1067,7 +1081,7 @@ function CredentialsVault({ installer }) {
                   <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 3, flexWrap: "wrap" }}>
                     <span style={{ fontFamily: H, fontSize: 14, fontWeight: 700, color: T.text }}>{doc.label}</span>
                     {doc.req && <span style={{ fontSize: 9, background: `rgba(${T.rgb},.12)`, color: T.accent, padding: "1px 7px", borderRadius: 6, fontWeight: 700 }}>REQUIRED</span>}
-                    <span style={{ fontSize: 10, fontWeight: 700, background: `${sc2.color}18`, color: sc2.color, padding: "2px 8px", borderRadius: 10 }}>{sc2.icon} {sc2.label}</span>
+                    <span style={{ fontSize: 10, fontWeight: 700, background: `${sc2.color}18`, color: sc2.color, padding: "2px 8px", borderRadius: 10, display:"inline-flex", alignItems:"center", gap:4 }}><sc2.Icon s={10} c={sc2.color}/> {sc2.label}</span>
                   </div>
                   <div style={{ fontSize: 11, color: T.sub, marginBottom: doc.file ? 10 : 0 }}>{doc.desc}</div>
                   {doc.status !== "missing" && (
@@ -1139,12 +1153,17 @@ function ProfileEditor({ installer, setInstaller }) {
   const save = async () => {
     setSaving(true);
     try {
-      if (installer?.id) await sb.from("installers").update(form).eq("id", installer.id);
+      if (installer?.id) {
+        const {error} = await sb.from("installers").update(form).eq("id", installer.id);
+        if (error) throw error;
+      }
       setInstaller(prev => ({ ...prev, ...form }));
-    } catch (e) { console.log(e); }
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2500);
+    } catch (e) {
+      console.error("Save error:", e);
+    }
     setSaving(false);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2500);
   };
 
   // Live preview card
@@ -1157,8 +1176,8 @@ function ProfileEditor({ installer, setInstaller }) {
           <div style={{ fontFamily: H, fontSize: 15, fontWeight: 800, color: T.text, marginBottom: 3 }}>{form.name || "Your Business Name"}</div>
           <div style={{ fontSize: 11, color: T.sub }}>{form.city}, {form.province} · {form.years_experience} yrs</div>
           <div style={{ display: "flex", gap: 5, marginTop: 6, flexWrap: "wrap" }}>
-            <span style={{ fontSize: 9, background: "rgba(52,211,153,.12)", color: T.green, padding: "2px 7px", borderRadius: 6, fontWeight: 700 }}>✓ SESSA</span>
-            <span style={{ fontSize: 9, background: "rgba(96,165,250,.12)", color: T.blue, padding: "2px 7px", borderRadius: 6, fontWeight: 700 }}>✓ Verified</span>
+            <span style={{ fontSize: 9, background: "rgba(52,211,153,.12)", color: T.green, padding: "2px 7px", borderRadius: 6, fontWeight: 700 }}>SESSA</span>
+            <span style={{ fontSize: 9, background: "rgba(96,165,250,.12)", color: T.blue, padding: "2px 7px", borderRadius: 6, fontWeight: 700 }}>Verified</span>
             {form.finance_available && <span style={{ fontSize: 9, background: "rgba(167,139,250,.12)", color: T.purple, padding: "2px 7px", borderRadius: 6, fontWeight: 700 }}>Finance</span>}
           </div>
         </div>
@@ -1607,16 +1626,6 @@ function QuoteBuilder({ leads }) {
   );
 }
 
-// ─── SIDEBAR NAV ─────────────────────────────────────────────
-const NAV = [
-  { id: "leads",       label: "Lead Inbox",    Icon: Ic.Inbox,  badge: true },
-  { id: "quotes",      label: "Quote Builder", Icon: Ic.Quote,  badge: false },
-  { id: "credentials", label: "Credentials",   Icon: Ic.Shield, badge: false },
-  { id: "profile",     label: "My Profile",    Icon: Ic.User,   badge: false },
-  { id: "performance", label: "Performance",   Icon: Ic.Chart,  badge: false },
-];
-
-
 // ─── SIDEBAR ─────────────────────────────────────────────────
 const NAV_ITEMS=[
   {id:"leads",       label:"Lead Inbox",    Icon:Ic.Inbox,    badge:true},
@@ -1666,7 +1675,7 @@ function InstallerSidebar({tab,setTab,installer,onSignOut,newLeads}){
       </nav>
 
       <div style={{padding:"10px 10px",borderTop:`1px solid ${T.border}`,flexShrink:0,display:"flex",gap:8}}>
-        <a href={`${window.location.origin}?preview=solariq2026`} target="_blank" rel="noopener noreferrer" style={{flex:1,display:"flex",alignItems:"center",gap:6,padding:"8px 10px",background:T.card,border:`1px solid ${T.border}`,borderRadius:9,textDecoration:"none",fontSize:11,color:T.sub,fontWeight:600,fontFamily:B}}>
+        <a href={`${window.location.origin}/installers${installer?.id ? `#installer-${installer.id}` : ""}`} target="_blank" rel="noopener noreferrer" style={{flex:1,display:"flex",alignItems:"center",gap:6,padding:"8px 10px",background:T.card,border:`1px solid ${T.border}`,borderRadius:9,textDecoration:"none",fontSize:11,color:T.sub,fontWeight:600,fontFamily:B}}>
           <Ic.Eye s={12} c={T.sub}/> View Listing
         </a>
         <button onClick={onSignOut} style={{display:"flex",alignItems:"center",justifyContent:"center",padding:"8px 10px",background:T.card,border:`1px solid ${T.border}`,borderRadius:9,cursor:"pointer",color:T.sub}}>
@@ -1679,7 +1688,7 @@ function InstallerSidebar({tab,setTab,installer,onSignOut,newLeads}){
 
 function MobileBottomNav({tab,setTab,newLeads}){
   return(
-    <div style={{position:"fixed",bottom:0,left:0,right:0,background:T.nav,borderTop:`1px solid ${T.border}`,display:"flex",zIndex:200,backdropFilter:"blur(20px)"}}>
+    <div className="mobile-bottom-nav" style={{position:"fixed",bottom:0,left:0,right:0,background:T.nav,borderTop:`1px solid ${T.border}`,display:"flex",zIndex:200,backdropFilter:"blur(20px)"}}>
       {NAV_ITEMS.map(n=>(
         <button key={n.id} onClick={()=>setTab(n.id)} style={{flex:1,background:"none",border:"none",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"8px 4px",cursor:"pointer",gap:3,position:"relative"}}>
           <n.Icon s={18} c={tab===n.id?T.accent:T.sub}/>
@@ -1747,129 +1756,156 @@ function InstallerApp(){
   const [tab,setTab]=useState("leads");
   const sc=useScreen();
 
-  // Called once we have a confirmed valid session
-  const loadDashboard=async(sess)=>{
-    setSession(sess);
+  // loadProfile is defined OUTSIDE useEffect to avoid stale closure
+  const loadProfile=useCallback(async(s)=>{
+    if(!s?.user?.id)return;
     try{
-      // Use the session's access_token so RLS works correctly
-      const {data,error}=await sb
-        .from("installers")
-        .select("*")
-        .eq("user_id",sess.user.id)
-        .maybeSingle();
-
-      if(error){
-        // RLS blocked or real DB error — show onboarding, not a crash
-        console.warn("installers query:",error.code,error.message);
-        setAppState("onboarding");
-        return;
-      }
-      if(data){
+      const {data,error}=await sb.from("installers").select("*").eq("user_id",s.user.id).maybeSingle();
+      if(data&&!error){
         setInstaller(data);
+        // Fetch this installer's real leads
+        const {data:lData}=await sb.from("leads").select("*").order("created_at",{ascending:false});
+        if(lData&&lData.length>0)setLeads(lData);
+        else setLeads(MOCK_LEADS);
         setAppState("ready");
       } else {
-        // No installer row yet — first time user
+        // No installer row yet → go to onboarding
         setAppState("onboarding");
       }
     } catch(e){
-      console.warn("loadDashboard catch:",e?.message);
+      console.warn("Profile load:",e?.message);
       setAppState("onboarding");
     }
-  };
+  },[]);
 
   useEffect(()=>{
-    sb.auth.getSession().then(({data:{session:s},error})=>{
-      if(error||!s){
-        // Clear any stale/broken session and show login
-        sb.auth.signOut().catch(()=>{});
-        setAppState("auth");
-        return;
-      }
-      loadDashboard(s);
+    let mounted=true;
+    sb.auth.getSession().then(({data:{session:s}})=>{
+      if(!mounted)return;
+      if(s){setSession(s);loadProfile(s);}
+      else setAppState("auth");
     });
     const {data:{subscription}}=sb.auth.onAuthStateChange((event,s)=>{
-      if(event==="SIGNED_OUT"||!s){
-        setSession(null);setInstaller(null);setAppState("auth");
-      }
+      if(!mounted)return;
+      if(!s){setSession(null);setInstaller(null);setAppState("auth");return;}
+      setSession(s);
+      if(event==="SIGNED_IN"){loadProfile(s);}
     });
-    return ()=>subscription.unsubscribe();
-  },[]); // eslint-disable-line
-
-  const handleAuth=async(sess)=>{
-    await loadDashboard(sess);
-  };
+    return ()=>{mounted=false;subscription.unsubscribe();};
+  },[loadProfile]);
 
   const signOut=async()=>{
     await sb.auth.signOut();
     setSession(null);setInstaller(null);setLeads(MOCK_LEADS);setAppState("auth");
   };
 
+  const onAuth=useCallback(async(s)=>{
+    const activeSession = s || (await sb.auth.getSession()).data.session;
+    if(activeSession){
+      setSession(activeSession);
+      await loadProfile(activeSession);
+    }
+  },[loadProfile]);
+
   const completeOnboarding=async(formData)=>{
     if(!session?.user?.id)throw new Error("No session");
     const payload={
       user_id:session.user.id,
-      name:(formData.name||"").trim()||"My Business",
-      city:(formData.city||"").trim()||"Johannesburg",
-      province:formData.province||"Gauteng",
+      name:formData.name.trim(),
+      city:formData.city.trim(),
+      province:formData.province,
       about:formData.about||"",
-      phone:(formData.phone||"").trim(),
-      whatsapp:(formData.whatsapp||formData.phone||"").trim(),
-      email:(formData.email||session.user.email||"").trim(),
-      website:(formData.website||"").trim(),
+      phone:formData.phone.trim(),
+      whatsapp:formData.whatsapp||formData.phone,
+      email:formData.email||session.user.email,
+      website:formData.website||"",
       price_min:parseInt(formData.price_min)||null,
       price_max:parseInt(formData.price_max)||null,
       years_experience:parseInt(formData.years_experience)||1,
-      specialty:[...(formData.install_specs||[]),(formData.businessType==="technician"||formData.businessType==="both"?formData.repair_specs||[]:[])]
-        .filter(Boolean).join(", ")||"Residential",
-      brands:formData.brands||[],
+      specialty:(formData.install_specs||[]).join(", ")||(formData.businessType==="technician"?"Repair & Maintenance":"Residential"),
+      brands:Array.isArray(formData.brands)?formData.brands:[],
+      provinces_served:Array.isArray(formData.provinces_served)?formData.provinces_served:[formData.province],
       response_hours:parseInt(formData.response_hours)||24,
       finance_available:!!formData.finance_available,
       status:"pending",
     };
-    const {data:inst,error}=await sb.from("installers").insert(payload).select().single();
+    // Upsert in case row already exists for this user
+    const {data:inst,error}=await sb.from("installers").upsert(payload,{onConflict:"user_id"}).select().single();
     if(error){
-      console.error("Insert error:",error.code,error.message,error.hint);
-      throw new Error(error.message);
+      console.error("Insert error:",error);
+      throw error;
     }
     setInstaller(inst);
+    // Fetch real leads now that we have an installer record
+    const {data:lData}=await sb.from("leads").select("*").order("created_at",{ascending:false});
+    if(lData&&lData.length>0)setLeads(lData);
     setAppState("ready");
   };
 
   const newLeads=leads.filter(l=>l.status==="new").length;
 
+  // ── Render by state ──────────────────────────────────────
   if(appState==="booting")return <BootScreen/>;
-  if(appState==="auth")return <InstallerAuth onAuth={handleAuth}/>;
-  if(appState==="onboarding")return(
-    <><style>{CSS}</style><OnboardingWizard installer={installer} onComplete={completeOnboarding} onBack={()=>{sb.auth.signOut();setAppState("auth");}}/></>
-  );
 
+  if(appState==="auth")return <InstallerAuth onAuth={onAuth}/>;
+
+  if(appState==="onboarding")return <OnboardingWizard installer={installer} onComplete={completeOnboarding} onSignOut={signOut}/>;
+
+  // ── READY ────────────────────────────────────────────────
   const PAGES={
-    leads:       <LeadInbox leads={leads} setLeads={setLeads}/>,
+    leads:       <LeadInbox leads={leads} setLeads={setLeads} setTab={setTab}/>,
     quotes:      <QuoteBuilder leads={leads}/>,
     credentials: <CredentialsVault installer={installer}/>,
     profile:     <ProfileEditor installer={installer} setInstaller={setInstaller}/>,
     performance: <PerformanceDashboard leads={leads} installer={installer}/>,
   };
+
   return(
-    <><style>{CSS}</style>
-    <div style={{display:"flex",minHeight:"100vh",background:T.bg}}>
-      {!sc.isMobile&&<InstallerSidebar tab={tab} setTab={setTab} installer={installer} onSignOut={signOut} newLeads={newLeads}/>}
-      <div style={{flex:1,marginLeft:sc.isMobile?0:T.navW,minWidth:0,minHeight:"100vh",paddingBottom:sc.isMobile?80:0}}>
-        <div style={{position:"sticky",top:0,zIndex:100,background:T.nav,borderBottom:`1px solid ${T.border}`,backdropFilter:"blur(20px)",height:54,display:"flex",alignItems:"center",padding:"0 28px",gap:12}}>
-          {sc.isMobile&&<div style={{display:"flex",alignItems:"center",gap:8}}><Ic.Logo s={26}/><span style={{fontFamily:H,fontSize:16,fontWeight:900,color:T.text}}>Solar<span style={{color:T.accent}}>IQ</span></span></div>}
-          <div style={{flex:1}}/>
-          {installer?.status==="pending"&&<div style={{display:"flex",alignItems:"center",gap:6,padding:"5px 13px",background:`rgba(${T.rgb},.08)`,border:`1px solid rgba(${T.rgb},.2)`,borderRadius:20}}><div style={{width:6,height:6,borderRadius:"50%",background:T.accent,animation:"pulse 2s infinite"}}/><span style={{fontSize:11,color:T.accent,fontWeight:700}}>Pending Review</span></div>}
-          {installer?.status==="approved"&&<div style={{display:"flex",alignItems:"center",gap:6,padding:"5px 13px",background:"rgba(52,211,153,.08)",border:"1px solid rgba(52,211,153,.2)",borderRadius:20}}><div style={{width:6,height:6,borderRadius:"50%",background:T.green,animation:"pulse 2s infinite"}}/><span style={{fontSize:11,color:T.green,fontWeight:700}}>Verified and Live</span></div>}
-          {!sc.isMobile&&<button onClick={signOut} style={{display:"flex",alignItems:"center",gap:7,padding:"6px 14px",background:T.card,border:`1px solid ${T.border}`,borderRadius:9,cursor:"pointer",color:T.sub,fontSize:12,fontWeight:600,fontFamily:B}}><Ic.Out s={13} c={T.sub}/> Sign Out</button>}
+    <>
+      <style>{CSS}</style>
+      <div style={{display:"flex",minHeight:"100vh",background:T.bg}}>
+        {!sc.isMobile&&<InstallerSidebar tab={tab} setTab={setTab} installer={installer} onSignOut={signOut} newLeads={newLeads}/>}
+
+        <div style={{flex:1,marginLeft:sc.isMobile?0:T.navW,minWidth:0,minHeight:"100vh",paddingBottom:sc.isMobile?80:0,transition:"margin-left .25s"}}>
+          {/* Top bar */}
+          <div style={{position:"sticky",top:0,zIndex:100,background:T.nav,borderBottom:`1px solid ${T.border}`,backdropFilter:"blur(20px)",height:54,display:"flex",alignItems:"center",padding:"0 28px",gap:12}}>
+            {sc.isMobile&&(
+              <div style={{display:"flex",alignItems:"center",gap:8}}>
+                <Ic.Logo s={26}/>
+                <span style={{fontFamily:H,fontSize:16,fontWeight:900,color:T.text}}>Solar<span style={{color:T.accent}}>IQ</span></span>
+              </div>
+            )}
+            <div style={{flex:1}}/>
+            {installer?.status==="pending"&&(
+              <div style={{display:"flex",alignItems:"center",gap:6,padding:"5px 13px",background:`rgba(${T.rgb},.08)`,border:`1px solid rgba(${T.rgb},.2)`,borderRadius:20}}>
+                <div style={{width:6,height:6,borderRadius:"50%",background:T.accent,animation:"pulse 2s infinite"}}/>
+                <span style={{fontSize:11,color:T.accent,fontWeight:700}}>Pending Review</span>
+              </div>
+            )}
+            {installer?.status==="approved"&&(
+              <div style={{display:"flex",alignItems:"center",gap:6,padding:"5px 13px",background:"rgba(52,211,153,.08)",border:"1px solid rgba(52,211,153,.2)",borderRadius:20}}>
+                <div style={{width:6,height:6,borderRadius:"50%",background:T.green,animation:"pulse 2s infinite"}}/>
+                <span style={{fontSize:11,color:T.green,fontWeight:700}}>Verified and Live</span>
+              </div>
+            )}
+            {!sc.isMobile&&(
+              <button onClick={signOut} style={{display:"flex",alignItems:"center",gap:7,padding:"6px 14px",background:T.card,border:`1px solid ${T.border}`,borderRadius:9,cursor:"pointer",color:T.sub,fontSize:12,fontWeight:600,fontFamily:B}}>
+                <Ic.Out s={13} c={T.sub}/> Sign Out
+              </button>
+            )}
+          </div>
+
+          <div style={{padding:sc.isMobile?"16px 14px":sc.isTablet?"24px 28px":"30px 40px",maxWidth:1440,margin:"0 auto"}}>
+            {PAGES[tab]||PAGES.leads}
+          </div>
         </div>
-        <div style={{padding:sc.isMobile?"16px 14px":sc.isTablet?"24px 28px":"30px 40px",maxWidth:1440,margin:"0 auto"}}>
-          {PAGES[tab]||PAGES.leads}
-        </div>
+
+        {sc.isMobile&&<MobileBottomNav tab={tab} setTab={setTab} newLeads={newLeads}/>}
       </div>
-      {sc.isMobile&&<MobileBottomNav tab={tab} setTab={setTab} newLeads={newLeads}/>}
-    </div></>
+    </>
   );
 }
+
 export default function Installer(){
   return(
     <ErrorBoundary>
