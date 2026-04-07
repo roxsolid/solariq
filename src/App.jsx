@@ -804,7 +804,7 @@ function Servicing(){
                 <div style={{fontSize:14,color:t.sub,lineHeight:1.7,marginBottom:10}}>{errRes.fix}</div>
                 <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
                   <div style={{flex:1,background:errRes.diy?"rgba(74,222,128,.07)":"rgba(239,68,68,.07)",border:`1px solid ${errRes.diy?"rgba(74,222,128,.2)":"rgba(239,68,68,.2)"}`,borderRadius:10,padding:"10px 13px",display:"flex",alignItems:"center",gap:8}}>
-                    <span style={{display:"flex",alignItems:"center"}}>{errRes.diy?<Ico.Check s={14} c="#4ade80"/>:<Ico.AlertTriangle s={14} c="#f87171"}/>}</span>
+                    <span style={{display:"flex",alignItems:"center"}}>{errRes.diy?<Ico.Check s={14} c="#4ade80"/>:<Ico.AlertTriangle s={14} c="#f87171"/>}</span>
                     <span style={{fontSize:12,color:errRes.diy?"#4ade80":"#f87171",fontWeight:600,fontFamily:B}}>{errRes.diy?"You can resolve this yourself":"Requires a qualified technician"}</span>
                   </div>
                   {!errRes.diy&&<PBtn sm onClick={()=>setPage("techs")} style={{borderRadius:10,width:"auto",padding:"10px 16px"}}>Find Technician →</PBtn>}

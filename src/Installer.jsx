@@ -199,9 +199,17 @@ function InstallerAuth({onAuth}){
     setLoading(true);setErr("");
     if(mode==="signup"){
       if(pw.length<6){setErr("Password must be at least 6 characters.");setLoading(false);return;}
-      const {error}=await sb.auth.signUp({email:email.trim(),password:pw,options:{data:{name}}});
-      if(error)setErr(error.message);
-      else setDone(true);
+      const {data,error}=await sb.auth.signUp({email:email.trim(),password:pw,options:{data:{name}}});
+      if(error){
+        setErr(error.message);
+      } else if(data?.session){
+        // Email confirmation disabled — user is already signed in
+        onAuth(data.session);
+        return;
+      } else {
+        // Email confirmation required — show check inbox screen
+        setDone(true);
+      }
     } else {
       const {data,error}=await sb.auth.signInWithPassword({email:email.trim(),password:pw});
       if(error)setErr(error.message);
@@ -220,6 +228,14 @@ function InstallerAuth({onAuth}){
 
   const FormSection=(
     <div style={{width:"100%",maxWidth:440,animation:"fadeUp .5s ease"}}>
+      {/* Back to main site */}
+      <div style={{marginBottom:20}}>
+        <a href="/" style={{display:"inline-flex",alignItems:"center",gap:6,fontSize:12,color:T.sub,textDecoration:"none",fontFamily:B,fontWeight:600}}
+          onMouseEnter={e=>e.currentTarget.style.color=T.textMid}
+          onMouseLeave={e=>e.currentTarget.style.color=T.sub}>
+          <Ic.Left s={12} c={T.sub}/> Back to SolarIQ
+        </a>
+      </div>
       {/* Brand */}
       <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:36}}>
         <Ic.Logo s={38}/>
@@ -238,9 +254,18 @@ function InstallerAuth({onAuth}){
           <div style={{fontSize:13,color:T.textMid,lineHeight:1.8,marginBottom:24}}>
             Confirmation link sent to<br/><strong style={{color:T.text}}>{email}</strong><br/>Click it, then sign in here.
           </div>
-          <Btn full variant="accent" onClick={()=>{setMode("login");setDone(false);setPw("");}}>
-            <Ic.Left s={13} c={T.accent}/> Back to Sign In
-          </Btn>
+          <div style={{display:"flex",flexDirection:"column",gap:10}}>
+            <Btn full onClick={()=>{setMode("login");setDone(false);setPw("");}}>
+              <Ic.Left s={13} c="#000"/> Back to Sign In
+            </Btn>
+            <button onClick={async()=>{
+              await sb.auth.resend({type:"signup",email:email.trim()});
+              setErr("Confirmation email resent!");
+            }} style={{background:"none",border:`1px solid ${T.border}`,borderRadius:10,padding:"10px",fontSize:12,color:T.sub,cursor:"pointer",fontFamily:B}}>
+              Resend confirmation email
+            </button>
+          </div>
+          {err&&<div style={{marginTop:12,fontSize:12,color:T.green}}>{err}</div>}
         </div>
       ):(
         <>
@@ -518,8 +543,20 @@ function OnboardingWizard({installer,onComplete,onSignOut}){
   const saveAndContinue=async()=>{
     if(step<WIZARD_STEPS.length-1){setStep(s=>s+1);return;}
     setSaving(true);setSaveErr("");
-    try{await onComplete(data);}
-    catch(e){setSaveErr("Something went wrong. Please try again.");setSaving(false);}
+    try{
+      await onComplete(data);
+    } catch(e){
+      const msg = e?.message||"";
+      if(msg.includes("duplicate")||msg.includes("unique")){
+        setSaveErr("Account already exists — signing you in now.");
+        // Row exists, just proceed to dashboard by refreshing session
+        const {data:sd}=await sb.auth.getSession();
+        if(sd?.session) await onComplete({...data,_skipInsert:true}).catch(()=>{});
+      } else {
+        setSaveErr(`Error: ${msg||"Something went wrong. Please try again."}`);
+      }
+      setSaving(false);
+    }
   };
 
   const progress=Math.round((step/(WIZARD_STEPS.length-1))*100);
@@ -1809,6 +1846,11 @@ function InstallerApp(){
 
   const completeOnboarding=async(formData)=>{
     if(!session?.user?.id)throw new Error("No session");
+    // If row already exists (duplicate key), just load it
+    if(formData._skipInsert){
+      const {data:existing}=await sb.from("installers").select("*").eq("user_id",session.user.id).maybeSingle();
+      if(existing){setInstaller(existing);setAppState("ready");return;}
+    }
     const payload={
       user_id:session.user.id,
       name:formData.name.trim(),
@@ -1829,14 +1871,12 @@ function InstallerApp(){
       finance_available:!!formData.finance_available,
       status:"pending",
     };
-    // Upsert in case row already exists for this user
     const {data:inst,error}=await sb.from("installers").upsert(payload,{onConflict:"user_id"}).select().single();
     if(error){
       console.error("Insert error:",error);
       throw error;
     }
     setInstaller(inst);
-    // Fetch real leads now that we have an installer record
     const {data:lData}=await sb.from("leads").select("*").order("created_at",{ascending:false});
     if(lData&&lData.length>0)setLeads(lData);
     setAppState("ready");
