@@ -1736,79 +1736,83 @@ function InstallerApp(){
   const [tab,setTab]=useState("leads");
   const sc=useScreen();
 
-  // loadProfile is defined OUTSIDE useEffect to avoid stale closure
-  const loadProfile=useCallback(async(s)=>{
-    if(!s?.user?.id)return;
+  const go=async(s)=>{
+    // s is a valid Supabase session object
+    setSession(s);
     try{
-      const {data,error}=await sb.from("installers").select("*").eq("user_id",s.user.id).maybeSingle();
-      if(data&&!error){
+      const {data}=await sb.from("installers")
+        .select("*")
+        .eq("user_id",s.user.id)
+        .maybeSingle();
+      if(data){
         setInstaller(data);
-        // Fetch this installer's real leads
-        const {data:lData}=await sb.from("leads").select("*").order("created_at",{ascending:false});
-        if(lData&&lData.length>0)setLeads(lData);
         setAppState("ready");
       } else {
         setAppState("onboarding");
       }
     } catch(e){
-      console.warn("Profile load:",e?.message);
+      console.warn("loadProfile error:",e?.message);
       setAppState("onboarding");
     }
-  },[]);
+  };
 
   useEffect(()=>{
-    let mounted=true;
+    // On mount: check if there's already a session
     sb.auth.getSession().then(({data:{session:s}})=>{
-      if(!mounted)return;
-      if(s){setSession(s);loadProfile(s);}
+      if(s) go(s);
       else setAppState("auth");
     });
-    const {data:{subscription}}=sb.auth.onAuthStateChange((event,s)=>{
-      if(!mounted)return;
-      if(!s){setSession(null);setInstaller(null);setAppState("auth");return;}
-      setSession(s);
-      if(event==="SIGNED_IN"){loadProfile(s);}
+    // Listen for future sign-in / sign-out events
+    const {data:{subscription}}=sb.auth.onAuthStateChange((_event,s)=>{
+      if(!s){
+        setSession(null);
+        setInstaller(null);
+        setAppState("auth");
+      }
+      // Don't call go() here — getSession() above handles the initial load.
+      // go() is only called explicitly after sign-in.
     });
-    return ()=>{mounted=false;subscription.unsubscribe();};
-  },[loadProfile]);
+    return ()=>subscription.unsubscribe();
+  // eslint-disable-next-line
+  },[]);
 
   const signOut=async()=>{
     await sb.auth.signOut();
-    setSession(null);setInstaller(null);setLeads(MOCK_LEADS);setAppState("auth");
+    setSession(null);
+    setInstaller(null);
+    setLeads(MOCK_LEADS);
+    setAppState("auth");
   };
-
-  const onAuth=useCallback(async(s)=>{
-    if(s){setSession(s);await loadProfile(s);}
-    else{
-      const {data:{session:freshS}}=await sb.auth.getSession();
-      if(freshS){setSession(freshS);await loadProfile(freshS);}
-    }
-  },[loadProfile]);
 
   const completeOnboarding=async(formData)=>{
     if(!session?.user?.id)throw new Error("No session");
     const payload={
       user_id:session.user.id,
-      name:formData.name.trim(),
-      city:formData.city.trim(),
-      province:formData.province,
+      name:(formData.name||"").trim(),
+      city:(formData.city||"").trim(),
+      province:formData.province||"Gauteng",
       about:formData.about||"",
-      phone:formData.phone.trim(),
-      whatsapp:formData.whatsapp||formData.phone,
-      email:formData.email||session.user.email,
+      phone:(formData.phone||"").trim(),
+      whatsapp:formData.whatsapp||formData.phone||"",
+      email:formData.email||session.user.email||"",
       website:formData.website||"",
       price_min:parseInt(formData.price_min)||null,
       price_max:parseInt(formData.price_max)||null,
       years_experience:parseInt(formData.years_experience)||1,
-      specialty:(formData.install_specs||[]).join(", ")||(formData.businessType==="technician"?"Repair & Maintenance":"Residential"),
+      specialty:[...(formData.install_specs||[]),(formData.businessType==="technician"||formData.businessType==="both"?formData.repair_specs||[]:[])]
+        .filter(Boolean).join(", ")||"Residential",
       brands:formData.brands||[],
       response_hours:parseInt(formData.response_hours)||24,
       finance_available:!!formData.finance_available,
       status:"pending",
     };
-    const {data:inst,error}=await sb.from("installers").insert(payload).select().single();
+    const {data:inst,error}=await sb
+      .from("installers")
+      .insert(payload)
+      .select()
+      .single();
     if(error){
-      console.error("Insert error:",error);
+      console.error("Onboarding insert error:",error.message,error.details,error.hint);
       throw error;
     }
     setInstaller(inst);
@@ -1817,14 +1821,15 @@ function InstallerApp(){
 
   const newLeads=leads.filter(l=>l.status==="new").length;
 
-  // ── Render by state ──────────────────────────────────────
-  if(appState==="booting")return <BootScreen/>;
+  if(appState==="booting") return <BootScreen/>;
+  if(appState==="auth")    return <InstallerAuth onAuth={(s)=>go(s)}/>;
+  if(appState==="onboarding") return(
+    <>
+      <style>{CSS}</style>
+      <OnboardingWizard installer={installer} onComplete={completeOnboarding}/>
+    </>
+  );
 
-  if(appState==="auth")return <InstallerAuth onAuth={onAuth}/>;
-
-  if(appState==="onboarding")return <OnboardingWizard installer={installer} onComplete={completeOnboarding}/>;
-
-  // ── READY ────────────────────────────────────────────────
   const PAGES={
     leads:       <LeadInbox leads={leads} setLeads={setLeads}/>,
     quotes:      <QuoteBuilder leads={leads}/>,
@@ -1838,9 +1843,7 @@ function InstallerApp(){
       <style>{CSS}</style>
       <div style={{display:"flex",minHeight:"100vh",background:T.bg}}>
         {!sc.isMobile&&<InstallerSidebar tab={tab} setTab={setTab} installer={installer} onSignOut={signOut} newLeads={newLeads}/>}
-
-        <div style={{flex:1,marginLeft:sc.isMobile?0:T.navW,minWidth:0,minHeight:"100vh",paddingBottom:sc.isMobile?80:0,transition:"margin-left .25s"}}>
-          {/* Top bar */}
+        <div style={{flex:1,marginLeft:sc.isMobile?0:T.navW,minWidth:0,minHeight:"100vh",paddingBottom:sc.isMobile?80:0}}>
           <div style={{position:"sticky",top:0,zIndex:100,background:T.nav,borderBottom:`1px solid ${T.border}`,backdropFilter:"blur(20px)",height:54,display:"flex",alignItems:"center",padding:"0 28px",gap:12}}>
             {sc.isMobile&&(
               <div style={{display:"flex",alignItems:"center",gap:8}}>
@@ -1867,12 +1870,10 @@ function InstallerApp(){
               </button>
             )}
           </div>
-
           <div style={{padding:sc.isMobile?"16px 14px":sc.isTablet?"24px 28px":"30px 40px",maxWidth:1440,margin:"0 auto"}}>
             {PAGES[tab]||PAGES.leads}
           </div>
         </div>
-
         {sc.isMobile&&<MobileBottomNav tab={tab} setTab={setTab} newLeads={newLeads}/>}
       </div>
     </>
