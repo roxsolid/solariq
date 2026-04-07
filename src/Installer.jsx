@@ -465,14 +465,14 @@ const WIZARD_STEPS=[
   {id:"gallery", label:"Gallery",       Icon:Ic.Camera, desc:"Show your best work"},
 ];
 
-function OnboardingWizard({installer,onComplete}){
+function OnboardingWizard({installer,onComplete,onBack}){
   const sc=useScreen();
   const [step,setStep]=useState(0);
   const [saving,setSaving]=useState(false);
   const [saveErr,setSaveErr]=useState("");
 
   const [data,setData]=useState({
-    businessType:"installer", // installer | technician | both
+    businessType:"installer",
     name:installer?.name||"",
     about:installer?.about||"",
     phone:installer?.phone||"",
@@ -507,8 +507,12 @@ function OnboardingWizard({installer,onComplete}){
   const saveAndContinue=async()=>{
     if(step<WIZARD_STEPS.length-1){setStep(s=>s+1);return;}
     setSaving(true);setSaveErr("");
-    try{await onComplete(data);}
-    catch(e){setSaveErr("Something went wrong. Please try again.");setSaving(false);}
+    try{
+      await onComplete(data);
+    } catch(e){
+      setSaveErr(e?.message||"Could not save profile. Check your connection and try again.");
+      setSaving(false);
+    }
   };
 
   const progress=Math.round((step/(WIZARD_STEPS.length-1))*100);
@@ -524,12 +528,19 @@ function OnboardingWizard({installer,onComplete}){
 
         <div style={{width:"100%",maxWidth:sc.isDesktop?900:640,position:"relative",zIndex:1,animation:"fadeUp .5s ease"}}>
           {/* Header */}
-          <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:32}}>
-            <Ic.Logo s={36}/>
-            <div>
-              <div style={{fontFamily:H,fontSize:18,fontWeight:900,color:T.text}}>Solar<span style={{color:T.accent}}>IQ</span></div>
-              <div style={{fontSize:9,color:T.sub,letterSpacing:2,textTransform:"uppercase"}}>Installer Portal</div>
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,marginBottom:32}}>
+            <div style={{display:"flex",alignItems:"center",gap:10}}>
+              <Ic.Logo s={36}/>
+              <div>
+                <div style={{fontFamily:H,fontSize:18,fontWeight:900,color:T.text}}>Solar<span style={{color:T.accent}}>IQ</span></div>
+                <div style={{fontSize:9,color:T.sub,letterSpacing:2,textTransform:"uppercase"}}>Installer Portal</div>
+              </div>
             </div>
+            {onBack&&(
+              <button onClick={onBack} style={{background:"none",border:`1px solid ${T.border}`,borderRadius:8,padding:"6px 14px",cursor:"pointer",color:T.sub,fontSize:12,fontWeight:600,fontFamily:B,display:"flex",alignItems:"center",gap:6}}>
+                <Ic.Left s={12} c={T.sub}/> Back to Sign In
+              </button>
+            )}
           </div>
           <div style={{fontFamily:H,fontSize:sc.isMobile?20:26,fontWeight:800,color:T.text,marginBottom:6}}>Set up your installer profile</div>
           <div style={{fontSize:13,color:T.sub,marginBottom:28}}>Complete your profile to unlock leads and get listed on SolarIQ.</div>
@@ -1736,66 +1747,75 @@ function InstallerApp(){
   const [tab,setTab]=useState("leads");
   const sc=useScreen();
 
-  const go=async(s)=>{
-    // s is a valid Supabase session object
-    setSession(s);
+  // Called once we have a confirmed valid session
+  const loadDashboard=async(sess)=>{
+    setSession(sess);
     try{
-      const {data}=await sb.from("installers")
+      // Use the session's access_token so RLS works correctly
+      const {data,error}=await sb
+        .from("installers")
         .select("*")
-        .eq("user_id",s.user.id)
+        .eq("user_id",sess.user.id)
         .maybeSingle();
+
+      if(error){
+        // RLS blocked or real DB error — show onboarding, not a crash
+        console.warn("installers query:",error.code,error.message);
+        setAppState("onboarding");
+        return;
+      }
       if(data){
         setInstaller(data);
         setAppState("ready");
       } else {
+        // No installer row yet — first time user
         setAppState("onboarding");
       }
     } catch(e){
-      console.warn("loadProfile error:",e?.message);
+      console.warn("loadDashboard catch:",e?.message);
       setAppState("onboarding");
     }
   };
 
   useEffect(()=>{
-    // On mount: check if there's already a session
-    sb.auth.getSession().then(({data:{session:s}})=>{
-      if(s) go(s);
-      else setAppState("auth");
-    });
-    // Listen for future sign-in / sign-out events
-    const {data:{subscription}}=sb.auth.onAuthStateChange((_event,s)=>{
-      if(!s){
-        setSession(null);
-        setInstaller(null);
+    sb.auth.getSession().then(({data:{session:s},error})=>{
+      if(error||!s){
+        // Clear any stale/broken session and show login
+        sb.auth.signOut().catch(()=>{});
         setAppState("auth");
+        return;
       }
-      // Don't call go() here — getSession() above handles the initial load.
-      // go() is only called explicitly after sign-in.
+      loadDashboard(s);
+    });
+    const {data:{subscription}}=sb.auth.onAuthStateChange((event,s)=>{
+      if(event==="SIGNED_OUT"||!s){
+        setSession(null);setInstaller(null);setAppState("auth");
+      }
     });
     return ()=>subscription.unsubscribe();
-  // eslint-disable-next-line
-  },[]);
+  },[]); // eslint-disable-line
+
+  const handleAuth=async(sess)=>{
+    await loadDashboard(sess);
+  };
 
   const signOut=async()=>{
     await sb.auth.signOut();
-    setSession(null);
-    setInstaller(null);
-    setLeads(MOCK_LEADS);
-    setAppState("auth");
+    setSession(null);setInstaller(null);setLeads(MOCK_LEADS);setAppState("auth");
   };
 
   const completeOnboarding=async(formData)=>{
     if(!session?.user?.id)throw new Error("No session");
     const payload={
       user_id:session.user.id,
-      name:(formData.name||"").trim(),
-      city:(formData.city||"").trim(),
+      name:(formData.name||"").trim()||"My Business",
+      city:(formData.city||"").trim()||"Johannesburg",
       province:formData.province||"Gauteng",
       about:formData.about||"",
       phone:(formData.phone||"").trim(),
-      whatsapp:formData.whatsapp||formData.phone||"",
-      email:formData.email||session.user.email||"",
-      website:formData.website||"",
+      whatsapp:(formData.whatsapp||formData.phone||"").trim(),
+      email:(formData.email||session.user.email||"").trim(),
+      website:(formData.website||"").trim(),
       price_min:parseInt(formData.price_min)||null,
       price_max:parseInt(formData.price_max)||null,
       years_experience:parseInt(formData.years_experience)||1,
@@ -1806,14 +1826,10 @@ function InstallerApp(){
       finance_available:!!formData.finance_available,
       status:"pending",
     };
-    const {data:inst,error}=await sb
-      .from("installers")
-      .insert(payload)
-      .select()
-      .single();
+    const {data:inst,error}=await sb.from("installers").insert(payload).select().single();
     if(error){
-      console.error("Onboarding insert error:",error.message,error.details,error.hint);
-      throw error;
+      console.error("Insert error:",error.code,error.message,error.hint);
+      throw new Error(error.message);
     }
     setInstaller(inst);
     setAppState("ready");
@@ -1821,13 +1837,10 @@ function InstallerApp(){
 
   const newLeads=leads.filter(l=>l.status==="new").length;
 
-  if(appState==="booting") return <BootScreen/>;
-  if(appState==="auth")    return <InstallerAuth onAuth={(s)=>go(s)}/>;
-  if(appState==="onboarding") return(
-    <>
-      <style>{CSS}</style>
-      <OnboardingWizard installer={installer} onComplete={completeOnboarding}/>
-    </>
+  if(appState==="booting")return <BootScreen/>;
+  if(appState==="auth")return <InstallerAuth onAuth={handleAuth}/>;
+  if(appState==="onboarding")return(
+    <><style>{CSS}</style><OnboardingWizard installer={installer} onComplete={completeOnboarding} onBack={()=>{sb.auth.signOut();setAppState("auth");}}/></>
   );
 
   const PAGES={
@@ -1837,49 +1850,26 @@ function InstallerApp(){
     profile:     <ProfileEditor installer={installer} setInstaller={setInstaller}/>,
     performance: <PerformanceDashboard leads={leads} installer={installer}/>,
   };
-
   return(
-    <>
-      <style>{CSS}</style>
-      <div style={{display:"flex",minHeight:"100vh",background:T.bg}}>
-        {!sc.isMobile&&<InstallerSidebar tab={tab} setTab={setTab} installer={installer} onSignOut={signOut} newLeads={newLeads}/>}
-        <div style={{flex:1,marginLeft:sc.isMobile?0:T.navW,minWidth:0,minHeight:"100vh",paddingBottom:sc.isMobile?80:0}}>
-          <div style={{position:"sticky",top:0,zIndex:100,background:T.nav,borderBottom:`1px solid ${T.border}`,backdropFilter:"blur(20px)",height:54,display:"flex",alignItems:"center",padding:"0 28px",gap:12}}>
-            {sc.isMobile&&(
-              <div style={{display:"flex",alignItems:"center",gap:8}}>
-                <Ic.Logo s={26}/>
-                <span style={{fontFamily:H,fontSize:16,fontWeight:900,color:T.text}}>Solar<span style={{color:T.accent}}>IQ</span></span>
-              </div>
-            )}
-            <div style={{flex:1}}/>
-            {installer?.status==="pending"&&(
-              <div style={{display:"flex",alignItems:"center",gap:6,padding:"5px 13px",background:`rgba(${T.rgb},.08)`,border:`1px solid rgba(${T.rgb},.2)`,borderRadius:20}}>
-                <div style={{width:6,height:6,borderRadius:"50%",background:T.accent,animation:"pulse 2s infinite"}}/>
-                <span style={{fontSize:11,color:T.accent,fontWeight:700}}>Pending Review</span>
-              </div>
-            )}
-            {installer?.status==="approved"&&(
-              <div style={{display:"flex",alignItems:"center",gap:6,padding:"5px 13px",background:"rgba(52,211,153,.08)",border:"1px solid rgba(52,211,153,.2)",borderRadius:20}}>
-                <div style={{width:6,height:6,borderRadius:"50%",background:T.green,animation:"pulse 2s infinite"}}/>
-                <span style={{fontSize:11,color:T.green,fontWeight:700}}>Verified and Live</span>
-              </div>
-            )}
-            {!sc.isMobile&&(
-              <button onClick={signOut} style={{display:"flex",alignItems:"center",gap:7,padding:"6px 14px",background:T.card,border:`1px solid ${T.border}`,borderRadius:9,cursor:"pointer",color:T.sub,fontSize:12,fontWeight:600,fontFamily:B}}>
-                <Ic.Out s={13} c={T.sub}/> Sign Out
-              </button>
-            )}
-          </div>
-          <div style={{padding:sc.isMobile?"16px 14px":sc.isTablet?"24px 28px":"30px 40px",maxWidth:1440,margin:"0 auto"}}>
-            {PAGES[tab]||PAGES.leads}
-          </div>
+    <><style>{CSS}</style>
+    <div style={{display:"flex",minHeight:"100vh",background:T.bg}}>
+      {!sc.isMobile&&<InstallerSidebar tab={tab} setTab={setTab} installer={installer} onSignOut={signOut} newLeads={newLeads}/>}
+      <div style={{flex:1,marginLeft:sc.isMobile?0:T.navW,minWidth:0,minHeight:"100vh",paddingBottom:sc.isMobile?80:0}}>
+        <div style={{position:"sticky",top:0,zIndex:100,background:T.nav,borderBottom:`1px solid ${T.border}`,backdropFilter:"blur(20px)",height:54,display:"flex",alignItems:"center",padding:"0 28px",gap:12}}>
+          {sc.isMobile&&<div style={{display:"flex",alignItems:"center",gap:8}}><Ic.Logo s={26}/><span style={{fontFamily:H,fontSize:16,fontWeight:900,color:T.text}}>Solar<span style={{color:T.accent}}>IQ</span></span></div>}
+          <div style={{flex:1}}/>
+          {installer?.status==="pending"&&<div style={{display:"flex",alignItems:"center",gap:6,padding:"5px 13px",background:`rgba(${T.rgb},.08)`,border:`1px solid rgba(${T.rgb},.2)`,borderRadius:20}}><div style={{width:6,height:6,borderRadius:"50%",background:T.accent,animation:"pulse 2s infinite"}}/><span style={{fontSize:11,color:T.accent,fontWeight:700}}>Pending Review</span></div>}
+          {installer?.status==="approved"&&<div style={{display:"flex",alignItems:"center",gap:6,padding:"5px 13px",background:"rgba(52,211,153,.08)",border:"1px solid rgba(52,211,153,.2)",borderRadius:20}}><div style={{width:6,height:6,borderRadius:"50%",background:T.green,animation:"pulse 2s infinite"}}/><span style={{fontSize:11,color:T.green,fontWeight:700}}>Verified and Live</span></div>}
+          {!sc.isMobile&&<button onClick={signOut} style={{display:"flex",alignItems:"center",gap:7,padding:"6px 14px",background:T.card,border:`1px solid ${T.border}`,borderRadius:9,cursor:"pointer",color:T.sub,fontSize:12,fontWeight:600,fontFamily:B}}><Ic.Out s={13} c={T.sub}/> Sign Out</button>}
         </div>
-        {sc.isMobile&&<MobileBottomNav tab={tab} setTab={setTab} newLeads={newLeads}/>}
+        <div style={{padding:sc.isMobile?"16px 14px":sc.isTablet?"24px 28px":"30px 40px",maxWidth:1440,margin:"0 auto"}}>
+          {PAGES[tab]||PAGES.leads}
+        </div>
       </div>
-    </>
+      {sc.isMobile&&<MobileBottomNav tab={tab} setTab={setTab} newLeads={newLeads}/>}
+    </div></>
   );
 }
-
 export default function Installer(){
   return(
     <ErrorBoundary>
