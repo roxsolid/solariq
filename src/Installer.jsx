@@ -215,15 +215,20 @@ function InstallerAuth({onAuth}){
       }
     } else {
       const {data,error}=await sb.auth.signInWithPassword({email:email.trim(),password:pw});
+      console.log("signInWithPassword result:",{data,error});
       if(error){
-        setErr(error.message);
+        setErr(`${error.message} (${error.status||error.code||"no code"})`);
         setLoading(false);
       } else if(data?.session){
+        console.log("Session obtained, calling onAuth...");
         onAuth(data.session);
-        // don't setLoading(false) — component will unmount on success
         return;
+      } else if(data?.user&&!data?.session){
+        setErr("Email not confirmed. Check your inbox or use the resend button.");
+        setLoading(false);
       } else {
-        setErr("Sign in failed — please try again.");
+        console.log("No session, no error. Full data:",JSON.stringify(data));
+        setErr("Sign in returned no session. Check console for details.");
         setLoading(false);
       }
     }
@@ -1828,9 +1833,9 @@ function InstallerApp(){
   const [tab,setTab]=useState("leads");
   const sc=useScreen();
 
-  // loadProfile: "booting" then "ready" | "onboarding" | falls back safely
   const loadProfile=useCallback(async(s)=>{
     if(!s?.user?.id)return;
+    console.log("loadProfile: user",s.user.email,"id",s.user.id);
     try{
       const {data,error}=await sb
         .from("installers")
@@ -1838,11 +1843,10 @@ function InstallerApp(){
         .eq("user_id",s.user.id)
         .maybeSingle();
 
-      // maybeSingle returns null data (no error) when no row exists.
-      // PGRST116 is the legacy single() "no rows" code — handle both.
+      console.log("loadProfile installers query:",{data,error});
+
       if(error&&error.code!=="PGRST116"){
         console.error("loadProfile DB error:",error.message,error.code);
-        // Permission / RLS issue — let them go through onboarding
         setAppState("onboarding");
         return;
       }
@@ -1861,8 +1865,10 @@ function InstallerApp(){
             .order("created_at",{ascending:false});
           setLeads(lData?.length>0?lData:MOCK_LEADS);
         }
+        console.log("loadProfile: setting state to ready");
         setAppState("ready");
       } else {
+        console.log("loadProfile: no installer row, going to onboarding");
         setAppState("onboarding");
       }
     } catch(e){
@@ -1894,11 +1900,9 @@ function InstallerApp(){
 
   const onAuth=useCallback(async(s)=>{
     try{
-      // Use the session passed directly from signInWithPassword/signUp.
-      // onAuthStateChange will also fire SIGNED_IN, but loadProfile is
-      // idempotent so a double call is harmless.
+      console.log("onAuth called, session user:",s?.user?.email);
       const activeSession=s||(await sb.auth.getSession()).data?.session;
-      if(!activeSession){setAppState("auth");return;}
+      if(!activeSession){console.error("onAuth: no active session");setAppState("auth");return;}
       setSession(activeSession);
       await loadProfile(activeSession);
     }catch(e){
