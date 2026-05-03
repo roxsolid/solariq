@@ -1,8 +1,8 @@
 import { useState, useEffect, createContext, useContext } from "react";
 import { createClient } from "@supabase/supabase-js";
 
-const SUPABASE_URL = "https://intvnxvannltfibguykw.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImludHZueHZhbm5sdGZpYmd1eWt3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NzAwNjgsImV4cCI6MjA5MDA0NjA2OH0.KnPP0-vxXyBYTvHxbXfrH8AKd61u1hWpEO2gpjWnzNE";
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || "https://intvnxvannltfibguykw.supabase.co";
+const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImludHZueHZhbm5sdGZpYmd1eWt3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NzAwNjgsImV4cCI6MjA5MDA0NjA2OH0.KnPP0-vxXyBYTvHxbXfrH8AKd61u1hWpEO2gpjWnzNE";
 const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const DARK = { dark:true, accent:"#f5a623", accent2:"#ff6b00", rgb:"245,166,35", bg:"#07090d", bgCard:"rgba(255,255,255,.04)", bgCard2:"rgba(255,255,255,.07)", border:"rgba(255,255,255,.08)", text:"#f0f0f0", textMid:"#aaa", sub:"#555", navBg:"rgba(7,9,13,.95)", inputBg:"rgba(255,255,255,.06)" };
@@ -528,14 +528,29 @@ function Installers(){
     if(!quoteForm.name||!quoteForm.phone)return;
     setQuoteSaving(true);
     try{
-      await sb.from("leads").insert({
-        installer_id:null,
-        name:quoteForm.name,email:quoteForm.email,phone:quoteForm.phone,
-        system_kw:parseFloat(quoteForm.system_kw)||null,
-        notes:`Quote request for ${quoteInst?.name||"installer"}. ${quoteForm.notes}`,
-        source:"quote_request",status:"new",
-      });
-    }catch(e){console.log(e);}
+      // Build a full lead record matching our new schema
+      const leadPayload={
+        installer_id:   quoteInst?.supabaseId||null,
+        name:           quoteForm.name.trim(),
+        email:          quoteForm.email.trim(),
+        phone:          quoteForm.phone.trim(),
+        area:           quoteInst?.city?`${quoteInst.city}, ${quoteInst.prov}`:"",
+        system_kw:      parseFloat(quoteForm.system_kw)||0,
+        battery_kwh:    0,
+        panels:         0,
+        daily_kwh:      0,
+        monthly_bill:   0,
+        estimated_cost: 0,
+        goal:           "",
+        roof:           "",
+        urgency:        "Enquiry via SolarIQ",
+        notes:          `Quote request for ${quoteInst?.name||"installer"}. ${quoteForm.notes||""}`.trim(),
+        source:         "quote_request",
+        status:         "new",
+      };
+      const {error}=await sb.from("leads").insert(leadPayload);
+      if(error)console.error("Lead insert error:",error.message);
+    }catch(e){console.log("submitQuote error:",e);}
     setQuoteSent(true);setQuoteSaving(false);
   };
 
@@ -1158,8 +1173,10 @@ function ComingSoon(){
 
   const saveEmail=async()=>{
     if(!email||saving)return;
+    const emailOk=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+    if(!emailOk)return;
     setSaving(true);
-    try{await sb.from("subscribers").upsert({email,source:"coming_soon",active:true},{onConflict:"email"});}
+    try{await sb.from("subscribers").upsert({email:email.trim().toLowerCase(),source:"coming_soon",active:true},{onConflict:"email"});}
     catch(e){console.log(e);}
     setDone(true);setSaving(false);
   };
@@ -1239,8 +1256,10 @@ export default function App(){
 
   const saveNewsletter=async()=>{
     if(!nlEmail||nlSaving)return;
+    const emailOk=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(nlEmail.trim());
+    if(!emailOk)return;
     setNlSaving(true);
-    try{await sb.from("subscribers").upsert({email:nlEmail,source:"newsletter",active:true},{onConflict:"email"});}
+    try{await sb.from("subscribers").upsert({email:nlEmail.trim().toLowerCase(),source:"newsletter",active:true},{onConflict:"email"});}
     catch(e){console.log(e);}
     setNlDone(true);setNlSaving(false);
   };

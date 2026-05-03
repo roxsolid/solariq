@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { createClient } from "@supabase/supabase-js";
 
-const SUPABASE_URL = "https://intvnxvannltfibguykw.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImludHZueHZhbm5sdGZpYmd1eWt3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NzAwNjgsImV4cCI6MjA5MDA0NjA2OH0.KnPP0-vxXyBYTvHxbXfrH8AKd61u1hWpEO2gpjWnzNE";
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || "https://intvnxvannltfibguykw.supabase.co";
+const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImludHZueHZhbm5sdGZpYmd1eWt3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NzAwNjgsImV4cCI6MjA5MDA0NjA2OH0.KnPP0-vxXyBYTvHxbXfrH8AKd61u1hWpEO2gpjWnzNE";
 const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const DARK = {
@@ -1601,14 +1601,14 @@ export default function Admin(){
           sb.from("installers").select("id",{count:"exact",head:true}).eq("status","pending"),
         ]);
         setStats({
-          installers:(inst.count||0)+SEED_INSTALLERS.filter(i=>i.type==="installer"&&i.status==="approved").length,
-          leads:leads.count||0,
+          installers: inst.count||0,
+          leads:      leads.count||0,
           subscribers:subs.count||0,
-          posts:(posts.count||0)+SEED_ARTICLES.length,
-          pending:pending.count||0,
-          events:4847,
+          posts:      posts.count||0,
+          pending:    pending.count||0,
+          events:     0,
         });
-      }catch(e){console.log(e);}
+      }catch(e){console.log("Admin stats error:",e);}
       setStatsLoading(false);
     };
     load();

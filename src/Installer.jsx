@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { createClient } from "@supabase/supabase-js";
 
-const SUPABASE_URL = "https://intvnxvannltfibguykw.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImludHZueHZhbm5sdGZpYmd1eWt3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NzAwNjgsImV4cCI6MjA5MDA0NjA2OH0.KnPP0-vxXyBYTvHxbXfrH8AKd61u1hWpEO2gpjWnzNE";
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || "https://intvnxvannltfibguykw.supabase.co";
+const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImludHZueHZhbm5sdGZpYmd1eWt3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NzAwNjgsImV4cCI6MjA5MDA0NjA2OH0.KnPP0-vxXyBYTvHxbXfrH8AKd61u1hWpEO2gpjWnzNE";
 const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const T = {
@@ -1161,24 +1161,24 @@ function CredentialsVault({ installer }) {
 function ProfileEditor({ installer, setInstaller }) {
   const sc = useScreen();
   const [form, setForm] = useState({
-    name: installer?.name || "SunPower SA",
-    about: installer?.about || "12 years installing solar across Gauteng. Specialise in hybrid systems for load shedding resilience.",
-    phone: installer?.phone || "+27 82 000 0000",
-    whatsapp: installer?.whatsapp || "+27 82 000 0000",
-    email: installer?.email || "info@sunpowersa.co.za",
-    website: installer?.website || "sunpowersa.co.za",
-    city: installer?.city || "Johannesburg",
-    province: installer?.province || "Gauteng",
-    price_min: installer?.price_min || 80000,
-    price_max: installer?.price_max || 200000,
-    years_experience: installer?.years_experience || 12,
-    jobs_completed: installer?.jobs_completed || 847,
-    specialty: installer?.specialty || "Residential",
-    response_hours: installer?.response_hours || 2,
-    finance_available: installer?.finance_available || true,
-    brands: installer?.brands || ["Sunsynk", "Victron"],
-    specialties: installer?.specialties || ["Residential", "Hybrid"],
-    provinces_served: installer?.provinces_served || ["Gauteng"],
+    name:             installer?.name || "",
+    about:            installer?.about || "",
+    phone:            installer?.phone || "",
+    whatsapp:         installer?.whatsapp || "",
+    email:            installer?.email || "",
+    website:          installer?.website || "",
+    city:             installer?.city || "",
+    province:         installer?.province || "Gauteng",
+    price_min:        installer?.price_min || 0,
+    price_max:        installer?.price_max || 0,
+    years_experience: installer?.years_experience || 1,
+    jobs_completed:   installer?.jobs_completed || 0,
+    specialty:        installer?.specialty || "Residential",
+    response_hours:   installer?.response_hours || 24,
+    finance_available:installer?.finance_available || false,
+    brands:           installer?.brands || [],
+    specialties:      installer?.specialties || [],
+    provinces_served: installer?.provinces_served || [],
   });
 
   const up = (k, v) => setForm(f => ({ ...f, [k]: v }));
@@ -1186,19 +1186,42 @@ function ProfileEditor({ installer, setInstaller }) {
 
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [saveErr, setSaveErr] = useState("");
 
   const save = async () => {
     setSaving(true);
+    setSaveErr("");
     try {
-      if (installer?.id) {
-        const {error} = await sb.from("installers").update(form).eq("id", installer.id);
-        if (error) throw error;
-      }
-      setInstaller(prev => ({ ...prev, ...form }));
+      if (!installer?.id) { setSaveErr("No installer ID — please reload."); setSaving(false); return; }
+      // Only send columns that exist in our schema
+      const payload={
+        name:             form.name,
+        about:            form.about,
+        phone:            form.phone,
+        whatsapp:         form.whatsapp,
+        email:            form.email,
+        website:          form.website,
+        city:             form.city,
+        province:         form.province,
+        price_min:        form.price_min||null,
+        price_max:        form.price_max||null,
+        years_experience: form.years_experience,
+        jobs_completed:   form.jobs_completed,
+        specialty:        form.specialty,
+        response_hours:   form.response_hours,
+        finance_available:form.finance_available,
+        brands:           form.brands,
+        specialties:      form.specialties,
+        provinces_served: form.provinces_served,
+      };
+      const {error} = await sb.from("installers").update(payload).eq("id", installer.id);
+      if (error) throw error;
+      setInstaller(prev => ({ ...prev, ...payload }));
       setSaved(true);
       setTimeout(() => setSaved(false), 2500);
     } catch (e) {
       console.error("Save error:", e);
+      setSaveErr(e.message||"Save failed — please try again.");
     }
     setSaving(false);
   };
@@ -1242,7 +1265,8 @@ function ProfileEditor({ installer, setInstaller }) {
         </div>
         <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
           <Btn onClick={save} loading={saving}>Save Profile</Btn>
-          {saved && <span style={{ fontSize: 12, color: T.green, fontWeight: 600 }}>Profile saved</span>}
+          {saved && <span style={{ fontSize: 12, color: T.green, fontWeight: 600 }}>✓ Saved</span>}
+          {saveErr && <span style={{ fontSize: 12, color: T.red, fontWeight: 600 }}>{saveErr}</span>}
         </div>
       </div>
 
@@ -1793,24 +1817,53 @@ function InstallerApp(){
   const [tab,setTab]=useState("leads");
   const sc=useScreen();
 
-  // loadProfile is defined OUTSIDE useEffect to avoid stale closure
+  // loadProfile — reads from the new schema, routes to onboarding only when
+  // no installer row exists for this user. Any other error shows auth screen.
   const loadProfile=useCallback(async(s)=>{
     if(!s?.user?.id)return;
     try{
-      const {data,error}=await sb.from("installers").select("*").eq("user_id",s.user.id).maybeSingle();
-      if(data&&!error){
+      const {data,error}=await sb
+        .from("installers")
+        .select("*")
+        .eq("user_id",s.user.id)
+        .maybeSingle();
+
+      if(error&&error.code!=="PGRST116"){
+        // PGRST116 = no rows found — that's fine, send to onboarding
+        // Any other error is a real problem
+        console.error("loadProfile error:",error.message);
+        setAppState("auth");
+        return;
+      }
+
+      if(data){
         setInstaller(data);
-        // Fetch this installer's real leads
-        const {data:lData}=await sb.from("leads").select("*").order("created_at",{ascending:false});
-        if(lData&&lData.length>0)setLeads(lData);
-        else setLeads(MOCK_LEADS);
+        // Fetch leads assigned to this installer
+        const {data:lData,error:lErr}=await sb
+          .from("leads")
+          .select("*")
+          .eq("installer_id",data.id)
+          .order("created_at",{ascending:false});
+        // If admin (no installer_id filter needed), fetch all leads
+        const isAdmin=s.user.email==="mail4tebello@gmail.com";
+        if(isAdmin){
+          const {data:allLeads}=await sb
+            .from("leads")
+            .select("*")
+            .order("created_at",{ascending:false});
+          if(allLeads&&allLeads.length>0)setLeads(allLeads);
+          else setLeads(MOCK_LEADS);
+        } else {
+          if(lData&&lData.length>0)setLeads(lData);
+          else setLeads(MOCK_LEADS);
+        }
         setAppState("ready");
       } else {
-        // No installer row yet → go to onboarding
+        // No installer row yet — new user goes to onboarding
         setAppState("onboarding");
       }
     } catch(e){
-      console.warn("Profile load:",e?.message);
+      console.warn("loadProfile exception:",e?.message);
       setAppState("onboarding");
     }
   },[]);
@@ -1837,48 +1890,64 @@ function InstallerApp(){
   };
 
   const onAuth=useCallback(async(s)=>{
-    const activeSession = s || (await sb.auth.getSession()).data.session;
+    // s may be passed directly from signInWithPassword, or we fetch fresh
+    const activeSession=s||(await sb.auth.getSession()).data?.session;
     if(activeSession){
       setSession(activeSession);
       await loadProfile(activeSession);
+    } else {
+      setAppState("auth");
     }
   },[loadProfile]);
 
   const completeOnboarding=async(formData)=>{
     if(!session?.user?.id)throw new Error("No session");
-    // If row already exists (duplicate key), just load it
-    if(formData._skipInsert){
-      const {data:existing}=await sb.from("installers").select("*").eq("user_id",session.user.id).maybeSingle();
-      if(existing){setInstaller(existing);setAppState("ready");return;}
-    }
+
     const payload={
-      user_id:session.user.id,
-      name:formData.name.trim(),
-      city:formData.city.trim(),
-      province:formData.province,
-      about:formData.about||"",
-      phone:formData.phone.trim(),
-      whatsapp:formData.whatsapp||formData.phone,
-      email:formData.email||session.user.email,
-      website:formData.website||"",
-      price_min:parseInt(formData.price_min)||null,
-      price_max:parseInt(formData.price_max)||null,
-      years_experience:parseInt(formData.years_experience)||1,
-      specialty:(formData.install_specs||[]).join(", ")||(formData.businessType==="technician"?"Repair & Maintenance":"Residential"),
-      brands:Array.isArray(formData.brands)?formData.brands:[],
-      provinces_served:Array.isArray(formData.provinces_served)?formData.provinces_served:[formData.province],
-      response_hours:parseInt(formData.response_hours)||24,
-      finance_available:!!formData.finance_available,
-      status:"pending",
+      user_id:        session.user.id,
+      name:           (formData.name||"").trim(),
+      city:           (formData.city||"").trim(),
+      province:       formData.province||"Gauteng",
+      about:          formData.about||"",
+      phone:          (formData.phone||"").trim(),
+      whatsapp:       formData.whatsapp||formData.phone||"",
+      email:          formData.email||session.user.email||"",
+      website:        formData.website||"",
+      price_min:      formData.price_min?parseInt(formData.price_min):null,
+      price_max:      formData.price_max?parseInt(formData.price_max):null,
+      years_experience: parseInt(formData.years_experience)||1,
+      jobs_completed: 0,
+      specialty:      Array.isArray(formData.install_specs)&&formData.install_specs.length>0
+                        ? formData.install_specs.join(", ")
+                        : formData.businessType==="technician"?"Repair & Maintenance":"Residential",
+      business_type:  formData.businessType||"installer",
+      brands:         Array.isArray(formData.brands)?formData.brands:[],
+      provinces_served: Array.isArray(formData.provinces_served)&&formData.provinces_served.length>0
+                          ? formData.provinces_served
+                          : [formData.province||"Gauteng"],
+      specialties:    Array.isArray(formData.install_specs)?formData.install_specs:[],
+      repair_specs:   Array.isArray(formData.repair_specs)?formData.repair_specs:[],
+      response_hours: parseInt(formData.response_hours)||24,
+      finance_available: !!formData.finance_available,
+      status:         "pending",
+      is_verified:    false,
+      sessa_verified: false,
     };
-    const {data:inst,error}=await sb.from("installers").upsert(payload,{onConflict:"user_id"}).select().single();
+
+    const {data:inst,error}=await sb
+      .from("installers")
+      .upsert(payload,{onConflict:"user_id"})
+      .select()
+      .single();
+
     if(error){
-      console.error("Insert error:",error);
-      throw error;
+      console.error("completeOnboarding error:",error);
+      throw new Error(error.message);
     }
+
     setInstaller(inst);
-    const {data:lData}=await sb.from("leads").select("*").order("created_at",{ascending:false});
-    if(lData&&lData.length>0)setLeads(lData);
+    // New accounts start with mock leads so the dashboard isn't empty
+    setLeads(MOCK_LEADS);
     setAppState("ready");
   };
 
