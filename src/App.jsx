@@ -1063,7 +1063,7 @@ function ArticleView({article,onBack}){
       <div style={{background:`linear-gradient(135deg,rgba(${t.rgb},.1),rgba(${t.rgb},.04))`,border:`1px solid rgba(${t.rgb},.2)`,borderRadius:14,padding:"18px",textAlign:"center",marginBottom:14}}>
         <div style={{fontFamily:H,fontSize:15,fontWeight:W.section,color:t.text,marginBottom:5}}>Ready to Calculate?</div>
         <p style={{color:t.sub,fontSize:13,marginBottom:13}}>Personalised result in under 2 minutes. Free.</p>
-        <PBtn sm style={{width:"100%",padding:"10px"}} style={{display:"flex",alignItems:"center",justifyContent:"center",gap:6}}><span style={{display:"flex"}}><Ico.Sun s={14} c={typeof isDark !== "undefined" && isDark?"#000":"#fff"}/></span> Calculate My System</PBtn>
+        <PBtn sm style={{width:"100%",padding:"10px",display:"flex",alignItems:"center",justifyContent:"center",gap:6}}><span style={{display:"flex"}}><Ico.Sun s={14} c={t.dark?"#000":"#fff"}/></span> Calculate My System</PBtn>
       </div>
       {related.length>0&&(
         <div>
@@ -1092,7 +1092,7 @@ function ArticleView({article,onBack}){
           {body}
           <div style={{background:`linear-gradient(135deg,rgba(${t.rgb},.1),rgba(${t.rgb},.04))`,border:`1px solid rgba(${t.rgb},.2)`,borderRadius:14,padding:"18px",textAlign:"center",marginBottom:20}}>
             <div style={{fontFamily:H,fontSize:15,fontWeight:W.section,color:t.text,marginBottom:4}}>Ready to Calculate?</div>
-            <PBtn sm style={{width:"100%",padding:"10px"}} style={{display:"flex",alignItems:"center",justifyContent:"center",gap:6}}><span style={{display:"flex"}}><Ico.Sun s={14} c={typeof isDark !== "undefined" && isDark?"#000":"#fff"}/></span> Calculate My System</PBtn>
+            <PBtn sm style={{width:"100%",padding:"10px",display:"flex",alignItems:"center",justifyContent:"center",gap:6}}><span style={{display:"flex"}}><Ico.Sun s={14} c={t.dark?"#000":"#fff"}/></span> Calculate My System</PBtn>
           </div>
           {related.length>0&&(
             <div>

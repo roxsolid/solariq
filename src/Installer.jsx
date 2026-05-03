@@ -202,20 +202,31 @@ function InstallerAuth({onAuth}){
       const {data,error}=await sb.auth.signUp({email:email.trim(),password:pw,options:{data:{name}}});
       if(error){
         setErr(error.message);
+        setLoading(false);
       } else if(data?.session){
         // Email confirmation disabled — user is already signed in
         onAuth(data.session);
+        // don't setLoading(false) — component will unmount
         return;
       } else {
         // Email confirmation required — show check inbox screen
         setDone(true);
+        setLoading(false);
       }
     } else {
       const {data,error}=await sb.auth.signInWithPassword({email:email.trim(),password:pw});
-      if(error)setErr(error.message);
-      else if(data.session)onAuth(data.session);
+      if(error){
+        setErr(error.message);
+        setLoading(false);
+      } else if(data?.session){
+        onAuth(data.session);
+        // don't setLoading(false) — component will unmount on success
+        return;
+      } else {
+        setErr("Sign in failed — please try again.");
+        setLoading(false);
+      }
     }
-    setLoading(false);
   };
 
   const FEATURES=[
@@ -1817,8 +1828,7 @@ function InstallerApp(){
   const [tab,setTab]=useState("leads");
   const sc=useScreen();
 
-  // loadProfile — reads from the new schema, routes to onboarding only when
-  // no installer row exists for this user. Any other error shows auth screen.
+  // loadProfile: "booting" then "ready" | "onboarding" | falls back safely
   const loadProfile=useCallback(async(s)=>{
     if(!s?.user?.id)return;
     try{
@@ -1828,38 +1838,31 @@ function InstallerApp(){
         .eq("user_id",s.user.id)
         .maybeSingle();
 
+      // maybeSingle returns null data (no error) when no row exists.
+      // PGRST116 is the legacy single() "no rows" code — handle both.
       if(error&&error.code!=="PGRST116"){
-        // PGRST116 = no rows found — that's fine, send to onboarding
-        // Any other error is a real problem
-        console.error("loadProfile error:",error.message);
-        setAppState("auth");
+        console.error("loadProfile DB error:",error.message,error.code);
+        // Permission / RLS issue — let them go through onboarding
+        setAppState("onboarding");
         return;
       }
 
       if(data){
         setInstaller(data);
-        // Fetch leads assigned to this installer
-        const {data:lData,error:lErr}=await sb
-          .from("leads")
-          .select("*")
-          .eq("installer_id",data.id)
-          .order("created_at",{ascending:false});
-        // If admin (no installer_id filter needed), fetch all leads
         const isAdmin=s.user.email==="mail4tebello@gmail.com";
         if(isAdmin){
           const {data:allLeads}=await sb
-            .from("leads")
-            .select("*")
-            .order("created_at",{ascending:false});
-          if(allLeads&&allLeads.length>0)setLeads(allLeads);
-          else setLeads(MOCK_LEADS);
+            .from("leads").select("*").order("created_at",{ascending:false});
+          setLeads(allLeads?.length>0?allLeads:MOCK_LEADS);
         } else {
-          if(lData&&lData.length>0)setLeads(lData);
-          else setLeads(MOCK_LEADS);
+          const {data:lData}=await sb
+            .from("leads").select("*")
+            .eq("installer_id",data.id)
+            .order("created_at",{ascending:false});
+          setLeads(lData?.length>0?lData:MOCK_LEADS);
         }
         setAppState("ready");
       } else {
-        // No installer row yet — new user goes to onboarding
         setAppState("onboarding");
       }
     } catch(e){
@@ -1890,12 +1893,16 @@ function InstallerApp(){
   };
 
   const onAuth=useCallback(async(s)=>{
-    // s may be passed directly from signInWithPassword, or we fetch fresh
-    const activeSession=s||(await sb.auth.getSession()).data?.session;
-    if(activeSession){
+    try{
+      // Use the session passed directly from signInWithPassword/signUp.
+      // onAuthStateChange will also fire SIGNED_IN, but loadProfile is
+      // idempotent so a double call is harmless.
+      const activeSession=s||(await sb.auth.getSession()).data?.session;
+      if(!activeSession){setAppState("auth");return;}
       setSession(activeSession);
       await loadProfile(activeSession);
-    } else {
+    }catch(e){
+      console.error("onAuth error:",e?.message);
       setAppState("auth");
     }
   },[loadProfile]);
