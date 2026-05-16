@@ -472,7 +472,7 @@ function GalleryStep({data,setData}){
           <div style={{display:"inline-flex",alignItems:"center",gap:6,padding:"8px 18px",background:T.accentDim,border:`1px solid rgba(${T.rgb},.3)`,borderRadius:20,fontSize:12,fontWeight:700,color:T.accent}}>
             <Ic.Upload s={13} c={T.accent}/> Choose Photos
           </div>
-          <input id="gallery-input" type="file" multiple accept="image/*" style={{display:"none"}} onChange={e=>processFiles(e.target.files)}/>
+          <input id="gallery-input" type="file" multiple accept=".jpg,.jpeg,.png,.webp" style={{display:"none"}} onChange={e=>processFiles(e.target.files)}/>
         </div>
       )}
       {photos.length>0&&(
@@ -496,7 +496,7 @@ function GalleryStep({data,setData}){
               <Ic.Plus s={22} c={T.sub}/>
               <span style={{fontSize:10,color:T.sub,fontWeight:600}}>Add more</span>
               <span style={{fontSize:9,color:T.sub}}>{8-photos.length} remaining</span>
-              <input type="file" multiple accept="image/*" style={{display:"none"}} onChange={e=>processFiles(e.target.files)}/>
+              <input type="file" multiple accept=".jpg,.jpeg,.png,.webp" style={{display:"none"}} onChange={e=>processFiles(e.target.files)}/>
             </label>
           )}
         </div>
@@ -872,7 +872,7 @@ function LeadInbox({ leads, setLeads, setTab }) {
 
           {/* Row 4: Financial signals */}
           <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 12 }}>
-            <div style={{ fontSize: 12, color: T.textMid }}>R<strong style={{ color: T.green }}>R{lead.monthly_bill.toLocaleString()}/mo</strong> bill</div>
+            <div style={{ fontSize: 12, color: T.textMid }}><strong style={{ color: T.green }}>R{lead.monthly_bill.toLocaleString()}/mo</strong> bill</div>
             <div style={{ fontSize: 12, color: T.textMid }}><strong style={{ color: T.accent }}>R{lead.estimated_cost.toLocaleString()}</strong> est.</div>
             {lead.urgency && <span style={{ fontSize: 10, background: "rgba(52,211,153,.1)", color: T.green, padding: "2px 8px", borderRadius: 8, fontWeight: 700 }}>{lead.urgency}</span>}
           </div>
@@ -1149,7 +1149,7 @@ function CredentialsVault({ installer }) {
                 <label style={{ display: "flex", alignItems: "center", gap: 6, padding: "7px 14px", background: doc.status === "missing" ? `linear-gradient(135deg, ${T.accent}, ${T.accent2})` : T.card, border: `1px solid ${doc.status === "missing" ? "none" : T.border}`, borderRadius: 9, cursor: "pointer", fontSize: 11, fontWeight: 700, color: doc.status === "missing" ? "#000" : T.textMid, whiteSpace: "nowrap", flexShrink: 0, boxShadow: doc.status === "missing" ? `0 4px 14px rgba(${T.rgb},.3)` : "none" }}>
                   <Ic.Upload s={12} c={doc.status === "missing" ? "#000" : T.textMid} />
                   {doc.status === "missing" ? "Upload" : "Replace"}
-                  <input type="file" accept=".pdf,.jpg,.png" style={{ display: "none" }} onChange={() => setDocs(prev => prev.map(d => d.id === doc.id ? { ...d, status: "pending" } : d))} />
+                  <input type="file" accept=".jpg,.jpeg,.png,.webp,.pdf,.doc,.docx" style={{ display: "none" }} onChange={() => setDocs(prev => prev.map(d => d.id === doc.id ? { ...d, status: "pending" } : d))} />
                 </label>
               </div>
 
@@ -1195,6 +1195,7 @@ function ProfileEditor({ installer, setInstaller }) {
     brands:           installer?.brands || [],
     specialties:      installer?.specialties || [],
     provinces_served: installer?.provinces_served || [],
+    logo_url:         installer?.logo_url || "",
   });
 
   const up = (k, v) => setForm(f => ({ ...f, [k]: v }));
@@ -1291,6 +1292,20 @@ function ProfileEditor({ installer, setInstaller }) {
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           <Card style={{ padding: "22px" }}>
             <div style={{ fontFamily: H, fontSize: 14, fontWeight: 800, color: T.text, marginBottom: 18 }}>Business Information</div>
+            {/* Company logo upload */}
+            <div style={{ marginBottom: 18 }}>
+              <label style={{ fontSize: 11, color: T.sub, textTransform: "uppercase", letterSpacing: 1.5, display: "block", marginBottom: 8, fontWeight: 700 }}>Company Logo</label>
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <div style={{ width: 64, height: 64, borderRadius: 14, background: `rgba(${T.rgb},.08)`, border: `1px dashed rgba(${T.rgb},.3)`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, overflow: "hidden" }}>
+                  {form.logo_url ? <img src={form.logo_url} alt="logo" style={{ width: "100%", height: "100%", objectFit: "cover" }}/> : <Ic.User s={24} c={T.sub}/>}
+                </div>
+                <label style={{ background: T.card2, border: `1px solid ${T.border}`, borderRadius: 9, padding: "9px 16px", fontSize: 12, fontWeight: 700, color: T.textMid, cursor: "pointer", fontFamily: B, display: "flex", alignItems: "center", gap: 6 }}>
+                  <Ic.Upload s={14} c={T.textMid}/> Upload Logo
+                  <input type="file" accept=".jpg,.jpeg,.png,.webp" style={{ display: "none" }} onChange={e => { const f = e.target.files[0]; if (f) { const r = new FileReader(); r.onload = ev => up("logo_url", ev.target.result); r.readAsDataURL(f); } }}/>
+                </label>
+                <div style={{ fontSize: 11, color: T.sub, lineHeight: 1.5 }}>PNG or JPG<br/>Recommended: 200×200px</div>
+              </div>
+            </div>
             <div style={{ display: "grid", gridTemplateColumns: sc.isMobile ? "1fr" : "1fr 1fr", gap: "0 16px" }}>
               <div style={{ gridColumn: sc.isMobile ? "1" : "1 / -1" }}><Inp label="Business Name" value={form.name} onChange={v => up("name", v)} /></div>
               <div style={{ gridColumn: sc.isMobile ? "1" : "1 / -1" }}><Inp label="About" value={form.about} onChange={v => up("about", v)} rows={3} /></div>
@@ -1556,7 +1571,7 @@ function QuoteBuilder({ leads }) {
         <div style={{ fontSize: 12, color: T.sub }}>Generate a branded quote PDF from a lead's system specs</div>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: sc.isDesktop ? "1.2fr 1fr" : "1fr", gap: 16, alignItems: "start" }}>
+      <div style={{ display: "grid", gridTemplateColumns: sc.isDesktop ? "1.2fr 1fr" : "1fr", gap: 16, alignItems: "start", overflowX:"hidden" }}>
         {/* Left: form */}
         <div>
           {/* Link to lead */}
@@ -1583,8 +1598,8 @@ function QuoteBuilder({ leads }) {
             <div style={{ fontFamily: H, fontSize: 13, fontWeight: 700, color: T.text, marginBottom: 14 }}>Line Items</div>
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               {items.map(item => (
-                <div key={item.id} style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                  <input value={item.desc} onChange={e => updateItem(item.id, "desc", e.target.value)} placeholder="Item description" style={{ flex: 1, background: T.inputBg, border: `1px solid ${T.border}`, borderRadius: 8, padding: "8px 11px", color: T.text, fontSize: 12, fontFamily: B, outline: "none" }} />
+                <div key={item.id} style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+                  <input value={item.desc} onChange={e => updateItem(item.id, "desc", e.target.value)} placeholder="Item description" style={{ flex: 1, minWidth: 160, background: T.inputBg, border: `1px solid ${T.border}`, borderRadius: 8, padding: "8px 11px", color: T.text, fontSize: 12, fontFamily: B, outline: "none" }} />
                   <input value={item.qty} onChange={e => updateItem(item.id, "qty", e.target.value)} type="number" min="1" style={{ width: 52, background: T.inputBg, border: `1px solid ${T.border}`, borderRadius: 8, padding: "8px", color: T.text, fontSize: 12, fontFamily: B, outline: "none", textAlign: "center" }} />
                   <div style={{ position: "relative" }}>
                     <span style={{ position: "absolute", left: 8, top: "50%", transform: "translateY(-50%)", fontSize: 11, color: T.sub }}>R</span>
@@ -1627,8 +1642,9 @@ function QuoteBuilder({ leads }) {
                 <div style={{ fontSize: 11, color: T.sub }}>Valid until: {validUntil}</div>
               </div>
               <div style={{ textAlign: "right" }}>
-                <div style={{ width: 36, height: 36, background: `linear-gradient(135deg, ${T.accent}, ${T.accent2})`, borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", marginLeft: "auto", marginBottom: 4 }}>
-                  <Ic.Logo s={22}/>
+                <div style={{ display:"flex", alignItems:"center", gap:6, justifyContent:"flex-end", marginBottom: 4 }}>
+                  <Ic.Logo s={26}/>
+                  <div style={{fontFamily:H,fontSize:13,fontWeight:900,color:T.text}}>Solar<span style={{color:T.accent}}>IQ</span></div>
                 </div>
                 <div style={{ fontSize: 9, color: T.sub, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1 }}>SolarIQ Verified</div>
               </div>
@@ -1685,14 +1701,23 @@ function QuoteBuilder({ leads }) {
 
             {/* Actions */}
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              <Btn full onClick={() => setGenerated(true)} loading={false}>
-                <Ic.Doc s={13} c="#000" /> Generate PDF Quote
+              <Btn full onClick={() => {
+                setGenerated(true);
+                const ref=`SIQ-${Date.now().toString().slice(-6)}`;
+                const content=`SOLARIQ QUOTE\n${ref}\nValid until: ${validUntil}\n${"═".repeat(38)}\n\n${selectedLead?`Prepared for: ${selectedLead.name}\n${selectedLead.area}\n\n`:""}\nLINE ITEMS\n${"─".repeat(38)}\n${items.filter(i=>i.desc).map(i=>`${i.desc}\n  Qty: ${i.qty} × R${i.unit.toLocaleString()} = R${(i.qty*i.unit).toLocaleString()}`).join("\n")}\n\n${"─".repeat(38)}\nSubtotal:         R${subtotal.toLocaleString()}\nMargin (${margin}%):     R${marginAmt.toLocaleString()}\nTOTAL INVESTMENT: R${total.toLocaleString()}\n\nTERMS\n${"─".repeat(38)}\n${notes}\n\nGenerated by SolarIQ — solariq.co.za`;
+                const a=document.createElement("a");a.href="data:text/plain;charset=utf-8,"+encodeURIComponent(content);a.download=`SolarIQ-Quote-${ref}.txt`;a.click();
+              }}>
+                <Ic.FileText s={13} c="#000" /> Generate & Download Quote
               </Btn>
               {generated && (
-                <div style={{ animation: "fadeUp .3s ease" }}>
-                  <Btn full variant="ghost" onClick={() => { const m = encodeURIComponent(`Hi${selectedLead ? " " + selectedLead.name.split(" ")[0] : ""}, your SolarIQ solar quote is ready. Total investment: R${total.toLocaleString()}. Valid until ${validUntil}. Please reply to discuss or schedule a site visit.`); window.open(`https://wa.me/${selectedLead?.phone?.replace(/\s/g, "") || ""}?text=${m}`, "_blank"); }} style={{ background: "rgba(37,211,102,.1)", border: "1px solid rgba(37,211,102,.25)", color: "#25d366" }}>
+                <div style={{ display:"flex",flexDirection:"column",gap:7, animation: "fadeUp .3s ease" }}>
+                  <Btn full variant="ghost" onClick={() => { const m = encodeURIComponent(`Hi${selectedLead ? " " + selectedLead.name.split(" ")[0] : ""}, your SolarIQ solar quote is ready.\n\nTotal Investment: R${total.toLocaleString()}\nValid until: ${validUntil}\n\nPlease reply to discuss or schedule a site visit.`); window.open(`https://wa.me/${selectedLead?.phone?.replace(/\s/g, "") || ""}?text=${m}`, "_blank"); }} style={{ background: "rgba(37,211,102,.1)", border: "1px solid rgba(37,211,102,.25)", color: "#25d366" }}>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="#25d366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
                     Send via WhatsApp
                   </Btn>
+                  {selectedLead?.email&&<Btn full variant="ghost" onClick={()=>{window.location.href=`mailto:${selectedLead.email}?subject=Your SolarIQ Solar Quote&body=Hi ${selectedLead.name.split(" ")[0]},%0A%0AYour solar quote is ready. Total Investment: R${total.toLocaleString()}. Valid until ${validUntil}.%0A%0APlease reply to discuss or schedule a site visit.%0A%0ARegards`;}} style={{color:T.blue,border:`1px solid rgba(96,165,250,.25)`,background:"rgba(96,165,250,.08)"}}>
+                    <Ic.Send s={12} c={T.blue}/> Send via Email
+                  </Btn>}
                 </div>
               )}
             </div>
